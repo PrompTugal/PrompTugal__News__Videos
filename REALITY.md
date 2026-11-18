@@ -27,3 +27,4 @@ Does not exist yet:
 - Observability (an obs.js lane), the brand fonts, a `/design/` page, a scheduled rebuild, GitHub issue forms (a plain "new issue" link stands in).
 - Signed work: `scripts/sign-release.sh` signs a manifest of every tracked file (tested valid with `sgit pki verify`), but no signature is committed: the leak scan flags the `.sig` as a long high-entropy string; an ask to Dinis. Commits carry the `Agent:` trailer only.
 - A check of any page by a person.
+- 2026-11-18, about 15:42 UTC: live at https://videos.promptugal.news as v0.1.3 (commit 433b0d6); the home page, the collection, a video page, /how/, /security/, a playlist and /api/v1/videos/index.json answered 200.
