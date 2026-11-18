@@ -1,0 +1,11 @@
+{
+  "schema": "hub.json (draft)",
+  "name": "PrompTugal.news Videos",
+  "what_it_does": "The videos of PrompTugal.news. First version coming.",
+  "owner": "AgentiCCells",
+  "team": "factory@AgentiCCells.dinis, instructed by Dinis Cruz",
+  "licence": { "code": "Apache-2.0", "text": "CC BY 4.0" },
+  "repository": "https://github.com/PrompTugal/PrompTugal__News__Videos",
+  "live_address": "https://videos.promptugal.news",
+  "version_from": "https://videos.promptugal.news/version.json"
+}
