@@ -1,6 +1,131 @@
 {
  "about": "Every vulnerability, bug and breach found on videos.promptugal.news, published (Dinis Cruz, 18 November 2026, about 15:15 UTC). A fixed finding in full; an open one as its title, severity and state only, until it is fixed. Never deleted.",
- "license": { "name": "CC BY 4.0", "url": "https://creativecommons.org/licenses/by/4.0/", "holder": "PrompTugal.news" },
+ "license": {
+  "name": "CC BY 4.0",
+  "url": "https://creativecommons.org/licenses/by/4.0/",
+  "holder": "PrompTugal.news"
+ },
  "central_log": "https://promptugal.news/security/",
- "findings": []
+ "findings": [
+  {
+   "id": "VID-2026-001",
+   "severity": "medium",
+   "title": "Open findings would have been published in full in the JSON",
+   "file": "scripts/build.mjs (api/v1/security/findings.json)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "The page showed an open finding by title, severity and state only, but the JSON copy was written raw, with its detail and fix. Latent: no finding existed yet. Never published.",
+   "fix": "The JSON now carries only id, title, severity, state and date for any finding not fixed.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-002",
+   "severity": "low",
+   "title": "A crafted URL could add a link in the markdown twins",
+   "file": "scripts/build.mjs (markdown twins)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "An https URL holding \") [text](\" passed the https check and was written raw into the markdown twins, where it would end the link and start another. Never published: no such URL is in the data.",
+   "fix": "URLs in markdown are normalised and ( ) [ ] < > quotes, spaces, backslashes, backticks and bars are percent-encoded; bare URLs are wrapped in angle brackets.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-003",
+   "severity": "low",
+   "title": "A title with line breaks could add lines to llms.txt and the twins",
+   "file": "scripts/build.mjs (clean)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "Line breaks in a title or channel name survived into the markdown twins and llms.txt, which language models read: a way to slip text that looks like an instruction onto its own line. Never published.",
+   "fix": "Every field is reduced to one line: control characters removed, whitespace collapsed.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-004",
+   "severity": "low",
+   "title": "Some direction marks and zero-width characters were not removed",
+   "file": "scripts/build.mjs (clean)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "U+200E, U+200F, U+061C, zero-width characters and U+FEFF passed through; they can make text read differently from what it holds. The Arabic title carried a right-to-left mark.",
+   "fix": "Removed with the other control and direction-override characters.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-005",
+   "severity": "low",
+   "title": "The place name was not escaped in a video's markdown twin",
+   "file": "scripts/build.mjs (video twin)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "The place was written raw into the twin's \"Where\" line. Never exploitable with the data as it is (one fixed place).",
+   "fix": "Escaped as the other fields.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-006",
+   "severity": "info",
+   "title": "The threat model claimed more than the code did",
+   "file": "docs/threat-models/build-and-pages.md",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "It said the twins escape markdown and that bidi characters are removed; findings 2 to 5 made that partly untrue.",
+   "fix": "Updated after the fixes.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-007",
+   "severity": "info",
+   "title": "The embedded video was not tied to the source link",
+   "file": "scripts/build.mjs (data checks)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "A record could embed one YouTube id while its source link pointed to another video.",
+   "fix": "The build stops unless the source URL's v= is the embedded id.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-008",
+   "severity": "info",
+   "title": "The API would publish any extra field in the data",
+   "file": "scripts/build.mjs (api/v1/videos/<id>.json)",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "fixed",
+   "detail": "Each video's JSON was its record spread whole, so a field added by mistake (a private note) would be published.",
+   "fix": "The API publishes only a fixed list of fields.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-009",
+   "severity": "info",
+   "title": "Four channels to confirm as organisations, not private people",
+   "file": "data/videos.json",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "open",
+   "detail": "The reviewer could not confirm that SECTIES PB, The Spotlight: Beyond Profession, VOICE OF NEPAL TV - VON and RVTV are organisations rather than private people.",
+   "fix": "To confirm by a person or the library; kept meanwhile because each publishes under a channel or broadcaster name, not a personal one, and social.watch@ and security@ kept them during the summit.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-010",
+   "severity": "info",
+   "title": "No frame-ancestors protection",
+   "file": "every page",
+   "found": "2026-11-18 ~15:45 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
+   "state": "accepted",
+   "detail": "A Content Security Policy in a meta tag cannot set frame-ancestors, and GitHub Pages cannot send headers, so another site could frame these pages.",
+   "fix": "Accepted: the pages hold no forms, sign-in or actions to trick a reader into.",
+   "commit": ""
+  }
+ ]
 }

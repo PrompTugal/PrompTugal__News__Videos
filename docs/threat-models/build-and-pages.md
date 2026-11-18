@@ -13,13 +13,16 @@
 ## What could go wrong, and the mitigations
 | Threat | Mitigation |
 |---|---|
-| HTML or script injection through a title, channel name or note (stored XSS) | Every value is escaped (`esc`: `& < > " '`); markdown twins escape markdown and angle brackets; a strict Content Security Policy on every page (`script-src 'self'`, no inline script or style). |
+| HTML or script injection through a title, channel name or note (stored XSS) | Every value is escaped (`esc`: `& < > " '`); markdown twins escape markdown characters and percent-encode URLs (VID-2026-002); every field is one line (VID-2026-003); a strict Content Security Policy on every page (`script-src 'self'`, no inline script or style). |
 | A `javascript:` or `data:` link from the data | `href()` accepts only https URLs (no user or password part) or site-relative paths without `..`; anything else stops the build. |
 | Path traversal through an id | Ids are checked against fixed patterns before any path is made; the build stops on a bad id. |
-| Bidirectional-text or control characters in a title that disguise what a reader sees | `clean()` removes control characters and bidi overrides; em dashes become en dashes (house style). |
+| Bidirectional-text or control characters in a title that disguise what a reader sees | `clean()` removes control characters, zero-width characters, direction marks and overrides (VID-2026-004); em dashes become en dashes (house style). |
 | A wrong or private person named | Private people's videos are kept as a count and theme only (no name, handle, link or words); `people` lists only public, professional people named by the publisher. |
 | Someone else's media copied | The build never fetches or writes media; the only media is the platform's own player, loaded by the reader. |
 | A tampered data file in a pull request | Only agents with write access push to `dev`; every commit carries an `Agent:` trailer checked in CI; security@ reviews each commit. |
+| A private field published by mistake | The API publishes a fixed list of fields (VID-2026-008); open security findings are published by title, severity and state only, in the page and the JSON (VID-2026-001). |
+| An embed that differs from its source link | The build stops unless the source URL's video is the embedded one (VID-2026-007). |
+| Being framed by another site | Not possible to stop on GitHub Pages (no headers); accepted, as the pages hold no forms or actions (VID-2026-010). |
 | Secrets in the output | The leak scan runs over the tree and `_site/` before every release and in CI. |
 
 ## Residual risk

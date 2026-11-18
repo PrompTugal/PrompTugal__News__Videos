@@ -19,18 +19,21 @@ const builtAt = new Date();
 // ---------------------------------------------------------------- safe text
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // House style: no em dash anywhere on the site; a source's em dash is shown as an en dash.
-const clean = (s) => String(s ?? '').replace(/—/g, '–').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f‪-‮⁦-⁩]/g, '');
+// Every field is one line: control, zero-width and direction-mark characters go, whitespace collapses (VID-2026-003, 004).
+const clean = (s) => String(s ?? '').replace(/\u2014/g, '\u2013').replace(/[\u0000-\u001f\u007f\u061c\u200b-\u200f\u2028-\u202e\u2066-\u2069\ufeff]/g, ' ').replace(/\s+/g, ' ').trim();
 const okHttps = (u) => { try { const x = new URL(u); return x.protocol === 'https:' && !x.username && !x.password; } catch { return false; } };
 const okRel = (u) => /^\/[A-Za-z0-9/_.-]*(#[A-Za-z0-9_-]+)?$/.test(u) && !u.includes('..') && !u.startsWith('//');
 const href = (u) => { if (okRel(u) || okHttps(u)) return esc(u); throw new Error(`unsafe URL in the data: ${String(u).slice(0, 80)}`); };
 const link = (u, t) => `<a href="${href(u)}">${esc(clean(t))}</a>`;
 const md = (s) => clean(s).replace(/[\\`*_[\]<>|#]/g, (c) => `\\${c}`);
-const mdLink = (u, t) => `[${md(t)}](${okRel(u) ? SITE + u : okHttps(u) ? u : ''})`;
+// A URL in markdown is normalised and its markdown-breaking characters percent-encoded (VID-2026-002).
+const mdUrl = (u) => { const a = okRel(u) ? SITE + u : okHttps(u) ? new URL(u).href : ''; return a.replace(/[()[\]<>"'\s\\`|]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')); };
+const mdLink = (u, t) => `[${md(t)}](${mdUrl(u)})`;
 const ID = /^[a-z0-9]+(?:-[A-Za-z0-9_]+)+$/; // our call numbers: yt-<id>, cnbc-<slug>
 const YT = /^[A-Za-z0-9_-]{11}$/;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
-const slug = (s) => clean(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'x';
+const slug = (s) => clean(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'x';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const fmtDay = (d) => { if (!DAY.test(d || '')) return ''; const [y, m, dd] = d.split('-').map(Number); return `${dd} ${MONTHS[m - 1]} ${y}`; };
@@ -62,6 +65,7 @@ for (const v of videos) {
     need(YT.test(v.platform_id || ''), `${id}: YouTube id must be 11 characters of [A-Za-z0-9_-]`);
     need(id === `yt-${v.platform_id}`, `${id}: the call number must be yt-<YouTube id>`);
     need(new URL(v.url).hostname === 'www.youtube.com', `${id}: YouTube url must be on www.youtube.com`);
+    need(new URL(v.url).searchParams.get('v') === v.platform_id, `${id}: the url's video must be the embedded one`); // VID-2026-007
   }
   need(v.day === null || DAY.test(v.day), `${id}: day`);
   need(v.published && (v.published.date === null || DAY.test(v.published.date)), `${id}: published.date`);
@@ -82,6 +86,9 @@ for (const c of collections) {
 if (!okHttps(data.evidence_base)) problems.push('evidence_base must be https');
 if (problems.length) { console.error(problems.join('\n')); console.error(`FAILED: ${problems.length} problem(s) in data/videos.json`); process.exit(1); }
 
+// The API publishes only these fields of a video (VID-2026-008).
+const FIELDS = ['id', 'platform', 'platform_id', 'url', 'title', 'channel', 'people', 'published', 'place', 'collection', 'day', 'kind', 'topics', 'storm', 'found', 'note', 'talks'];
+const pick = (v) => Object.fromEntries(FIELDS.map((k) => [k, v[k] ?? null]));
 const byId = new Map(videos.map((v) => [v.id, v]));
 const licOf = (v) => ({ name: "the platform's terms", url: PLATFORMS[v.platform].terms });
 const KIND = { 'official-replay': "The organiser's replay", recording: 'A recording at the summit', press: 'Press coverage' };
@@ -166,7 +173,7 @@ ${body}
 function api(path, obj) {
   const file = join('_site', path);
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, JSON.stringify(obj, null, 1).replace(/—/g, '–') + '\n');
+  writeFileSync(file, JSON.stringify(obj, null, 1).replace(/\u2014/g, '\u2013') + '\n');
 }
 
 // ---------------------------------------------------------------- pieces
@@ -214,7 +221,7 @@ function dayBlock(d) {
 function dayMd(d) {
   if (d.state === 'cancelled') return `### ${md(d.label)}, ${weekday(d.date)} ${fmtDay(d.date)}: cancelled\n\n${md(d.why)}\n\n- ${mdLink(d.storm.url, d.storm.title)}\n${d.evidence.map((e) => `- ${mdLink(e.url, e.title)} (${md(e.publisher)})`).join('\n')}`;
   const rs = (d.replays || []).map((r) => byId.get(r));
-  return `### ${md(d.label)}, ${weekday(d.date)} ${fmtDay(d.date)}\n\n${rs.length ? rs.map((v) => `The organiser's replay: ${mdLink(`/videos/${v.id}/`, v.title)} (${v.url})`).join('\n') : md(d.gap || 'No replay found yet.')}\n\n${mdList(others.filter((v) => v.day === d.date).map((v) => v.id))}`;
+  return `### ${md(d.label)}, ${weekday(d.date)} ${fmtDay(d.date)}\n\n${rs.length ? rs.map((v) => `The organiser's replay: ${mdLink(`/videos/${v.id}/`, v.title)} (<${mdUrl(v.url)}>)`).join('\n') : md(d.gap || 'No replay found yet.')}\n\n${mdList(others.filter((v) => v.day === d.date).map((v) => v.id))}`;
 }
 const undated = others.filter((v) => !v.day).map((v) => v.id);
 const pi = C.private_items;
@@ -261,9 +268,9 @@ ${player(v)}
 <section><h2 id="talks">Talks by timestamp</h2>${talks}</section>
 ${pls.length ? `<section><h2>In the playlists</h2><ul>${pls.map((p) => `<li>${link(plPath(p), p.title)} <span class="small">(${p.ids.length})</span></li>`).join('')}</ul></section>` : ''}
 <p class="report small">Is this card wrong, or should this video not be here? <a href="${REPO}/issues/new">Tell us</a>.</p>`,
-    mdBody: `- What: ${md(KIND[v.kind] || 'A video')}${v.note ? `. ${md(v.note)}` : ''}\n- Who: ${md(v.channel.name)}${v.people.length ? `; with ${v.people.map((p) => md(p.name)).join(', ')}` : ''}\n- When: ${v.published.date ? fmtDay(v.published.date) : 'not known'} (${md(v.published.precision)})\n- Where: ${placeName(v.place)}, ${md(C.title)}\n- Source: ${v.url}\n- Licence: the platform's terms (${lic.url}); our card CC BY 4.0\n- Found: by ${md(v.found.by)}, ${fmtStamp(v.found.at)}: ${md(v.found.how)}${v.found.verified ? '' : ' (not fully checked)'}\n- Call number: ${v.id}\n\nWatch: ${v.url}`,
+    mdBody: `- What: ${md(KIND[v.kind] || 'A video')}${v.note ? `. ${md(v.note)}` : ''}\n- Who: ${md(v.channel.name)}${v.people.length ? `; with ${v.people.map((p) => md(p.name)).join(', ')}` : ''}\n- When: ${v.published.date ? fmtDay(v.published.date) : 'not known'} (${md(v.published.precision)})\n- Where: ${md(placeName(v.place))}, ${md(C.title)}\n- Source: <${mdUrl(v.url)}>\n- Licence: the platform's terms (<${mdUrl(lic.url)}>); our card CC BY 4.0\n- Found: by ${md(v.found.by)}, ${fmtStamp(v.found.at)}: ${md(v.found.how)}${v.found.verified ? '' : ' (not fully checked)'}\n- Call number: ${v.id}\n\nWatch: <${mdUrl(v.url)}>`,
   });
-  api(`api/v1/videos/${v.id}.json`, { ...v, license: lic, page: `${SITE}/videos/${v.id}/`, embed: v.platform === 'youtube' ? `${EMBED_HOST}/embed/${v.platform_id}` : null, evidence: data.evidence_base, license_of_this_record: data.license_of_this_record });
+  api(`api/v1/videos/${v.id}.json`, { ...pick(v), license: lic, page: `${SITE}/videos/${v.id}/`, embed: v.platform === 'youtube' ? `${EMBED_HOST}/embed/${v.platform_id}` : null, evidence: data.evidence_base, license_of_this_record: data.license_of_this_record });
 }
 
 // ---------------------------------------------------------------- every video
@@ -339,7 +346,7 @@ page({
 <section><h2>What we do not use</h2><p>The summit's own website and agenda (websummit.com): its terms forbid automated reading, and since 11 November 2026 the team builds nothing new on Web Summit's data (Dinis Cruz). The organisers' statement on Day Two is linked, never copied.</p></section>
 <section><h2>Security</h2><p>Every value from the data is escaped; links must be https; ids must match fixed shapes or the build stops. Threat models: ${modelLinks.length ? modelLinks.join(' · ') : 'none yet'}. ${link('/security/', 'Findings')}.</p></section>
 <section><h2>Who made it</h2><p>videos.b@PrompTugal.dinis, an AI agent (Claude, Opus, with Sonnet sub-agents for the reviews), started by conductor.b@PrompTugal.dinis at Dinis Cruz's word on 18 November 2026. No person has checked these pages yet.</p></section>`,
-  mdBody: `Videos come from the team's coverage record (${data.evidence_base}), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), nothing loaded until you press play; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
+  mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), nothing loaded until you press play; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
 });
 
 // ---------------------------------------------------------------- security
@@ -360,7 +367,8 @@ api(`api/v1/collections/${C.id}.json`, { ...C, videos: videos.filter((v) => v.co
 api('api/v1/collections/index.json', { collections: collections.map((c) => ({ id: c.id, title: c.title, json: `${SITE}/api/v1/collections/${c.id}.json` })) });
 api('api/v1/videos/index.json', { about: data.about, updated: data.updated, platforms: PLATFORMS, count: videos.length, videos: videos.map((v) => ({ id: v.id, title: clean(v.title), channel: clean(v.channel.name), kind: v.kind, day: v.day, published: v.published.date, license: licOf(v), json: `${SITE}/api/v1/videos/${v.id}.json`, page: `${SITE}/videos/${v.id}/` })), license_of_this_record: data.license_of_this_record });
 api('api/v1/playlists/index.json', { playlists: playlists.map((p) => ({ kind: p.kind, id: p.id, title: p.title, count: p.ids.length, json: `${SITE}/api/v1/playlists/${p.kind}/${p.id}.json` })), license_of_this_record: data.license_of_this_record });
-api('api/v1/security/findings.json', findings);
+// An open finding is published as its id, title, severity and state only, until it is fixed (VID-2026-001).
+api('api/v1/security/findings.json', { ...findings, findings: F.map((f) => f.state === 'fixed' ? f : { id: f.id, title: f.title, severity: f.severity, state: f.state, found: f.found }) });
 const ENDPOINTS = [['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
 page({
   path: '/api/', section: '/api/', title: 'The data · PrompTugal.news Videos',
