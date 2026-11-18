@@ -354,9 +354,48 @@ page({
 <section><h2>Licences</h2><p>Our pages, words and records: ${link(CCBY, 'CC BY 4.0')}. Each video: its platform's terms (${link(PLATFORMS.youtube.terms, "YouTube's terms")}). Code: Apache-2.0.</p></section>
 <section><h2>What we do not use</h2><p>The summit's own website and agenda (websummit.com): its terms forbid automated reading, and since 11 November 2026 the team builds nothing new on Web Summit's data (Dinis Cruz). The organisers' statement on Day Two is linked, never copied.</p></section>
 <section><h2>Security</h2><p>Every value from the data is escaped; links must be https; ids must match fixed shapes or the build stops. Threat models: ${modelLinks.length ? modelLinks.join(' · ') : 'none yet'}. ${link('/security/', 'Findings')}.</p></section>
+<section><h2>For the operator</h2><p>${link('/how/youtube-api-key/', 'Making the YouTube API key')}: how Dinis Cruz creates, restricts, hands over and revokes the key that will let the agents list the official replays and their chapters.</p></section>
 <section><h2>Who made it</h2><p>videos.b@PrompTugal.dinis, an AI agent (Claude, Opus, with Sonnet sub-agents for the reviews), started by conductor.b@PrompTugal.dinis at Dinis Cruz's word on 18 November 2026. No person has checked these pages yet.</p></section>`,
   mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), nothing loaded until you press play; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
 });
+
+// ---------------------------------------------------------------- the operator's page: making the YouTube API key
+// Asked for by Dinis Cruz (18 Nov 2026, ~16:55 UTC, in conductor.b@'s session). Checked against Google's own pages on
+// 18 Nov 2026 at about 17:45 UTC; where those pages differ from the steps relayed to us, Google's wording is followed.
+{
+  const G = {
+    start: 'https://developers.google.com/youtube/v3/getting-started',
+    quota: 'https://developers.google.com/youtube/v3/determine_quota_cost',
+    keys: 'https://docs.cloud.google.com/docs/authentication/api-keys',
+    use: 'https://docs.cloud.google.com/docs/authentication/api-keys-use',
+    console: 'https://console.cloud.google.com/',
+  };
+  page({
+    path: '/how/youtube-api-key/', section: '/how/', title: 'Making the YouTube API key: instructions for the operator · PrompTugal.news Videos',
+    description: "How the team's operator creates, restricts, hands over and revokes the YouTube Data API key the agents will use to list the official replays and their chapters.",
+    body: `<p class="crumbs"><a href="/how/">How it works</a> › The YouTube API key</p>
+<p class="kicker">For the operator, not for readers</p>
+<h1>Making the YouTube API key</h1>
+<p class="standfirst">Instructions for Dinis Cruz, who asked for this page on 18 November 2026. With this key the agents can list the official replays and read their chapters, so talks can be reached by timestamp.</p>
+<p class="note">Checked against Google's own documentation on 18 November 2026, about 17:45 UTC. Where Google's pages and our first draft differed, this page follows Google, and says so. Google changes its console: if a step reads differently there, follow the console and ${link(`${REPO}/issues/new`, 'tell us')}.</p>
+<section><h2>The steps</h2><ol>
+<li><b>Make a project.</b> Open the ${link(G.console, 'Google Cloud console')}, signed in with the account that should own the key, and create a project (for example <code>promptugal-news</code>). (${link(G.start, "Google: YouTube Data API, getting started")})</li>
+<li><b>Turn on the API.</b> In the API Library, find <b>YouTube Data API v3</b> and enable it for that project.</li>
+<li><b>Create the key.</b> Open <b>APIs &amp; services</b>, then <b>Credentials</b>, click <b>Create credentials</b> and choose <b>API key</b>. Give it a display name such as <code>promptugal-news-youtube</code>. (${link(G.keys, 'Google: manage API keys')})</li>
+<li><b>Restrict it at once.</b> Under API restrictions, allow <b>YouTube Data API v3</b> only. Google also recommends an <b>application restriction</b> (for a server, by IP address) and calls unrestricted keys insecure. The agents' cloud sessions have no fixed IP address, so an IP restriction would block them; the key is therefore restricted by API only, and kept where no agent can read it (step 6). Whether that is acceptable is your call.</li>
+<li><b>Know the quota.</b> Google's quota page, as read on 18 November 2026: a default of <b>10,000 units a day</b>; listing videos or a playlist's items costs <b>1 unit</b> a call; <b>search</b> has a separate limit (the page gives 1 unit a call, within 100 searches a day). Our first draft said a search cost 100 units; Google's current page says otherwise. Google's pages do not say whether a billing account is needed; the console says so if it is. (${link(G.quota, 'Google: quota costs')})</li>
+<li><b>Hand it over without showing it to anyone.</b> Never paste the key into a chat, a page, a commit, an issue or a message. When data.b@PrompTugal.dinis asks for it, a secure form appears in the Claude app: enter it there, for the host <code>www.googleapis.com</code>, in the header <code>X-Goog-Api-Key</code> (Google's preferred way, which keeps the key out of addresses). The network proxy then adds it to data.b@'s requests to that host; no agent ever sees the value. (${link(G.use, 'Google: use API keys')})</li>
+<li><b>What we do with it.</b> Read only: list the official channels' videos (Web Summit's first), read their chapters for talks by timestamp, and organisations' channels as signals. Never upload, comment or change anything. Each call is counted by telemetry.b@PrompTugal.dinis.</li>
+<li><b>Revoke or rotate it.</b> On the Credentials page, open the key and delete it, or rotate it (Google keeps a deleted key restorable for 30 days). Then tell conductor.b@PrompTugal.dinis, so the form can be filled again.</li>
+</ol></section>
+<section><h2>Where this changed from the steps relayed to us</h2><ul>
+<li>Search quota: Google's page gives 1 unit a call within 100 searches a day, not 100 units a search.</li>
+<li>Application restriction: Google recommends one (an IP restriction for servers); we cannot use it from cloud sessions without a fixed address, so it is left for you to decide.</li>
+<li>Billing: Google's pages do not say; we no longer claim none is needed.</li>
+</ul></section>`,
+    mdBody: `For the operator, not for readers. Checked against Google's documentation on 18 November 2026.\n\n1. Make a project in the Google Cloud console (${G.console}).\n2. Enable YouTube Data API v3 in the API Library.\n3. APIs & services, Credentials, Create credentials, API key; name it promptugal-news-youtube (${G.keys}).\n4. Restrict it to YouTube Data API v3. Google also recommends an application restriction (IP for servers); our cloud sessions have no fixed IP, so it is restricted by API only: your call.\n5. Quota (${G.quota}): 10,000 units a day; list calls 1 unit; search 1 unit a call within 100 a day. Billing: not stated by Google.\n6. Never paste the key anywhere; enter it only in the Claude app's secure form when data.b@ asks (host www.googleapis.com, header X-Goog-Api-Key) (${G.use}).\n7. Read only: official channels' videos, chapters for talks by timestamp, organisations' channels as signals; counted by telemetry.b@.\n8. Revoke or rotate on the Credentials page; tell conductor.b@.`,
+  });
+}
 
 // ---------------------------------------------------------------- security
 const F = Array.isArray(findings.findings) ? findings.findings : [];
