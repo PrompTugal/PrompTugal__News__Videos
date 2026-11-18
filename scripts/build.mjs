@@ -144,6 +144,9 @@ function page({ path, title, description, section, body, mdBody }) {
 <link rel="canonical" href="${SITE}${path}">
 <link rel="alternate" type="text/markdown" href="${path}index.md">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:image" content="${SITE}/preview.png">
+<meta property="og:title" content="${esc(clean(title))}">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/site.css?v=${esc(version)}">
 <script defer src="/assets/player.js?v=${esc(version)}"></script>
 </head>
@@ -502,6 +505,37 @@ ${APIS.map((a) => `<tr><th scope="row">${link(a.docs, a.name)}</th><td>${esc(a.u
     mdBody: SOURCES.map((s) => `## ${md(s.name)}\n\n- What: ${md(s.what)}\n- Where: <${mdUrl(s.url)}>\n- How often: ${md(s.how)}\n- Last read: ${s.last_read ? fmtStamp(s.last_read) : 'not recorded'}\n- Licence: ${md(s.licence.name)}\n- What we do: ${md(s.use)}\n- History: ${s.history.length ? s.history.map((h) => `${fmtStamp(h.read_at)}, ${h.bytes} bytes, sha256 ${h.sha256_prefix}`).join('; ') : 'one copy, made by hand'}`).join('\n\n'),
   });
   api('api/v1/sources/index.json', { about: 'The sources videos.promptugal.news reads, with every read kept (time, bytes, sha256 prefix computed at build time).', sources: SOURCES.map(({ history, ...s }) => ({ ...s, history: history.map(({ file, ...h }) => h) })), license_of_this_record: data.license_of_this_record });
+}
+
+// ---------------------------------------------------------------- /preview.svg: this site's own numbers, for the sites bar
+// Dinis, 18 Nov 2026 ~22:00 UTC (Website board/guidance/2026-11-18-the-sites-bar.md): each site makes its preview at each build.
+// Every figure is computed here from the same data as the pages; text is escaped; no external reference of any kind.
+{
+  const held = C.days.filter((d) => d.state !== 'cancelled');
+  const withReplay = held.filter((d) => (d.replays || []).length).length;
+  const channels = orgs.size;
+  const fig = [
+    [String(videos.length), 'videos, each in its own player'],
+    [`${withReplay} of ${held.length}`, "days held with the organiser's replay"],
+    [String(channels), 'channels that published them'],
+    [String(playlists.length), 'playlists by kind, topic and organisation'],
+  ];
+  const stamp = fmtStamp(builtAt.toISOString());
+  const x = (s) => esc(clean(s));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="t d">
+<title id="t">PrompTugal.news Videos: ${x(`${videos.length} videos from Web Summit Lisbon 2026`)}</title>
+<desc id="d">${x(fig.map(([n, l]) => `${n} ${l}`).join('; '))}. Day Two was cancelled by Storm Charles. Built ${x(stamp)} from data/videos.json and the library's catalogue; CC BY 4.0.</desc>
+<rect width="1200" height="630" fill="#f6f3ec"/>
+<rect x="0" y="0" width="1200" height="10" fill="#c52830"/>
+<text x="60" y="95" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="600" fill="#121317">Promp<tspan fill="#c52830">T</tspan><tspan fill="#006600">ugal</tspan>.<tspan font-style="italic" font-weight="400">news</tspan><tspan font-family="Arial, sans-serif" font-size="34" font-weight="400" fill="#666860"> · Videos</tspan></text>
+<text x="60" y="150" font-family="Arial, sans-serif" font-size="28" fill="#121317">${x(C.title)}: the replays by day, and the recordings others made</text>
+${fig.map(([n, l], i) => { const cx = 60 + (i % 2) * 560, cy = 220 + Math.floor(i / 2) * 170; return `<rect x="${cx}" y="${cy}" width="520" height="140" fill="#fffdf8" stroke="#d8d4cb"/><rect x="${cx}" y="${cy}" width="520" height="6" fill="${i === 1 ? '#c52830' : '#006600'}"/><text x="${cx + 28}" y="${cy + 80}" font-family="Georgia, serif" font-size="60" font-weight="600" fill="#121317">${x(n)}</text><text x="${cx + 28}" y="${cy + 118}" font-family="Arial, sans-serif" font-size="22" fill="#666860">${x(l)}</text>`; }).join('\n')}
+<text x="60" y="580" font-family="Arial, sans-serif" font-size="20" fill="#c52830">Day Two, 11 November: cancelled, Storm Charles</text>
+<text x="60" y="608" font-family="monospace" font-size="16" fill="#666860">${x(`videos.promptugal.news · built ${stamp} · from data/videos.json and the library · CC BY 4.0`)}</text>
+</svg>
+`;
+  writeFileSync('_site/preview.svg', svg);
+  api('api/v1/preview.json', { about: 'The figures in /preview.svg and /preview.png, as computed at build time.', built: builtAt.toISOString(), version, figures: fig.map(([value, label]) => ({ value, label })), sources: ['data/videos.json', 'data/library/latest.json'], license_of_this_record: data.license_of_this_record });
 }
 
 // ---------------------------------------------------------------- security
