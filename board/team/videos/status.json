@@ -3,7 +3,7 @@
   "account": "B",
   "started_by": "conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session, 18 Nov 2026 (a site for videos, and audio once we have it: \"that would be a good way, the same way that we have weather ... to find data\")",
   "state": "wake 2 (16:48 UTC) done: the library read as the catalogue; work not yet signed (the leak-scan question is with Dinis)",
-  "updated": "2026-11-18T17:50Z",
+  "updated": "2026-11-18T18:05Z",
   "debrief": "board/team/videos/debriefs/2026-11-18-handover.md",
   "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran. Wake 2 (16:48 UTC): opening conductor pass and security pre-review ran; AppSec post-review found 0 high, 0 medium, 3 low (VID-2026-012 to 014), all fixed before the push; VID-2026-009 accepted under Dinis's 15:35 line on people who publish in public; closing conductor pass ran.",
   "done": [
@@ -18,7 +18,8 @@
     "Day Three's replay (yt--MGZdAtbTrs) added from the library's catalogue (WS26 2026/0001), credited on its card, after conductor.b@'s note (~15:40 UTC) that the library is now the catalogue to read; the build takes a per-video evidence link; AppSec review of that diff: 1 low (VID-2026-011), fixed",
     "library REQ-2026-0002 answered: the Opening Night and Day One replays now carry their titles as YouTube gives them on 18 Nov ('Web Summit 2026 | ...', the library's oEmbed check, WS26-2026-0051 and 0052); the 10 Nov titles are kept in each card's note",
     "wake 2: scripts/sync-library.mjs reads the library's catalogue (one URL, no redirects, timeout, 2 MB streamed cap) and keeps every changed read as received with its time in data/library/raw/ (the pipeline standard); scripts/library-merge.mjs takes the library's Web Summit YouTube videos field by field (11 new: recaps and more coverage; 32 videos in all), links every known video to its library call number, skips and logs anything that fails; /api/openapi.json; threat model docs/threat-models/sync-library.md",
-    "/how/youtube-api-key/: the operator's instructions for making, restricting, handing over (the Claude app's secure form, header X-Goog-Api-Key) and revoking the YouTube Data API key, at Dinis's request (~16:55 UTC, relayed by conductor.b@), checked against Google's pages on 18 Nov ~17:45 UTC; three corrections to the relayed draft stated on the page (search quota, application restriction, billing)"
+    "/how/youtube-api-key/: the operator's instructions for making, restricting, handing over (the Claude app's secure form, header X-Goog-Api-Key) and revoking the YouTube Data API key, at Dinis's request (~16:55 UTC, relayed by conductor.b@), checked against Google's pages on 18 Nov ~17:45 UTC; three corrections to the relayed draft stated on the page (search quota, application restriction, billing)",
+    "/how/google-api-key/: one restricted key for YouTube, Fact Check Tools, Knowledge Graph Search, PageSpeed Insights, Books and Web Risk, at Dinis's request (~17:55 UTC, relayed by conductor.b@); each API checked on Google's pages ~18:00 UTC (host, quota, terms); the key is entered once per host (5 hosts); /how/youtube-api-key/ kept and points to it"
   ],
   "next": [
     "every wake: read the library's requests to this site, https://library.promptugal.news/api/v1/requests/videos.b-at-promptugal.dinis.json, and answer them",
@@ -35,7 +36,8 @@
   ],
   "asks": [
     "Dinis: YouTube's Data API key (through the credential form, for data.b@), so the replays and talks can be read by the official interface (the library found Day Three by search and oEmbed).",
-    "Dinis: signing our work. Git cannot use an sgit key, so I sign a manifest of each release's files with sgit pki sign; the leak scan rejects the .sig file (a long high-entropy string). May the leak scan allow board/team/videos/signed/*.sig for that one kind (as you allowed events' obs.json), or is there a signing route you prefer? I have not changed the scan."
+    "Dinis: signing our work. Git cannot use an sgit key, so I sign a manifest of each release's files with sgit pki sign; the leak scan rejects the .sig file (a long high-entropy string). May the leak scan allow board/team/videos/signed/*.sig for that one kind (as you allowed events' obs.json), or is there a signing route you prefer? I have not changed the scan.",
+    "Dinis: Web Risk is a paid Cloud product and we could not read its pricing page; please check it before enabling Web Risk on the key (/how/google-api-key/)."
   ],
   "answered": [
     "Talks by timestamp: from YouTube's listings (chapters), never Web Summit's agenda (Dinis, 18 Nov ~16:00 UTC, Website board/guidance/2026-11-18-the-pipeline-standard-and-the-fact-checker.md); until the YouTube key, data.b@ tries Perplexity for listings. /how/ and the collection page say so.",

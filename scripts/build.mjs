@@ -354,7 +354,7 @@ page({
 <section><h2>Licences</h2><p>Our pages, words and records: ${link(CCBY, 'CC BY 4.0')}. Each video: its platform's terms (${link(PLATFORMS.youtube.terms, "YouTube's terms")}). Code: Apache-2.0.</p></section>
 <section><h2>What we do not use</h2><p>The summit's own website and agenda (websummit.com): its terms forbid automated reading, and since 11 November 2026 the team builds nothing new on Web Summit's data (Dinis Cruz). The organisers' statement on Day Two is linked, never copied.</p></section>
 <section><h2>Security</h2><p>Every value from the data is escaped; links must be https; ids must match fixed shapes or the build stops. Threat models: ${modelLinks.length ? modelLinks.join(' · ') : 'none yet'}. ${link('/security/', 'Findings')}.</p></section>
-<section><h2>For the operator</h2><p>${link('/how/youtube-api-key/', 'Making the YouTube API key')}: how Dinis Cruz creates, restricts, hands over and revokes the key that will let the agents list the official replays and their chapters.</p></section>
+<section><h2>For the operator</h2><p>${link('/how/google-api-key/', 'One Google API key for the free APIs')}: YouTube, Fact Check Tools, Knowledge Graph Search, PageSpeed Insights, Books and Web Risk, in one restricted key. ${link('/how/youtube-api-key/', 'The YouTube part on its own')}: how Dinis Cruz creates, restricts, hands over and revokes the key that will let the agents list the official replays and their chapters.</p></section>
 <section><h2>Who made it</h2><p>videos.b@PrompTugal.dinis, an AI agent (Claude, Opus, with Sonnet sub-agents for the reviews), started by conductor.b@PrompTugal.dinis at Dinis Cruz's word on 18 November 2026. No person has checked these pages yet.</p></section>`,
   mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), nothing loaded until you press play; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
 });
@@ -377,6 +377,7 @@ page({
 <p class="kicker">For the operator, not for readers</p>
 <h1>Making the YouTube API key</h1>
 <p class="standfirst">Instructions for Dinis Cruz, who asked for this page on 18 November 2026. With this key the agents can list the official replays and read their chapters, so talks can be reached by timestamp.</p>
+<p class="note">Since 18 November 2026 (about 18:00 UTC) one key covers YouTube and the other free Google APIs we use: ${link('/how/google-api-key/', 'one Google API key for the free APIs')}. This page stays for the YouTube part.</p>
 <p class="note">Checked against Google's own documentation on 18 November 2026, about 17:45 UTC. Where Google's pages and our first draft differed, this page follows Google, and says so. Google changes its console: if a step reads differently there, follow the console and ${link(`${REPO}/issues/new`, 'tell us')}.</p>
 <section><h2>The steps</h2><ol>
 <li><b>Make a project.</b> Open the ${link(G.console, 'Google Cloud console')}, signed in with the account that should own the key, and create a project (for example <code>promptugal-news</code>). (${link(G.start, "Google: YouTube Data API, getting started")})</li>
@@ -394,6 +395,49 @@ page({
 <li>Billing: Google's pages do not say; we no longer claim none is needed.</li>
 </ul></section>`,
     mdBody: `For the operator, not for readers. Checked against Google's documentation on 18 November 2026.\n\n1. Make a project in the Google Cloud console (${G.console}).\n2. Enable YouTube Data API v3 in the API Library.\n3. APIs & services, Credentials, Create credentials, API key; name it promptugal-news-youtube (${G.keys}).\n4. Restrict it to YouTube Data API v3. Google also recommends an application restriction (IP for servers); our cloud sessions have no fixed IP, so it is restricted by API only: your call.\n5. Quota (${G.quota}): 10,000 units a day; list calls 1 unit; search 1 unit a call within 100 a day. Billing: not stated by Google.\n6. Never paste the key anywhere; enter it only in the Claude app's secure form when data.b@ asks (host www.googleapis.com, header X-Goog-Api-Key) (${G.use}).\n7. Read only: official channels' videos, chapters for talks by timestamp, organisations' channels as signals; counted by telemetry.b@.\n8. Revoke or rotate on the Credentials page; tell conductor.b@.`,
+  });
+}
+
+// ---------------------------------------------------------------- the operator's page: one Google key for the free APIs
+// Asked for by Dinis Cruz (18 Nov 2026, ~17:55 UTC, in conductor.b@'s session). Each API checked against Google's own pages
+// on 18 Nov 2026, about 18:00 UTC; "not stated" means the pages read did not say.
+{
+  const APIS = [
+    { name: 'YouTube Data API v3', use: "List the official channels' videos (Web Summit first), read their chapters for talks by timestamp, organisations' channels as signals. Read only.", host: 'www.googleapis.com', quota: '10,000 units a day by default; a list call 1 unit; search 1 unit a call within 100 searches a day.', terms: 'Not stated beyond the API terms on the pages read.', docs: 'https://developers.google.com/youtube/v3/determine_quota_cost' },
+    { name: 'Fact Check Tools API', use: "Published fact-checks (ClaimReview), for the library's fact-checker.", host: 'factchecktools.googleapis.com', quota: 'Not stated (results default to 10 a page).', terms: "Google's API Terms of Service apply; nothing on caching stated.", docs: 'https://developers.google.com/fact-check/tools/api' },
+    { name: 'Knowledge Graph Search API', use: "Entity ids for the library's graph.", host: 'kgsearch.googleapis.com', quota: 'Not stated (up to 500 results a call, 20 by default).', terms: 'Google APIs Terms of Service; images carry their own licences. Google says it is being moved to Cloud Enterprise Knowledge Graph and is "not suitable for use as a production-critical service".', docs: 'https://developers.google.com/knowledge-graph' },
+    { name: 'PageSpeed Insights API', use: "Our own sites' performance and accessibility.", host: 'pagespeedonline.googleapis.com (Google\'s samples also use www.googleapis.com)', quota: 'Not stated on the pages read.', terms: 'Not stated. Google plans to stop including Chrome UX Report field data in this API.', docs: 'https://developers.google.com/speed/docs/insights/v5/get-started' },
+    { name: 'Books API', use: 'Book records for the library.', host: 'www.googleapis.com', quota: 'Not stated (up to 40 results a call).', terms: 'No fee may be charged for an application using it without a separate agreement; Google attribution ("powered by Google") beside results, a link to Google Books on each, results not reordered or altered.', docs: 'https://developers.google.com/books/terms' },
+    { name: 'Web Risk API', use: 'Checking the links our sites send readers to.', host: 'webrisk.googleapis.com', quota: 'Per project: 6,000 lookups a minute (SearchUris), others 600 a minute; submissions 1,000 a day.', terms: 'Cache each result until its expireTime; "the information returned by the Web Risk must not be redistributed". Billing: we could not read Google\'s pricing page; check it before enabling, as Web Risk is a paid Cloud product.', docs: 'https://docs.cloud.google.com/web-risk/docs/overview' },
+  ];
+  const hosts = ['www.googleapis.com', 'factchecktools.googleapis.com', 'kgsearch.googleapis.com', 'pagespeedonline.googleapis.com', 'webrisk.googleapis.com'];
+  page({
+    path: '/how/google-api-key/', section: '/how/', title: "One Google API key for the free APIs: instructions for the operator · PrompTugal.news Videos",
+    description: "How the team's operator creates one Google Cloud key for YouTube, Fact Check Tools, Knowledge Graph Search, PageSpeed Insights, Books and Web Risk, restricted to exactly those APIs, and hands it over without anyone seeing it.",
+    body: `<p class="crumbs"><a href="/how/">How it works</a> › One Google API key</p>
+<p class="kicker">For the operator, not for readers</p>
+<h1>One Google API key for the free APIs</h1>
+<p class="standfirst">Instructions for Dinis Cruz, who asked for them on 18 November 2026. One Google Cloud project, one key, restricted to exactly the APIs enabled below. The YouTube part is also on ${link('/how/youtube-api-key/', 'its own page')}.</p>
+<p class="note">Each API was checked against Google's own pages on 18 November 2026, about 18:00 UTC. "Not stated" means those pages did not say; it does not mean there is no limit. Google changes its console and terms: if anything reads differently there, follow Google and ${link(`${REPO}/issues/new`, 'tell us')}.</p>
+<section><h2>The steps</h2><ol>
+<li><b>A project of its own.</b> In the ${link('https://console.cloud.google.com/', 'Google Cloud console')}, create a project (for example <code>promptugal-news-apis</code>), kept separate from any project that holds a Gmail or other OAuth client, so this key can never touch mail.</li>
+<li><b>Enable only these APIs</b> in that project's API Library: YouTube Data API v3, Fact Check Tools API, Knowledge Graph Search API, PageSpeed Insights API, Books API and, if you accept its billing (below), Web Risk API.</li>
+<li><b>Create one key:</b> APIs &amp; services, Credentials, Create credentials, API key; name it <code>promptugal-news-apis</code>.</li>
+<li><b>Restrict it at once</b> to exactly the APIs you enabled. Google also recommends an application restriction (by IP for servers); the agents' cloud sessions have no fixed address, so it is restricted by API only, and kept where no agent can read it. Your call (${link('https://docs.cloud.google.com/docs/authentication/api-keys', "Google: manage API keys")}).</li>
+<li><b>Hand it over without showing it.</b> Never paste the key into a chat, a page, a commit, an issue or a message. When data.b@PrompTugal.dinis asks, a secure form appears in the Claude app. These APIs live on <b>${hosts.length} different hosts</b>, and the form saves a key for one host at a time, so enter the same key once for each host it asks about: ${hosts.map((h) => `<code>${esc(h)}</code>`).join(', ')}, always in the header <code>X-Goog-Api-Key</code> (${link('https://docs.cloud.google.com/docs/authentication/api-keys-use', "Google's preferred way")}). No agent ever sees the value.</li>
+<li><b>Revoke or rotate</b> on the Credentials page, then tell conductor.b@PrompTugal.dinis.</li>
+</ol></section>
+<section><h2>Each API: what we use it for, its limits and terms</h2>
+<table><thead><tr><th scope="col">API</th><th scope="col">What for</th><th scope="col">Host</th><th scope="col">Free quota, as Google states it</th><th scope="col">Caching, storage and other terms</th></tr></thead><tbody>
+${APIS.map((a) => `<tr><th scope="row">${link(a.docs, a.name)}</th><td>${esc(a.use)}</td><td><code>${esc(a.host)}</code></td><td>${esc(a.quota)}</td><td>${esc(a.terms)}</td></tr>`).join('\n')}
+</tbody></table>
+<p class="small">Every API is used read only, and every call is counted by telemetry.b@PrompTugal.dinis. Not on the list: the free Safe Browsing API, which Google says is "for non-commercial use only" and deprecated, pointing commercial users to Web Risk (${link('https://developers.google.com/safe-browsing/v4', 'Google: Safe Browsing')}).</p></section>
+<section><h2>Open, for you</h2><ul>
+<li>Web Risk's price: we could not read Google's pricing page; please check it before enabling Web Risk.</li>
+<li>Knowledge Graph Search: Google calls it not suitable for production-critical use and is moving it; fine for the library's ids, not for anything that must not break.</li>
+<li>Books: Google requires attribution beside results and forbids charging for an application that uses it without an agreement; the library must show "powered by Google" and link each result to Google Books.</li>
+</ul></section>`,
+    mdBody: `For the operator, not for readers. Checked against Google's pages on 18 November 2026.\n\n1. A Google Cloud project of its own, separate from any OAuth or Gmail project.\n2. Enable only: ${APIS.map((a) => a.name).join(', ')} (Web Risk only if its billing is accepted).\n3. One API key, restricted to exactly those APIs.\n4. Never paste it anywhere; enter it in the Claude app's secure form, once per host: ${hosts.join(', ')}, header X-Goog-Api-Key.\n5. Revoke or rotate on the Credentials page; tell conductor.b@.\n\n${APIS.map((a) => `- ${md(a.name)} (${a.host}): ${md(a.use)} Quota: ${md(a.quota)} Terms: ${md(a.terms)} ${a.docs}`).join('\n')}`,
   });
 }
 
