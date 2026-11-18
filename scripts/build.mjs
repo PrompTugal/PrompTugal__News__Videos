@@ -59,6 +59,9 @@ const videos = Array.isArray(data.videos) ? data.videos : [];
 const libraryRead = loadLibrary();
 const merged = mergeLibrary(videos, libraryRead, clean);
 for (const s of merged.skipped) console.warn(`library item skipped: ${s}`);
+for (const s of merged.withdrawn) console.warn(`library item withdrawn, not shown: ${s}`);
+const withdrawnIds = new Set(videos.filter((v) => v.withdrawn).map((v) => v.id));
+for (let i = videos.length - 1; i >= 0; i--) if (videos[i].withdrawn) videos.splice(i, 1);
 const seen = new Set();
 for (const v of videos) {
   const id = v?.id;
@@ -82,6 +85,7 @@ for (const v of videos) {
   need(v.found?.evidence === undefined || okHttps(v.found.evidence), `${id}: found.evidence must be https`);
 }
 const collections = Array.isArray(data.collections) ? data.collections : [];
+for (const c of collections) for (const d of c.days || []) if (Array.isArray(d.replays)) d.replays = d.replays.filter((r) => !withdrawnIds.has(r));
 for (const c of collections) {
   need(SLUG.test(c.id || ''), `collection id ${c.id}`);
   for (const d of c.days || []) {
@@ -471,7 +475,7 @@ ${APIS.map((a) => `<tr><th scope="row">${link(a.docs, a.name)}</th><td>${esc(a.u
       url: 'https://library.promptugal.news/api/v1/items/index.json',
       how: "Read by scripts/sync-library.mjs when videos.b@ wakes (every three hours, 07:00 to 22:00 Lisbon); the build reads the copy on disk.",
       licence: { name: "CC BY 4.0 for the library's records; each video under YouTube's terms", url: CCBY },
-      use: `Its YouTube videos become cards and players here (${fromLibrary} new so far), and every video it also holds is linked to its call number.`,
+      use: `Its YouTube videos become cards and players here (${fromLibrary} new so far), and every video it also holds is linked to its call number. A video it withdraws comes off this site at the next build (${merged.withdrawn.length} so far).`,
       last_read: lastOk, history,
       threat_model: `${REPO}/blob/dev/docs/threat-models/sync-library.md`,
     },

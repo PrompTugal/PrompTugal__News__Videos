@@ -28,7 +28,9 @@ export function loadLibrary(path = 'data/library/latest.json', syncPath = 'data/
 // Returns { added, linked, skipped } and changes `videos` in place (adds records; adds `library` to known ones).
 export function mergeLibrary(videos, { items, readAt }, clean) {
   const byYt = new Map(videos.filter((v) => v.platform === 'youtube').map((v) => [v.platform_id, v]));
-  const out = { added: 0, linked: 0, skipped: [] };
+  const out = { added: 0, linked: 0, skipped: [], withdrawn: [] };
+  // Every YouTube id the library holds as anything but 'held' is withdrawn, whatever the order of the items (VID-2026-017).
+  const pulled = new Set(items.filter((it) => it && typeof it.url === 'string' && it.status !== 'held').map((it) => (it.url.match(WATCH) || [])[1]).filter(Boolean));
   for (const it of items) {
     if (!it || typeof it !== 'object' || typeof it.url !== 'string') continue;
     const m = it.url.match(WATCH);
@@ -40,6 +42,13 @@ export function mergeLibrary(videos, { items, readAt }, clean) {
     const api = `/api/v1/items/${it.id}.json`;
     const lib = { id: it.id, call_number: `WS26 ${it.id.slice(5, 9)}/${it.id.slice(10)}`, page: `${LIB}/item/${it.id}/`, api: `${LIB}${api}` };
     const known = byYt.get(m[1]);
+    // A video the library has withdrawn comes off this site too, ours or its own (take-down first).
+    if (it.status !== 'held' || pulled.has(m[1])) {
+      if (known) { known.withdrawn = true; }
+      // Only a cleaned status reaches the log (VID-2026-018).
+      out.withdrawn.push(`${it.id}: ${String(it.status).replace(/[^a-z-]/gi, '').slice(0, 20) || 'not held'}`);
+      continue;
+    }
     if (known) { known.library = lib; out.linked++; continue; }
     const title = clean(it.title);
     const channel = clean(String(it.publisher || '').replace(PUBLISHER, ''));

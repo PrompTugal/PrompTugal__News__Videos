@@ -199,6 +199,30 @@
    "detail": "A symbolic link with a kept-read name would have been read and its size and hash published. Needs write access to the repository; never happened.",
    "fix": "Only regular files are read.",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-017",
+   "severity": "low",
+   "title": "A withdrawal could be undone by item order",
+   "file": "scripts/library-merge.mjs",
+   "found": "2026-11-18 ~23:05 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "If the library listed a withdrawn item before a held one for the same YouTube video, the held one would have been added. Never happened.",
+   "fix": "Every YouTube id the library holds as anything but held is withdrawn, whatever the order.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-018",
+   "severity": "low",
+   "title": "Raw status text reached the build log",
+   "file": "scripts/library-merge.mjs",
+   "found": "2026-11-18 ~23:05 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "A status holding line breaks or terminal escape codes would have reached the CI log as it was. Never happened.",
+   "fix": "Only letters and hyphens of a status are logged.",
+   "commit": ""
   }
  ]
 }

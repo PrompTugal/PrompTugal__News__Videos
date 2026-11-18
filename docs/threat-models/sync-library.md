@@ -25,3 +25,6 @@ At each of its wakes the agent runs `scripts/sync-library.mjs`, which reads one 
 
 ## The /sources/ page (18 November 2026, wake 3)
 `/sources/` and `/api/v1/sources/index.json` list each kept read of the library by time, size and sha256 prefix. The build takes only file names that match `YYYY-MM-DDTHH-MM-SSZ.json` in `data/library/raw/`, computes each hash from the file itself, and shows no text from inside a raw file; the last-read time comes from `sync.json` and is shown only if it is a valid date.
+
+## Withdrawals (18 November 2026, wake 4)
+When the library marks an item anything but `held` (12 items were withdrawn in its read of about 22:49 UTC, 10 of them since the 16:49 read; none is a video), the merge takes nothing from it, and a video of ours with the same YouTube id comes off this site at the next build, including from its day's replays. The withdrawal is logged in the build output and counted on /sources/. Take-down first: the library's withdrawal is enough.

@@ -1,9 +1,9 @@
 {
   "source": "https://library.promptugal.news/api/v1/items/index.json",
-  "read_at": "2026-11-18T19:48:48Z",
+  "read_at": "2026-11-18T22:49:29Z",
   "ok": true,
   "status": 200,
-  "bytes": 50973,
-  "sha256_prefix": "2ebc39d08b9fc452",
-  "changed": false
+  "bytes": 51023,
+  "sha256_prefix": "142dc356458d920f",
+  "changed": true
 }
