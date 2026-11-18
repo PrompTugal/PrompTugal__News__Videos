@@ -175,6 +175,30 @@
    "detail": "A date was checked by its shape only, so 2026-99-99 would have shown as nonsense on a card. Never happened.",
    "fix": "Only real calendar dates are taken; others are left out.",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-015",
+   "severity": "low",
+   "title": "Free text could pass as the last-read time",
+   "file": "scripts/build.mjs (/sources/)",
+   "found": "2026-11-18 ~20:00 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "The library sync record's time was checked only by whether a date could be parsed from it, so text around a date would have been published in the sources JSON as it was. Never happened.",
+   "fix": "Only an ISO time is taken, and it is normalised before it is shown or published.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-016",
+   "severity": "low",
+   "title": "A link among the kept reads would have been followed",
+   "file": "scripts/build.mjs (/sources/)",
+   "found": "2026-11-18 ~20:00 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "A symbolic link with a kept-read name would have been read and its size and hash published. Needs write access to the repository; never happened.",
+   "fix": "Only regular files are read.",
+   "commit": ""
   }
  ]
 }

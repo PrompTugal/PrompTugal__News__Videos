@@ -8,6 +8,7 @@
 // or the build stops. Embeds come from one host only (EMBED_HOST), built from an 11-character YouTube id.
 import { cpSync, rmSync, readdirSync, readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 import { loadLibrary, mergeLibrary } from './library-merge.mjs';
 
 const version = process.env.SITE_VERSION || 'dev';
@@ -354,6 +355,7 @@ page({
 <section><h2>Licences</h2><p>Our pages, words and records: ${link(CCBY, 'CC BY 4.0')}. Each video: its platform's terms (${link(PLATFORMS.youtube.terms, "YouTube's terms")}). Code: Apache-2.0.</p></section>
 <section><h2>What we do not use</h2><p>The summit's own website and agenda (websummit.com): its terms forbid automated reading, and since 11 November 2026 the team builds nothing new on Web Summit's data (Dinis Cruz). The organisers' statement on Day Two is linked, never copied.</p></section>
 <section><h2>Security</h2><p>Every value from the data is escaped; links must be https; ids must match fixed shapes or the build stops. Threat models: ${modelLinks.length ? modelLinks.join(' · ') : 'none yet'}. ${link('/security/', 'Findings')}.</p></section>
+<section><h2>The sources</h2><p>${link('/sources/', 'Every source this site reads')}: what, where from, how often, the licence, what we do with it, and every read kept.</p></section>
 <section><h2>For the operator</h2><p>${link('/how/google-api-key/', 'One Google API key for the free APIs')}: YouTube, Fact Check Tools, Knowledge Graph Search, PageSpeed Insights, Books and Web Risk, in one restricted key. ${link('/how/youtube-api-key/', 'The YouTube part on its own')}: how Dinis Cruz creates, restricts, hands over and revokes the key that will let the agents list the official replays and their chapters.</p></section>
 <section><h2>Who made it</h2><p>videos.b@PrompTugal.dinis, an AI agent (Claude, Opus, with Sonnet sub-agents for the reviews), started by conductor.b@PrompTugal.dinis at Dinis Cruz's word on 18 November 2026. No person has checked these pages yet.</p></section>`,
   mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), nothing loaded until you press play; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
@@ -441,6 +443,67 @@ ${APIS.map((a) => `<tr><th scope="row">${link(a.docs, a.name)}</th><td>${esc(a.u
   });
 }
 
+// ---------------------------------------------------------------- the sources this site reads: a home page for each
+// The pipeline standard (Dinis, 18 Nov 2026 ~16:00 UTC): what we read, how often, what we do with it, its licence, its history.
+// Built from files in this repository only. Raw files are named by a fixed pattern and never read for text: only their
+// time (from the name) and their sha256 (computed here) are shown.
+{
+  const RAW = /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})Z\.json$/;
+  const rawDir = 'data/library/raw';
+  // Regular files only, never a link (VID-2026-016).
+  const raws = existsSync(rawDir) ? readdirSync(rawDir, { withFileTypes: true }).filter((e) => e.isFile() && RAW.test(e.name)).map((e) => e.name).sort().reverse() : [];
+  const history = raws.map((f) => {
+    const m = f.match(RAW);
+    const buf = readFileSync(join(rawDir, f));
+    return { file: f, read_at: `${m[1]}T${m[2]}:${m[3]}:${m[4]}Z`, bytes: buf.length, sha256_prefix: createHash('sha256').update(buf).digest('hex').slice(0, 16) };
+  });
+  let sync = {};
+  try { sync = JSON.parse(readFileSync('data/library/sync.json', 'utf8')); } catch {}
+  // Only an ISO time, normalised before it is shown or published (VID-2026-015).
+  const lastOk = typeof sync.read_at === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(sync.read_at) && !isNaN(new Date(sync.read_at)) ? new Date(sync.read_at).toISOString() : null;
+  const SOURCES = [
+    {
+      id: 'library', name: "The library's catalogue (library.promptugal.news)",
+      what: "Every item the library catalogues; we take its YouTube videos of the Web Summit Lisbon 2026 collection.",
+      url: 'https://library.promptugal.news/api/v1/items/index.json',
+      how: "Read by scripts/sync-library.mjs when videos.b@ wakes (every three hours, 07:00 to 22:00 Lisbon); the build reads the copy on disk.",
+      licence: { name: "CC BY 4.0 for the library's records; each video under YouTube's terms", url: CCBY },
+      use: `Its YouTube videos become cards and players here (${fromLibrary} new so far), and every video it also holds is linked to its call number.`,
+      last_read: lastOk, history,
+      threat_model: `${REPO}/blob/dev/docs/threat-models/sync-library.md`,
+    },
+    {
+      id: 'coverage-record', name: "social.watch@'s record of the summit's coverage (the seed)",
+      what: 'The videos found in the team\'s coverage sweeps of 10 November 2026, each checked then with YouTube\'s oEmbed.',
+      url: data.evidence_base,
+      how: 'Copied by hand once, on 18 November 2026, from that commit; not read again.',
+      licence: { name: 'CC BY 4.0 (our own record); each video under its platform\'s terms', url: CCBY },
+      use: `${videos.length - fromLibrary} videos, and the evidence for Day Two's cancellation.`,
+      last_read: '2026-11-18T15:30:00Z', history: [],
+      threat_model: `${REPO}/blob/dev/docs/threat-models/build-and-pages.md`,
+    },
+  ];
+  const card = (s) => `<li class="src" id="${esc(s.id)}"><h4>${esc(s.name)}</h4>
+<dl class="facts big"><dt>What</dt><dd>${esc(s.what)}</dd>
+<dt>Where</dt><dd>${link(s.url, s.url)}</dd>
+<dt>How often</dt><dd>${esc(s.how)}</dd>
+<dt>Last read</dt><dd>${s.last_read ? esc(fmtStamp(s.last_read)) : 'not recorded'}${s.id === 'library' ? ' <span class="small">(from data/library/sync.json)</span>' : ''}</dd>
+<dt>Licence</dt><dd>${link(s.licence.url, s.licence.name)}</dd>
+<dt>What we do</dt><dd>${esc(s.use)}</dd>
+<dt>History</dt><dd>${s.history.length ? `${s.history.length} read${s.history.length === 1 ? '' : 's'} kept as received (a new copy only when the answer changes): <ul class="small">${s.history.map((h) => `<li>${esc(fmtStamp(h.read_at))} · ${esc(String(h.bytes))} bytes · sha256 <code>${esc(h.sha256_prefix)}</code>…</li>`).join('')}</ul><span class="small">In <code>data/library/raw/</code> in ${link(REPO, 'the repository')}; the prefixes are computed from the files at build time.</span>` : 'One copy, made by hand; nothing to keep.'}</dd>
+<dt>Risks</dt><dd>${link(s.threat_model, 'Its threat model')}</dd></dl></li>`;
+  page({
+    path: '/sources/', section: '/how/', title: 'The sources this site reads · PrompTugal.news Videos',
+    description: 'Every source videos.promptugal.news reads: what, from where, how often, its licence, what we do with it, and every read kept.',
+    body: `<p class="crumbs"><a href="/how/">How it works</a> › Sources</p><h1>The sources this site reads</h1>
+<p class="standfirst">${SOURCES.length} sources. For each: what we read, where from, how often, under which licence, what we do with it, and the reads we keep. This page states facts from the files in our repository; nothing here is a proposal or a simulation.</p>
+<p class="small">The videos themselves stay on their platforms; their channels are not sources we read, only where the videos are played. ${link('/api/v1/sources/index.json', 'This page as JSON')}.</p>
+<ul class="srcs">${SOURCES.map(card).join('\n')}</ul>`,
+    mdBody: SOURCES.map((s) => `## ${md(s.name)}\n\n- What: ${md(s.what)}\n- Where: <${mdUrl(s.url)}>\n- How often: ${md(s.how)}\n- Last read: ${s.last_read ? fmtStamp(s.last_read) : 'not recorded'}\n- Licence: ${md(s.licence.name)}\n- What we do: ${md(s.use)}\n- History: ${s.history.length ? s.history.map((h) => `${fmtStamp(h.read_at)}, ${h.bytes} bytes, sha256 ${h.sha256_prefix}`).join('; ') : 'one copy, made by hand'}`).join('\n\n'),
+  });
+  api('api/v1/sources/index.json', { about: 'The sources videos.promptugal.news reads, with every read kept (time, bytes, sha256 prefix computed at build time).', sources: SOURCES.map(({ history, ...s }) => ({ ...s, history: history.map(({ file, ...h }) => h) })), license_of_this_record: data.license_of_this_record });
+}
+
 // ---------------------------------------------------------------- security
 const F = Array.isArray(findings.findings) ? findings.findings : [];
 const SEV = ['critical', 'high', 'medium', 'low', 'info'];
@@ -461,7 +524,7 @@ api('api/v1/videos/index.json', { about: data.about, updated: data.updated, plat
 api('api/v1/playlists/index.json', { playlists: playlists.map((p) => ({ kind: p.kind, id: p.id, title: p.title, count: p.ids.length, json: `${SITE}/api/v1/playlists/${p.kind}/${p.id}.json` })), license_of_this_record: data.license_of_this_record });
 // An open finding is published as its id, title, severity and state only, until it is fixed (VID-2026-001).
 api('api/v1/security/findings.json', { ...findings, findings: F.map((f) => f.state === 'fixed' ? f : { id: f.id, title: f.title, severity: f.severity, state: f.state, found: f.found }) });
-const ENDPOINTS = [['/api/openapi.json', 'the OpenAPI description of this API'], ['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
+const ENDPOINTS = [['/api/openapi.json', 'the OpenAPI description of this API'], ['/api/v1/sources/index.json', 'the sources this site reads, with every read kept'], ['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
 page({
   path: '/api/', section: '/api/', title: 'The data · PrompTugal.news Videos',
   description: 'Every page here is built from JSON first; the JSON is published, under CC BY 4.0.',

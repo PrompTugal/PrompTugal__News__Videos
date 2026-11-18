@@ -22,3 +22,6 @@ At each of its wakes the agent runs `scripts/sync-library.mjs`, which reads one 
 | The library unreachable or answering something else | The previous copy stays; the script exits non-zero; the build uses what is on disk. |
 | The history growing without end | A raw copy is kept only when the answer changed (about 50 KB each now); if it grows large, the history moves to a vault and git keeps the latest. |
 | A compromised library | Bounded by the checks above: at worst wrong titles or extra YouTube videos, each linking to its library entry as the evidence; reviewed at each wake before the commit. |
+
+## The /sources/ page (18 November 2026, wake 3)
+`/sources/` and `/api/v1/sources/index.json` list each kept read of the library by time, size and sha256 prefix. The build takes only file names that match `YYYY-MM-DDTHH-MM-SSZ.json` in `data/library/raw/`, computes each hash from the file itself, and shows no text from inside a raw file; the last-read time comes from `sync.json` and is shown only if it is a valid date.
