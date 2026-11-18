@@ -2,7 +2,7 @@
   "role": "videos.b@PrompTugal.dinis",
   "account": "B",
   "started_by": "conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session, 18 Nov 2026 (a site for videos, and audio once we have it: \"that would be a good way, the same way that we have weather ... to find data\")",
-  "state": "run 1 done: first version of videos.promptugal.news released to dev; no wake schedule of its own (conductor.b@ wakes it)",
+  "state": "run 1 done: first version of videos.promptugal.news released to dev; work not yet signed (leak scan and signature, an ask); no wake schedule of its own (conductor.b@ wakes it)",
   "updated": "2026-11-18T15:55Z",
   "debrief": "board/team/videos/debriefs/2026-11-18-handover.md",
   "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran.",
@@ -13,7 +13,7 @@
     "playlists by kind, organisation and topic (two or more videos), place and Storm Charles; /videos/; /how/; /security/; /api/ with /api/v1/ JSON; markdown twins; llms.txt; 404",
     "masthead, sites rail, free-here chip, take-down disclaimer, principles line linking promptugal.news/principles/ and /report/",
     "threat models: docs/threat-models/build-and-pages.md and embeds.md",
-    "key videos.b-promptugal (sgit pki keygen): public bundle team/keys/videos-b-promptugal.json, board/keys.json; the work is signed by a manifest (scripts/sign-release.sh, board/team/videos/signed/)",
+    "key videos.b-promptugal (sgit pki keygen): public bundle team/keys/videos-b-promptugal.json, board/keys.json; scripts/sign-release.sh signs a manifest of every tracked file's sha256 (tested: sgit pki verify says valid), but no signed manifest is committed: the leak scan flags the signature as a long high-entropy string (see asks)",
     "commit check accepts role@PrompTugal.dinis, as in Weather and Events"
   ],
   "next": [
@@ -29,6 +29,7 @@
   "asks": [
     "Dinis: talks by timestamp. The replays are hours long; the obvious source of the talks and their times is Web Summit's agenda, which the team stopped using on 11 Nov at your word. May we list talks from (a) the replays' own published chapters or descriptions read through YouTube's Data API once you add its key, or (b) organisers' and speakers' own submissions, or should timestamps wait? Until you say, the field stays empty and the pages say why.",
     "Dinis: YouTube's Data API key (through the credential form, for data.b@), so discovery can find the official replays (Day Three is missing) by the official interface rather than by search.",
-    "Dinis: is linking the organisers' Day Two statement on websummit.com fine? It is linked only, never copied or read again (opened once by social.watch@ on 10 Nov, before the machine-reading stop)."
+    "Dinis: is linking the organisers' Day Two statement on websummit.com fine? It is linked only, never copied or read again (opened once by social.watch@ on 10 Nov, before the machine-reading stop).",
+    "Dinis: signing our work. Git cannot use an sgit key, so I sign a manifest of each release's files with sgit pki sign; the leak scan rejects the .sig file (a long high-entropy string). May the leak scan allow board/team/videos/signed/*.sig for that one kind (as you allowed events' obs.json), or is there a signing route you prefer? I have not changed the scan."
   ]
 }

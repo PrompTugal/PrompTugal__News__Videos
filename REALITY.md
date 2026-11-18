@@ -25,4 +25,5 @@ Does not exist yet:
 - Any read from library.promptugal.news or data.promptugal.news: neither publishes videos yet (404 on 18 November, about 15:25 UTC). No collector runs here.
 - Audio; other events, places and organisations' collections; the Day Three replay.
 - Observability (an obs.js lane), the brand fonts, a `/design/` page, a scheduled rebuild, GitHub issue forms (a plain "new issue" link stands in).
+- Signed work: `scripts/sign-release.sh` signs a manifest of every tracked file (tested valid with `sgit pki verify`), but no signature is committed: the leak scan flags the `.sig` as a long high-entropy string; an ask to Dinis. Commits carry the `Agent:` trailer only.
 - A check of any page by a person.
