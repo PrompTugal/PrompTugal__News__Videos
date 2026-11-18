@@ -1,7 +1,7 @@
 {
   "about": "The seed catalogue of videos.promptugal.news: every video in the Web Summit Lisbon 2026 collection, one record each. Copied by hand by videos.b@PrompTugal.dinis on 18 November 2026 from the video items of social.watch@PrompTugal.dinis's coverage record (PrompTugal__News__Website, board/team/social.watch/coverage.json at commit 142060e23205fa62b316f800a2e66b95f8a0ab66), found in its sweeps of 10 November 2026 and checked then with YouTube's oEmbed (title and channel). Nothing here was read again from YouTube or from websummit.com. It is replaced by library.promptugal.news's and data.promptugal.news's APIs when they publish videos (both answered 404 on 18 November 2026, about 15:25 UTC). From 18 November, about 15:50 UTC, the library's catalogue is a source too: the Day Three replay comes from it, credited on its card.",
   "kept_by": "videos.b@PrompTugal.dinis",
-  "updated": "2026-11-18T15:50Z",
+  "updated": "2026-11-18T16:05Z",
   "license_of_this_record": {
     "name": "CC BY 4.0",
     "url": "https://creativecommons.org/licenses/by/4.0/"
@@ -94,7 +94,7 @@
         ],
         "why": "Videos by private people posting as themselves: counted with their theme only, never their name, handle, link or words (security@PrompTugal.dinis, 10 November 2026, 20:05 UTC)."
       },
-      "talks_note": "Talks by timestamp are not listed yet. The obvious source, the summit's agenda, is Web Summit's data, which we do not use (Dinis, 11 November 2026: no new work built on Web Summit-derived data). They will come from the replays' own published chapters or descriptions, through the platform's official API, or from organisers and speakers, when Dinis decides."
+      "talks_note": "Talks by timestamp are not listed yet. They will come from YouTube's own listings for each replay (its chapters), never from the summit's agenda, which is Web Summit's data and which we do not use (Dinis Cruz, 18 November 2026, about 16:00 UTC). Until YouTube's API key is added, data.promptugal.news asks Perplexity for the listings, linked and never copied."
     }
   ],
   "videos": [

@@ -3,7 +3,7 @@
   "account": "B",
   "started_by": "conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session, 18 Nov 2026 (a site for videos, and audio once we have it: \"that would be a good way, the same way that we have weather ... to find data\")",
   "state": "run 1 done: first version of videos.promptugal.news released to dev; work not yet signed (leak scan and signature, an ask); no wake schedule of its own (conductor.b@ wakes it)",
-  "updated": "2026-11-18T16:00Z",
+  "updated": "2026-11-18T16:05Z",
   "debrief": "board/team/videos/debriefs/2026-11-18-handover.md",
   "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran.",
   "done": [
@@ -19,6 +19,7 @@
   ],
   "next": [
     "every wake: pull dev, stop if board/HOLD.md, inner passes as Sonnet sub-agents",
+    "talks by timestamp from YouTube's chapters as data.b@ publishes them (Perplexity listings first, the Data API once Dinis adds the key); each talk linked to its replay at its second",
     "read the library's /api/v1/items/ as the catalogue in the build (a sync script with its own threat model), instead of copying by hand",
     "read data.promptugal.news when it publishes videos (404 on 18 Nov ~15:25 UTC)",
     "GitHub issue forms (a video submission, a report or take-down); a scheduled rebuild once data is read from an API",
@@ -28,9 +29,11 @@
     "register the key on pki.sgit.ai; list it in the Website repo's board/keys.json via conductor.b@"
   ],
   "asks": [
-    "Dinis: talks by timestamp. The replays are hours long; the obvious source of the talks and their times is Web Summit's agenda, which the team stopped using on 11 Nov at your word. May we list talks from (a) the replays' own published chapters or descriptions read through YouTube's Data API once you add its key, or (b) organisers' and speakers' own submissions, or should timestamps wait? Until you say, the field stays empty and the pages say why.",
     "Dinis: YouTube's Data API key (through the credential form, for data.b@), so the replays and talks can be read by the official interface (the library found Day Three by search and oEmbed).",
-    "Dinis: is linking the organisers' Day Two statement on websummit.com fine? It is linked only, never copied or read again (opened once by social.watch@ on 10 Nov, before the machine-reading stop).",
     "Dinis: signing our work. Git cannot use an sgit key, so I sign a manifest of each release's files with sgit pki sign; the leak scan rejects the .sig file (a long high-entropy string). May the leak scan allow board/team/videos/signed/*.sig for that one kind (as you allowed events' obs.json), or is there a signing route you prefer? I have not changed the scan."
+  ],
+  "answered": [
+    "Talks by timestamp: from YouTube's listings (chapters), never Web Summit's agenda (Dinis, 18 Nov ~16:00 UTC, Website board/guidance/2026-11-18-the-pipeline-standard-and-the-fact-checker.md); until the YouTube key, data.b@ tries Perplexity for listings. /how/ and the collection page say so.",
+    "Linking websummit.com's Day Two statement: yes, \"you can always link ... but don't copy the stuff\" (same guidance)."
   ]
 }

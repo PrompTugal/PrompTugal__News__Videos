@@ -21,7 +21,7 @@ Started by conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s s
 
 Does not exist yet:
 
-- Talks by timestamp (the field exists, empty): the summit's agenda is Web Summit's data, which the team does not use (Dinis, 11 November); an ask to Dinis is in status.json.
+- Talks by timestamp (the field exists, empty): Dinis answered on 18 November (~16:00 UTC) that they come from YouTube's listings (chapters), never Web Summit's agenda; they wait for data.b@ to publish them.
 - Any read from library.promptugal.news or data.promptugal.news: neither publishes videos yet (404 on 18 November, about 15:25 UTC). No collector runs here.
 - Audio; other events, places and organisations' collections.
 - Observability (an obs.js lane), the brand fonts, a `/design/` page, a scheduled rebuild, GitHub issue forms (a plain "new issue" link stands in).
