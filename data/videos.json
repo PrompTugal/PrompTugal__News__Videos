@@ -1,12 +1,25 @@
 {
-  "about": "The seed catalogue of videos.promptugal.news: every video in the Web Summit Lisbon 2026 collection, one record each. Copied by hand by videos.b@PrompTugal.dinis on 18 November 2026 from the video items of social.watch@PrompTugal.dinis's coverage record (PrompTugal__News__Website, board/team/social.watch/coverage.json at commit 142060e23205fa62b316f800a2e66b95f8a0ab66), found in its sweeps of 10 November 2026 and checked then with YouTube's oEmbed (title and channel). Nothing here was read again from YouTube or from websummit.com. It is replaced by library.promptugal.news's and data.promptugal.news's APIs when they publish videos (both answered 404 on 18 November 2026, about 15:25 UTC).",
+  "about": "The seed catalogue of videos.promptugal.news: every video in the Web Summit Lisbon 2026 collection, one record each. Copied by hand by videos.b@PrompTugal.dinis on 18 November 2026 from the video items of social.watch@PrompTugal.dinis's coverage record (PrompTugal__News__Website, board/team/social.watch/coverage.json at commit 142060e23205fa62b316f800a2e66b95f8a0ab66), found in its sweeps of 10 November 2026 and checked then with YouTube's oEmbed (title and channel). Nothing here was read again from YouTube or from websummit.com. It is replaced by library.promptugal.news's and data.promptugal.news's APIs when they publish videos (both answered 404 on 18 November 2026, about 15:25 UTC). From 18 November, about 15:50 UTC, the library's catalogue is a source too: the Day Three replay comes from it, credited on its card.",
   "kept_by": "videos.b@PrompTugal.dinis",
-  "updated": "2026-11-18T15:30Z",
-  "license_of_this_record": { "name": "CC BY 4.0", "url": "https://creativecommons.org/licenses/by/4.0/" },
+  "updated": "2026-11-18T15:50Z",
+  "license_of_this_record": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
   "evidence_base": "https://github.com/PrompTugal/PrompTugal__News__Website/blob/142060e23205fa62b316f800a2e66b95f8a0ab66/board/team/social.watch/coverage.json",
   "platforms": {
-    "youtube": { "name": "YouTube", "terms": "https://www.youtube.com/t/terms", "embed_host": "https://www.youtube-nocookie.com", "how": "The platform's own player, in YouTube's privacy-enhanced mode, loaded only when the reader presses play." },
-    "cnbc": { "name": "CNBC", "terms": "https://www.cnbc.com/nbcuniversal-terms-of-service/", "embed_host": null, "how": "Link only: we embed from YouTube alone." }
+    "youtube": {
+      "name": "YouTube",
+      "terms": "https://www.youtube.com/t/terms",
+      "embed_host": "https://www.youtube-nocookie.com",
+      "how": "The platform's own player, in YouTube's privacy-enhanced mode, loaded only when the reader presses play."
+    },
+    "cnbc": {
+      "name": "CNBC",
+      "terms": "https://www.cnbc.com/nbcuniversal-terms-of-service/",
+      "embed_host": null,
+      "how": "Link only: we embed from YouTube alone."
+    }
   },
   "collections": [
     {
@@ -16,287 +29,788 @@
       "place": "lisboa",
       "summary": "The organiser's own replays by day, and the recordings others made at and about the summit: companies, governments and the press. Day Two, Wednesday 11 November, did not take place: Storm Charles.",
       "days": [
-        { "date": "2026-11-09", "label": "Opening Night", "state": "held", "replays": ["yt-dJi_pXLxwno"] },
-        { "date": "2026-11-10", "label": "Day One", "state": "held", "replays": ["yt-S9RHQGNIaFY"] },
         {
-          "date": "2026-11-11", "label": "Day Two", "state": "cancelled",
+          "date": "2026-11-09",
+          "label": "Opening Night",
+          "state": "held",
+          "replays": [
+            "yt-dJi_pXLxwno"
+          ]
+        },
+        {
+          "date": "2026-11-10",
+          "label": "Day One",
+          "state": "held",
+          "replays": [
+            "yt-S9RHQGNIaFY"
+          ]
+        },
+        {
+          "date": "2026-11-11",
+          "label": "Day Two",
+          "state": "cancelled",
           "why": "Storm Charles. The organisers announced on the evening of 10 November that Day Two would not take place and that Thursday would go ahead after the storm passed; some of Wednesday's sessions moved to Thursday.",
           "evidence": [
-            { "title": "Important event update (the organisers' statement, dated 10 November 2026, 19:09)", "url": "https://websummit.com/blog/web-summit/important-event-update-2026/", "publisher": "Web Summit", "note": "Linked only. Opened by social.watch@ at 20:56 UTC on 10 November, before websummit.com stopped being read by machine." },
-            { "title": "Web Summit confirma regresso na quinta-feira após cancelamento devido ao mau tempo", "url": "https://24noticias.sapo.pt/atualidade/artigos/web-summit-confirma-regresso-na-quinta-feira-apos-cancelamento-devido-ao-mau-tempo", "publisher": "24 Notícias" },
-            { "title": "Web Summit promete o dia mais intenso de sempre após cancelar evento", "url": "https://marketeer.sapo.pt/web-summit-promete-o-dia-mais-intenso-de-sempre-apos-cancelar-evento-devid", "publisher": "Marketeer (with Lusa)" }
+            {
+              "title": "Important event update (the organisers' statement, dated 10 November 2026, 19:09)",
+              "url": "https://websummit.com/blog/web-summit/important-event-update-2026/",
+              "publisher": "Web Summit",
+              "note": "Linked only. Opened by social.watch@ at 20:56 UTC on 10 November, before websummit.com stopped being read by machine."
+            },
+            {
+              "title": "Web Summit confirma regresso na quinta-feira após cancelamento devido ao mau tempo",
+              "url": "https://24noticias.sapo.pt/atualidade/artigos/web-summit-confirma-regresso-na-quinta-feira-apos-cancelamento-devido-ao-mau-tempo",
+              "publisher": "24 Notícias"
+            },
+            {
+              "title": "Web Summit promete o dia mais intenso de sempre após cancelar evento",
+              "url": "https://marketeer.sapo.pt/web-summit-promete-o-dia-mais-intenso-de-sempre-apos-cancelar-evento-devid",
+              "publisher": "Marketeer (with Lusa)"
+            }
           ],
-          "storm": { "title": "Storm Charles, the archive on weather.promptugal.news", "url": "https://weather.promptugal.news/storms/charles/" },
+          "storm": {
+            "title": "Storm Charles, the archive on weather.promptugal.news",
+            "url": "https://weather.promptugal.news/storms/charles/"
+          },
           "replays": []
         },
-        { "date": "2026-11-12", "label": "Day Three", "state": "held", "replays": [], "gap": "The organiser's replay of Day Three is not in our evidence yet: the team's video sweeps ran on 10 November. We run no collector; it is added when data.promptugal.news or the library finds it, or an organiser sends it." }
+        {
+          "date": "2026-11-12",
+          "label": "Day Three",
+          "state": "held",
+          "replays": [
+            "yt--MGZdAtbTrs"
+          ],
+          "note": "Found by the library (library.promptugal.news, WS26 2026/0001). Which stage it shows is not confirmed; some of Wednesday's sessions moved to this day."
+        }
       ],
-      "private_items": { "count": 3, "platform": "YouTube", "themes": ["Portugal, housing and policy", "robotics, China and AI", "the summit"], "why": "Videos by private people posting as themselves: counted with their theme only, never their name, handle, link or words (security@PrompTugal.dinis, 10 November 2026, 20:05 UTC)." },
+      "private_items": {
+        "count": 3,
+        "platform": "YouTube",
+        "themes": [
+          "Portugal, housing and policy",
+          "robotics, China and AI",
+          "the summit"
+        ],
+        "why": "Videos by private people posting as themselves: counted with their theme only, never their name, handle, link or words (security@PrompTugal.dinis, 10 November 2026, 20:05 UTC)."
+      },
       "talks_note": "Talks by timestamp are not listed yet. The obvious source, the summit's agenda, is Web Summit's data, which we do not use (Dinis, 11 November 2026: no new work built on Web Summit-derived data). They will come from the replays' own published chapters or descriptions, through the platform's official API, or from organisers and speakers, when Dinis decides."
     }
   ],
   "videos": [
     {
-      "id": "yt-dJi_pXLxwno", "platform": "youtube", "platform_id": "dJi_pXLxwno",
+      "id": "yt-dJi_pXLxwno",
+      "platform": "youtube",
+      "platform_id": "dJi_pXLxwno",
       "url": "https://www.youtube.com/watch?v=dJi_pXLxwno",
       "title": "Web Summit Lisbon 2026 | Opening Night",
-      "channel": { "name": "Web Summit", "kind": "organiser" },
+      "channel": {
+        "name": "Web Summit",
+        "kind": "organiser"
+      },
       "people": [],
-      "published": { "date": "2026-11-09", "precision": "day, from YouTube's relative age at the sweep (streamed about 22 hours before)" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-09", "kind": "official-replay",
-      "topics": ["the summit"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-09",
+        "precision": "day, from YouTube's relative age at the sweep (streamed about 22 hours before)"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-09",
+      "kind": "official-replay",
+      "topics": [
+        "the summit"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "The organiser's own stream of opening night.",
       "talks": []
     },
     {
-      "id": "yt-S9RHQGNIaFY", "platform": "youtube", "platform_id": "S9RHQGNIaFY",
+      "id": "yt-S9RHQGNIaFY",
+      "platform": "youtube",
+      "platform_id": "S9RHQGNIaFY",
       "url": "https://www.youtube.com/watch?v=S9RHQGNIaFY",
       "title": "Web Summit Lisbon 2026 | Day One",
-      "channel": { "name": "Web Summit", "kind": "organiser" },
+      "channel": {
+        "name": "Web Summit",
+        "kind": "organiser"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "day, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "official-replay",
-      "topics": ["the summit"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "official-replay",
+      "topics": [
+        "the summit"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "The organiser's own stream of Day One.",
       "talks": []
     },
     {
-      "id": "yt-XMEf-M9k5yw", "platform": "youtube", "platform_id": "XMEf-M9k5yw",
+      "id": "yt--MGZdAtbTrs",
+      "platform": "youtube",
+      "platform_id": "-MGZdAtbTrs",
+      "url": "https://www.youtube.com/watch?v=-MGZdAtbTrs",
+      "title": "Web Summit 2026 | Day Three",
+      "channel": {
+        "name": "Web Summit",
+        "kind": "organiser"
+      },
+      "people": [],
+      "published": {
+        "date": null,
+        "precision": "not read: on or after 12 November 2026"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-12",
+      "kind": "official-replay",
+      "topics": [
+        "the summit"
+      ],
+      "storm": false,
+      "found": {
+        "by": "library.b@PrompTugal.dinis (WS26 2026/0001)",
+        "at": "2026-11-18T15:28Z",
+        "how": "a web search, then YouTube's oEmbed (title and channel); re-checked by library.b@",
+        "verified": true,
+        "evidence": "https://library.promptugal.news/api/v1/items/WS26-2026-0001.json"
+      },
+      "note": "The organiser's own recording of the final day. Which stage it shows is not confirmed.",
+      "talks": []
+    },
+    {
+      "id": "yt-XMEf-M9k5yw",
+      "platform": "youtube",
+      "platform_id": "XMEf-M9k5yw",
       "url": "https://www.youtube.com/watch?v=XMEf-M9k5yw",
       "title": "Replit Live: Web Summit Lisbon 2026 | Day 1",
-      "channel": { "name": "Replit", "kind": "company" },
+      "channel": {
+        "name": "Replit",
+        "kind": "company"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "day at best, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "recording",
-      "topics": ["AI", "startups"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day at best, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "recording",
+      "topics": [
+        "AI",
+        "startups"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "A company's own live stream from the summit.",
       "talks": []
     },
     {
-      "id": "yt-uXTIOZpQ3uQ", "platform": "youtube", "platform_id": "uXTIOZpQ3uQ",
+      "id": "yt-uXTIOZpQ3uQ",
+      "platform": "youtube",
+      "platform_id": "uXTIOZpQ3uQ",
       "url": "https://www.youtube.com/watch?v=uXTIOZpQ3uQ",
       "title": "Web Summit Lisbon: Day 1",
-      "channel": { "name": "Make", "kind": "company" },
+      "channel": {
+        "name": "Make",
+        "kind": "company"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "day at best, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "recording",
-      "topics": ["AI", "startups"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day at best, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "recording",
+      "topics": [
+        "AI",
+        "startups"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "A company's own video of its first day at the summit.",
       "talks": []
     },
     {
-      "id": "yt-c0pl5x6i248", "platform": "youtube", "platform_id": "c0pl5x6i248",
+      "id": "yt-c0pl5x6i248",
+      "platform": "youtube",
+      "platform_id": "c0pl5x6i248",
       "url": "https://www.youtube.com/watch?v=c0pl5x6i248",
       "title": "Verus and Confrmo at Web Summit Lisbon 2026 | Private messaging, verified identity",
-      "channel": { "name": "Verus", "kind": "company" },
+      "channel": {
+        "name": "Verus",
+        "kind": "company"
+      },
       "people": [],
-      "published": { "date": null, "precision": "not known: before 10 November 2026, 18:48 UTC" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "recording",
-      "topics": ["security", "startups"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": null,
+        "precision": "not known: before 10 November 2026, 18:48 UTC"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "recording",
+      "topics": [
+        "security",
+        "startups"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "An exhibitor's own video.",
       "talks": []
     },
     {
-      "id": "yt-MO1681bMX-c", "platform": "youtube", "platform_id": "MO1681bMX-c",
+      "id": "yt-MO1681bMX-c",
+      "platform": "youtube",
+      "platform_id": "MO1681bMX-c",
       "url": "https://www.youtube.com/watch?v=MO1681bMX-c",
       "title": "قطر في قمة الويب لشبونة 2026- Qatar at Web Summit Lisbon 2026",
-      "channel": { "name": "Government Communications Office (Qatar)", "kind": "government" },
+      "channel": {
+        "name": "Government Communications Office (Qatar)",
+        "kind": "government"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "day at best, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "recording",
-      "topics": ["policy", "investment"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day at best, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "recording",
+      "topics": [
+        "policy",
+        "investment"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "Qatar's presence at the summit, from its government's communications office. The title is in Arabic and English, as published.",
       "talks": []
     },
     {
-      "id": "yt-NH2Mpu3vcSE", "platform": "youtube", "platform_id": "NH2Mpu3vcSE",
+      "id": "yt-NH2Mpu3vcSE",
+      "platform": "youtube",
+      "platform_id": "NH2Mpu3vcSE",
       "url": "https://www.youtube.com/watch?v=NH2Mpu3vcSE",
       "title": "CONHEÇA AS TECNOLOGIAS DESENVOLVIDAS NA PARAÍBA PARA O MUNDO - WEB SUMMIT 2026 - AO VIVO DE LISBOA",
-      "channel": { "name": "SECTIES PB", "kind": "government" },
+      "channel": {
+        "name": "SECTIES PB",
+        "kind": "government"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "day at best, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "recording",
-      "topics": ["Brazil", "startups"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day at best, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "recording",
+      "topics": [
+        "Brazil",
+        "startups"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "A live stream from Lisbon on the technology of Paraíba, Brazil, by the channel SECTIES PB.",
       "talks": []
     },
     {
-      "id": "yt-JzLsTw-BCIA", "platform": "youtube", "platform_id": "JzLsTw-BCIA",
+      "id": "yt-JzLsTw-BCIA",
+      "platform": "youtube",
+      "platform_id": "JzLsTw-BCIA",
       "url": "https://www.youtube.com/watch?v=JzLsTw-BCIA",
       "title": "🔴 DIRETO | NAMA BABY na WEB SUMMIT 2026",
-      "channel": { "name": "RVTV", "kind": "press" },
+      "channel": {
+        "name": "RVTV",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "day at best, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "recording",
-      "topics": ["startups", "Portugal"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day at best, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "recording",
+      "topics": [
+        "startups",
+        "Portugal"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "One of a series of live streams from the summit by RVTV (the sweep saw similar ones; only this one was recorded).",
       "talks": []
     },
     {
-      "id": "yt-6vvcyQyhS98", "platform": "youtube", "platform_id": "6vvcyQyhS98",
+      "id": "yt-6vvcyQyhS98",
+      "platform": "youtube",
+      "platform_id": "6vvcyQyhS98",
       "url": "https://www.youtube.com/watch?v=6vvcyQyhS98",
       "title": "Décima edição da Web Summit em Lisboa. O que podemos esperar?",
-      "channel": { "name": "Renascença", "kind": "press" },
+      "channel": {
+        "name": "Renascença",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": "2026-11-09", "precision": "about a day before the sweep, from YouTube's relative age" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "press",
-      "topics": ["Portugal", "the summit"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-09",
+        "precision": "about a day before the sweep, from YouTube's relative age"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "press",
+      "topics": [
+        "Portugal",
+        "the summit"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "A Portuguese broadcaster's preview of the tenth edition.",
       "talks": []
     },
     {
-      "id": "yt-LsCsHpkPgpc", "platform": "youtube", "platform_id": "LsCsHpkPgpc",
+      "id": "yt-LsCsHpkPgpc",
+      "platform": "youtube",
+      "platform_id": "LsCsHpkPgpc",
       "url": "https://www.youtube.com/watch?v=LsCsHpkPgpc",
       "title": "China's 'impossible to ignore' tech rise on display at Web Summit in Lisbon",
-      "channel": { "name": "FRANCE 24 English", "kind": "press" },
+      "channel": {
+        "name": "FRANCE 24 English",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "about 8 hours before the sweep, from YouTube's relative age" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "press",
-      "topics": ["China", "AI", "robotics"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "about 8 hours before the sweep, from YouTube's relative age"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "press",
+      "topics": [
+        "China",
+        "AI",
+        "robotics"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "",
       "talks": []
     },
     {
-      "id": "yt-hsrThTM-oIM", "platform": "youtube", "platform_id": "hsrThTM-oIM",
+      "id": "yt-hsrThTM-oIM",
+      "platform": "youtube",
+      "platform_id": "hsrThTM-oIM",
       "url": "https://www.youtube.com/watch?v=hsrThTM-oIM",
       "title": "AI, robotics and more: CGTN explores the future at Web Summit 2026",
-      "channel": { "name": "CGTN Europe", "kind": "press" },
+      "channel": {
+        "name": "CGTN Europe",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": null, "precision": "not known: before 10 November 2026, 18:48 UTC" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "press",
-      "topics": ["AI", "robotics", "China"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": null,
+        "precision": "not known: before 10 November 2026, 18:48 UTC"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "press",
+      "topics": [
+        "AI",
+        "robotics",
+        "China"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "",
       "talks": []
     },
     {
-      "id": "yt-hhoqFc60Kog", "platform": "youtube", "platform_id": "hhoqFc60Kog",
+      "id": "yt-hhoqFc60Kog",
+      "platform": "youtube",
+      "platform_id": "hhoqFc60Kog",
       "url": "https://www.youtube.com/watch?v=hhoqFc60Kog",
       "title": "La Web Summit enciende en Lisboa su décima edición con la vista puesta en China y la IA",
-      "channel": { "name": "AGENCIA EFE", "kind": "press" },
+      "channel": {
+        "name": "AGENCIA EFE",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": null, "precision": "not known: probably 10 November 2026" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "press",
-      "topics": ["AI", "China", "the summit"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 3", "at": "2026-11-10T20:53Z", "how": "YouTube's oEmbed confirmed the video exists; the page itself was not opened", "verified": false },
+      "published": {
+        "date": null,
+        "precision": "not known: probably 10 November 2026"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "press",
+      "topics": [
+        "AI",
+        "China",
+        "the summit"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 3",
+        "at": "2026-11-10T20:53Z",
+        "how": "YouTube's oEmbed confirmed the video exists; the page itself was not opened",
+        "verified": false
+      },
       "note": "Not fully checked: oEmbed confirms it exists, but nobody on the team opened the page.",
       "talks": []
     },
     {
-      "id": "yt-D8tZOrwLP0c", "platform": "youtube", "platform_id": "D8tZOrwLP0c",
+      "id": "yt-D8tZOrwLP0c",
+      "platform": "youtube",
+      "platform_id": "D8tZOrwLP0c",
       "url": "https://www.youtube.com/watch?v=D8tZOrwLP0c",
       "title": "Cloudflare CEO on 'Uncle Jensen's crazy credit card'",
-      "channel": { "name": "CNBC International Live", "kind": "press" },
-      "people": [{ "name": "Matthew Prince", "role": "chief executive, Cloudflare" }],
-      "published": { "date": "2026-11-10", "precision": "about 9 hours before the sweep, from YouTube's relative age" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "press",
-      "topics": ["AI", "infrastructure"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed; not watched", "verified": true },
+      "channel": {
+        "name": "CNBC International Live",
+        "kind": "press"
+      },
+      "people": [
+        {
+          "name": "Matthew Prince",
+          "role": "chief executive, Cloudflare"
+        }
+      ],
+      "published": {
+        "date": "2026-11-10",
+        "precision": "about 9 hours before the sweep, from YouTube's relative age"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "press",
+      "topics": [
+        "AI",
+        "infrastructure"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed; not watched",
+        "verified": true
+      },
       "note": "An interview listed as part of CNBC's Web Summit coverage; the title names the guest's role.",
       "talks": []
     },
     {
-      "id": "cnbc-2026-11-10-tech-ceos", "platform": "cnbc", "platform_id": null,
+      "id": "cnbc-2026-11-10-tech-ceos",
+      "platform": "cnbc",
+      "platform_id": null,
       "url": "https://www.cnbc.com/video/2026/11/10/tech-ceos-discuss-ai-build-out-at-web-summit-in-lisbon.html",
       "title": "Tech CEOs discuss AI build out at Web Summit in Lisbon",
-      "channel": { "name": "CNBC (Squawk Box Europe)", "kind": "press" },
+      "channel": {
+        "name": "CNBC (Squawk Box Europe)",
+        "kind": "press"
+      },
       "people": [
-        { "name": "Matthew Prince", "role": "Cloudflare" },
-        { "name": "Richard Socher", "role": "Recursive" },
-        { "name": "Anton Osika", "role": "Lovable" }
+        {
+          "name": "Matthew Prince",
+          "role": "Cloudflare"
+        },
+        {
+          "name": "Richard Socher",
+          "role": "Recursive"
+        },
+        {
+          "name": "Anton Osika",
+          "role": "Lovable"
+        }
       ],
-      "published": { "date": "2026-11-10", "precision": "day, from the date in the page's address" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "press",
-      "topics": ["AI", "investment"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search for coverage of the summit; the page was opened", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "day, from the date in the page's address"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "press",
+      "topics": [
+        "AI",
+        "investment"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search for coverage of the summit; the page was opened",
+        "verified": true
+      },
       "note": "On CNBC's own site: linked, not embedded.",
       "talks": []
     },
     {
-      "id": "yt-dQCc5UGakQo", "platform": "youtube", "platform_id": "dQCc5UGakQo",
+      "id": "yt-dQCc5UGakQo",
+      "platform": "youtube",
+      "platform_id": "dQCc5UGakQo",
       "url": "https://www.youtube.com/watch?v=dQCc5UGakQo",
       "title": "Robots Take the Stage at Web Summit: Is Europe Ready for Physical AI?",
-      "channel": { "name": "The Spotlight: Beyond Profession", "kind": "press" },
+      "channel": {
+        "name": "The Spotlight: Beyond Profession",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": null, "precision": "not known: before 10 November 2026, 18:48 UTC" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "press",
-      "topics": ["robotics", "AI", "Europe"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": null,
+        "precision": "not known: before 10 November 2026, 18:48 UTC"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "press",
+      "topics": [
+        "robotics",
+        "AI",
+        "Europe"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "",
       "talks": []
     },
     {
-      "id": "yt-89tY8-exU5k", "platform": "youtube", "platform_id": "89tY8-exU5k",
+      "id": "yt-89tY8-exU5k",
+      "platform": "youtube",
+      "platform_id": "89tY8-exU5k",
       "url": "https://www.youtube.com/watch?v=89tY8-exU5k",
       "title": "Web Summit 2026: Is the AI Funding Boom Cooling for European Startups?",
-      "channel": { "name": "The Spotlight: Beyond Profession", "kind": "press" },
+      "channel": {
+        "name": "The Spotlight: Beyond Profession",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": null, "precision": "not known: before 10 November 2026, 18:48 UTC" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "press",
-      "topics": ["investment", "startups", "Europe"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": null,
+        "precision": "not known: before 10 November 2026, 18:48 UTC"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "press",
+      "topics": [
+        "investment",
+        "startups",
+        "Europe"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "",
       "talks": []
     },
     {
-      "id": "yt-RpB4VY_ymGI", "platform": "youtube", "platform_id": "RpB4VY_ymGI",
+      "id": "yt-RpB4VY_ymGI",
+      "platform": "youtube",
+      "platform_id": "RpB4VY_ymGI",
       "url": "https://www.youtube.com/watch?v=RpB4VY_ymGI",
       "title": "Websummit Portugal reúne 200 expositores brasileiros",
-      "channel": { "name": "Canal Rural", "kind": "press" },
+      "channel": {
+        "name": "Canal Rural",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "about an hour before the sweep, from YouTube's relative age" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "press",
-      "topics": ["Brazil", "startups"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "about an hour before the sweep, from YouTube's relative age"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "press",
+      "topics": [
+        "Brazil",
+        "startups"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "A Brazilian channel on the Brazilian exhibitors.",
       "talks": []
     },
     {
-      "id": "yt-CH9axjGRt3w", "platform": "youtube", "platform_id": "CH9axjGRt3w",
+      "id": "yt-CH9axjGRt3w",
+      "platform": "youtube",
+      "platform_id": "CH9axjGRt3w",
       "url": "https://www.youtube.com/watch?v=CH9axjGRt3w",
       "title": "Web Summit 2026 – Global Tech Leaders Gather in Lisbon as Artificial Intelligence Takes Centre Stage",
-      "channel": { "name": "VOICE OF NEPAL TV - VON", "kind": "press" },
+      "channel": {
+        "name": "VOICE OF NEPAL TV - VON",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": null, "precision": "not known: before 10 November 2026, 18:48 UTC" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": null, "kind": "press",
-      "topics": ["AI", "the summit"], "storm": false,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed", "verified": true },
+      "published": {
+        "date": null,
+        "precision": "not known: before 10 November 2026, 18:48 UTC"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": null,
+      "kind": "press",
+      "topics": [
+        "AI",
+        "the summit"
+      ],
+      "storm": false,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
+        "verified": true
+      },
       "note": "The title's em dash is shown as an en dash (house style).",
       "talks": []
     },
     {
-      "id": "yt-Fi3odaoiJz8", "platform": "youtube", "platform_id": "Fi3odaoiJz8",
+      "id": "yt-Fi3odaoiJz8",
+      "platform": "youtube",
+      "platform_id": "Fi3odaoiJz8",
       "url": "https://www.youtube.com/watch?v=Fi3odaoiJz8",
       "title": "«Não compreendo porque não suspendem a Web Summit, que tem 60 a 70 mil pessoas»",
-      "channel": { "name": "NOW Canal", "kind": "press" },
+      "channel": {
+        "name": "NOW Canal",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "about 17:50 UTC, from YouTube's relative age at the sweep" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "press",
-      "topics": ["Storm Charles", "Portugal", "policy"], "storm": true,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed; title only, the page body was not readable", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "about 17:50 UTC, from YouTube's relative age at the sweep"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "press",
+      "topics": [
+        "Storm Charles",
+        "Portugal",
+        "policy"
+      ],
+      "storm": true,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed; title only, the page body was not readable",
+        "verified": true
+      },
       "note": "A television debate, an hour or so before the organisers cancelled Day Two: a guest asks why the summit is not suspended.",
       "talks": []
     },
     {
-      "id": "yt-SzwxoCkwNBg", "platform": "youtube", "platform_id": "SzwxoCkwNBg",
+      "id": "yt-SzwxoCkwNBg",
+      "platform": "youtube",
+      "platform_id": "SzwxoCkwNBg",
       "url": "https://www.youtube.com/watch?v=SzwxoCkwNBg",
       "title": "Resposta a intempéries: 'Exército e Forças Armadas são agentes de proteção civil'",
-      "channel": { "name": "NOW Canal", "kind": "press" },
+      "channel": {
+        "name": "NOW Canal",
+        "kind": "press"
+      },
       "people": [],
-      "published": { "date": "2026-11-10", "precision": "about 3 hours before the sweep, from YouTube's relative age" },
-      "place": "lisboa", "collection": "web-summit-lisbon-2026", "day": "2026-11-10", "kind": "press",
-      "topics": ["Storm Charles", "Portugal", "policy"], "storm": true,
-      "found": { "by": "social.watch@PrompTugal.dinis, sweep 1", "at": "2026-11-10T18:48Z", "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed; title only", "verified": true },
+      "published": {
+        "date": "2026-11-10",
+        "precision": "about 3 hours before the sweep, from YouTube's relative age"
+      },
+      "place": "lisboa",
+      "collection": "web-summit-lisbon-2026",
+      "day": "2026-11-10",
+      "kind": "press",
+      "topics": [
+        "Storm Charles",
+        "Portugal",
+        "policy"
+      ],
+      "storm": true,
+      "found": {
+        "by": "social.watch@PrompTugal.dinis, sweep 1",
+        "at": "2026-11-10T18:48Z",
+        "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed; title only",
+        "verified": true
+      },
       "note": "The response to the storm; not about the summit itself, kept for the storm's context.",
       "talks": []
     }

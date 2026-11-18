@@ -23,8 +23,9 @@ Does not exist yet:
 
 - Talks by timestamp (the field exists, empty): the summit's agenda is Web Summit's data, which the team does not use (Dinis, 11 November); an ask to Dinis is in status.json.
 - Any read from library.promptugal.news or data.promptugal.news: neither publishes videos yet (404 on 18 November, about 15:25 UTC). No collector runs here.
-- Audio; other events, places and organisations' collections; the Day Three replay.
+- Audio; other events, places and organisations' collections.
 - Observability (an obs.js lane), the brand fonts, a `/design/` page, a scheduled rebuild, GitHub issue forms (a plain "new issue" link stands in).
 - Signed work: `scripts/sign-release.sh` signs a manifest of every tracked file (tested valid with `sgit pki verify`), but no signature is committed: the leak scan flags the `.sig` as a long high-entropy string; an ask to Dinis. Commits carry the `Agent:` trailer only.
 - A check of any page by a person.
 - 2026-11-18, about 15:42 UTC: live at https://videos.promptugal.news as v0.1.3 (commit 433b0d6); the home page, the collection, a video page, /how/, /security/, a playlist and /api/v1/videos/index.json answered 200.
+- 2026-11-18, about 15:55 UTC: Day Three's replay (the organiser's, `yt--MGZdAtbTrs`) added from the library's catalogue (library.promptugal.news, WS26 2026/0001), credited on its card with the library's item as the evidence; which stage it shows is not confirmed. 21 videos now. The library itself publishes `/api/v1/items/` (answered 200); this site does not read it in the build yet (copied by hand). Finding VID-2026-011 (low) fixed before the push.

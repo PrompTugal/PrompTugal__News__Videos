@@ -21,15 +21,16 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 // House style: no em dash anywhere on the site; a source's em dash is shown as an en dash.
 // Every field is one line: control, zero-width and direction-mark characters go, whitespace collapses (VID-2026-003, 004).
 const clean = (s) => String(s ?? '').replace(/\u2014/g, '\u2013').replace(/[\u0000-\u001f\u007f\u061c\u200b-\u200f\u2028-\u202e\u2066-\u2069\ufeff]/g, ' ').replace(/\s+/g, ' ').trim();
-const okHttps = (u) => { try { const x = new URL(u); return x.protocol === 'https:' && !x.username && !x.password; } catch { return false; } };
-const okRel = (u) => /^\/[A-Za-z0-9/_.-]*(#[A-Za-z0-9_-]+)?$/.test(u) && !u.includes('..') && !u.startsWith('//');
+// Only strings (VID-2026-011).
+const okHttps = (u) => { if (typeof u !== 'string') return false; try { const x = new URL(u); return x.protocol === 'https:' && !x.username && !x.password; } catch { return false; } };
+const okRel = (u) => typeof u === 'string' && /^\/[A-Za-z0-9/_.-]*(#[A-Za-z0-9_-]+)?$/.test(u) && !u.includes('..') && !u.startsWith('//');
 const href = (u) => { if (okRel(u) || okHttps(u)) return esc(u); throw new Error(`unsafe URL in the data: ${String(u).slice(0, 80)}`); };
 const link = (u, t) => `<a href="${href(u)}">${esc(clean(t))}</a>`;
 const md = (s) => clean(s).replace(/[\\`*_[\]<>|#]/g, (c) => `\\${c}`);
 // A URL in markdown is normalised and its markdown-breaking characters percent-encoded (VID-2026-002).
 const mdUrl = (u) => { const a = okRel(u) ? SITE + u : okHttps(u) ? new URL(u).href : ''; return a.replace(/[()[\]<>"'\s\\`|]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')); };
 const mdLink = (u, t) => `[${md(t)}](${mdUrl(u)})`;
-const ID = /^[a-z0-9]+(?:-[A-Za-z0-9_]+)+$/; // our call numbers: yt-<id>, cnbc-<slug>
+const ID = /^(?:yt-[A-Za-z0-9_-]{11}|[a-z0-9]+(?:-[a-z0-9]+)+)$/; // our call numbers: yt-<YouTube id>, or a lower-case slug (cnbc-...)
 const YT = /^[A-Za-z0-9_-]{11}$/;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -72,6 +73,7 @@ for (const v of videos) {
   need(Array.isArray(v.topics) && Array.isArray(v.people) && Array.isArray(v.talks), `${id}: topics, people and talks must be lists`);
   for (const t of v.talks || []) need(Number.isInteger(t.start) && t.start >= 0 && typeof t.title === 'string', `${id}: a talk needs a whole-second start and a title`);
   need(v.found && typeof v.found.by === 'string' && typeof v.found.at === 'string', `${id}: how we found it`);
+  need(v.found?.evidence === undefined || okHttps(v.found.evidence), `${id}: found.evidence must be https`);
 }
 const collections = Array.isArray(data.collections) ? data.collections : [];
 for (const c of collections) {
@@ -198,7 +200,8 @@ function card(v, { heading = 'h3', showDay = true } = {}) {
 function dayLabel(v) { const c = collections.find((x) => x.id === v.collection); const d = c?.days?.find((x) => x.date === v.day); return d ? `${d.label}, ${weekday(d.date)}` : ''; }
 const cards = (ids, o) => ids.length ? `<ul class="vids">${ids.map((i) => card(byId.get(i), o)).join('\n')}</ul>` : '<p class="none">None yet.</p>';
 const mdList = (ids) => ids.map((i) => { const v = byId.get(i); return `- ${mdLink(`/videos/${v.id}/`, v.title)}: ${md(v.channel.name)}${v.published.date ? `, ${fmtDay(v.published.date)}` : ''}`; }).join('\n');
-const seed = `<p class="fresh">The catalogue is a seed: ${videos.length} videos copied from the team's own record of the summit's coverage (found ${esc(fmtStamp('2026-11-10T18:48Z'))} to ${esc(fmtStamp('2026-11-10T20:53Z'))}, each checked then with YouTube's oEmbed). It is not everything that was published. ${link('/how/', 'How it works')}.</p>`;
+const fromLibrary = videos.filter((v) => /^library\./.test(v.found.by)).length;
+const seed = `<p class="fresh">The catalogue is a seed: ${videos.length - fromLibrary} videos copied from the team's own record of the summit's coverage (found ${esc(fmtStamp('2026-11-10T18:48Z'))} to ${esc(fmtStamp('2026-11-10T20:53Z'))}, each checked then with YouTube's oEmbed)${fromLibrary ? ` and ${fromLibrary} from ${link('https://library.promptugal.news/', 'the library')}'s catalogue` : ''}. It is not everything that was published. ${link('/how/', 'How it works')}.</p>`;
 
 // ---------------------------------------------------------------- the collection
 const C = collections[0];
@@ -214,7 +217,7 @@ function dayBlock(d) {
 <p class="small">The videos about the storm: ${link('/playlists/topic/storm-charles/', 'the Storm Charles playlist')}.</p></div>`;
   }
   const rs = (d.replays || []).map((r) => byId.get(r));
-  const replay = rs.length ? rs.map((v) => `<div class="replay"><p class="badge">The organiser's replay</p><p class="vid-title"><a href="/videos/${esc(v.id)}/">${esc(clean(v.title))}</a></p>${player(v)}<p class="small">Talks by timestamp: not listed yet (${link('/how/#talks', 'why')}).</p></div>`).join('') : `<p class="none">${esc(clean(d.gap || 'No replay found yet.'))}</p>`;
+  const replay = rs.length ? rs.map((v) => `<div class="replay"><p class="badge">The organiser's replay</p><p class="vid-title"><a href="/videos/${esc(v.id)}/">${esc(clean(v.title))}</a></p>${player(v)}${d.note ? `<p class="small">${esc(clean(d.note))}</p>` : ''}<p class="small">Talks by timestamp: not listed yet (${link('/how/#talks', 'why')}).</p></div>`).join('') : `<p class="none">${esc(clean(d.gap || 'No replay found yet.'))}</p>`;
   const same = others.filter((v) => v.day === d.date).map((v) => v.id);
   return `<div class="day">${head}${replay}${same.length ? `<h4>Also recorded that day</h4>${cards(same, { heading: 'h5', showDay: false })}` : ''}</div>`;
 }
@@ -262,7 +265,7 @@ ${player(v)}
 <dt>Where</dt><dd>${esc(placeName(v.place))}, at <a href="/collections/${esc(v.collection)}/">${esc(C.title)}</a></dd>
 <dt>Source</dt><dd>${link(v.url, v.url)}</dd>
 <dt>Licence</dt><dd><a class="lic" href="${href(lic.url)}">${esc(lic.name)}</a> (${esc(PLATFORMS[v.platform].name)}'s). Our card: <a class="lic" href="${CCBY}">CC BY 4.0</a>.</dd>
-<dt>Found</dt><dd>By ${esc(clean(v.found.by))}, ${esc(fmtStamp(v.found.at))}: ${esc(clean(v.found.how))}.${v.found.verified ? '' : ' <b>Not fully checked.</b>'} ${link(data.evidence_base, 'The evidence')}.</dd>
+<dt>Found</dt><dd>By ${esc(clean(v.found.by))}, ${esc(fmtStamp(v.found.at))}: ${esc(clean(v.found.how))}.${v.found.verified ? '' : ' <b>Not fully checked.</b>'} ${link(v.found.evidence || data.evidence_base, 'The evidence')}.</dd>
 <dt>Call number</dt><dd><code>${esc(v.id)}</code> · ${link(`/api/v1/videos/${v.id}.json`, 'as JSON')}</dd>
 </dl></section>
 <section><h2 id="talks">Talks by timestamp</h2>${talks}</section>
@@ -270,7 +273,7 @@ ${pls.length ? `<section><h2>In the playlists</h2><ul>${pls.map((p) => `<li>${li
 <p class="report small">Is this card wrong, or should this video not be here? <a href="${REPO}/issues/new">Tell us</a>.</p>`,
     mdBody: `- What: ${md(KIND[v.kind] || 'A video')}${v.note ? `. ${md(v.note)}` : ''}\n- Who: ${md(v.channel.name)}${v.people.length ? `; with ${v.people.map((p) => md(p.name)).join(', ')}` : ''}\n- When: ${v.published.date ? fmtDay(v.published.date) : 'not known'} (${md(v.published.precision)})\n- Where: ${md(placeName(v.place))}, ${md(C.title)}\n- Source: <${mdUrl(v.url)}>\n- Licence: the platform's terms (<${mdUrl(lic.url)}>); our card CC BY 4.0\n- Found: by ${md(v.found.by)}, ${fmtStamp(v.found.at)}: ${md(v.found.how)}${v.found.verified ? '' : ' (not fully checked)'}\n- Call number: ${v.id}\n\nWatch: <${mdUrl(v.url)}>`,
   });
-  api(`api/v1/videos/${v.id}.json`, { ...pick(v), license: lic, page: `${SITE}/videos/${v.id}/`, embed: v.platform === 'youtube' ? `${EMBED_HOST}/embed/${v.platform_id}` : null, evidence: data.evidence_base, license_of_this_record: data.license_of_this_record });
+  api(`api/v1/videos/${v.id}.json`, { ...pick(v), license: lic, page: `${SITE}/videos/${v.id}/`, embed: v.platform === 'youtube' ? `${EMBED_HOST}/embed/${v.platform_id}` : null, evidence: v.found.evidence || data.evidence_base, license_of_this_record: data.license_of_this_record });
 }
 
 // ---------------------------------------------------------------- every video
@@ -330,8 +333,8 @@ page({
   description: 'Where the videos come from, how they are played, what we never do, the licences, and what is missing.',
   body: `<h1>How it works</h1>
 <section><h2>Where the videos come from</h2>
-<p>Today, from one place: the team's own record of what was published about Web Summit Lisbon 2026, kept by social.watch@PrompTugal.dinis during the summit (${link(data.evidence_base, 'coverage.json')}). Its sweeps of 10 November 2026 searched YouTube and the press for the summit and checked each video's title and channel with YouTube's oEmbed. We copied the ${videos.length} videos from it into <code>data/videos.json</code> by hand on 18 November; nothing was read again.</p>
-<p>Next, from the team's APIs: the library (${link('https://library.promptugal.news/', 'library.promptugal.news')}, the catalogue and the graph) and ${link('https://data.promptugal.news/', 'data.promptugal.news')} (discovery and the platforms' official interfaces, YouTube's Data API once Dinis Cruz adds its key). Neither publishes videos yet. This site runs no collector of its own.</p>
+<p>Today, from two places. First, the team's own record of what was published about Web Summit Lisbon 2026, kept by social.watch@PrompTugal.dinis during the summit (${link(data.evidence_base, 'coverage.json')}). Its sweeps of 10 November 2026 searched YouTube and the press for the summit and checked each video's title and channel with YouTube's oEmbed. We copied ${videos.length - fromLibrary} videos from it into <code>data/videos.json</code> by hand on 18 November; nothing was read again. Second, the library (${link('https://library.promptugal.news/', 'library.promptugal.news')}), the team's catalogue: ${fromLibrary} video${fromLibrary === 1 ? '' : 's'} so far, each crediting its catalogue entry as the evidence.</p>
+<p>Next, read straight from the team's APIs: the library's catalogue (<code>/api/v1/items/</code>) and ${link('https://data.promptugal.news/', 'data.promptugal.news')} (discovery and the platforms' official interfaces, YouTube's Data API once Dinis Cruz adds its key). This site runs no collector of its own.</p>
 <p>Organisers and speakers can send their own videos: ${link(`${REPO}/issues/new`, 'open an issue')} with the link. We publish it credited to you and dated.</p></section>
 <section><h2>How they are played</h2>
 <ul><li><b>The platform's own player only.</b> A YouTube video plays in YouTube's privacy-enhanced player from <code>www.youtube-nocookie.com</code>, the one host this site may frame (the page's Content Security Policy says so).</li>

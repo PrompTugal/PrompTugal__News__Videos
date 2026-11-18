@@ -126,6 +126,18 @@
    "detail": "A Content Security Policy in a meta tag cannot set frame-ancestors, and GitHub Pages cannot send headers, so another site could frame these pages.",
    "fix": "Accepted: the pages hold no forms, sign-in or actions to trick a reader into.",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-011",
+   "severity": "low",
+   "title": "A URL given as a list passed the https check",
+   "file": "scripts/build.mjs (okHttps)",
+   "found": "2026-11-18 ~15:55 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "new URL() turns its argument into a string, so a one-item list holding an https address passed the check; the HTML escaped it, but the JSON would have carried a list where a string belongs. Never published.",
+   "fix": "The URL checks accept strings only.",
+   "commit": ""
   }
  ]
 }
