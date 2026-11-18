@@ -1,0 +1,8 @@
+{
+  "v": 1,
+  "encrypt": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAw0uxrgR+LnSA2yGptl0/\nAjtr+uTr2eYwl4sSNXAQLwbEK3mnniIZC9BTuANjgUNsOXoA8p8MLItEDMPYeFn3\nKcNC1OjpztNBt+5B2oya7hsnb8TAQI0rM8Yole02qWKbHIpLd2U+Ps7h8pIjo9Tr\n4JjsghbeEEAxdIoJSpQvaCYUVPrVEC7YxgOhXkoAQL+B/YxZdycp0TgIUvECjfkO\nMJptuvHbQwb+2XTGHmGM1cxBrJri9lYDnNHnxSFLbmz1BNxYz70FGR/oLzoXwqWd\nCJhsFAAORNhH/75WM6UgVUqQYaVRucProNVMmuBdKmNU/NlzXAj/Z6MdcQBI8qpn\n0IB/CJ6XNQz2B6k5mI60ValsC7oLMf2E/9J/p3tW9Fc9/rg7L/VLYOWEKjmpo0d/\nJx9mOUQOXzT0V2Inat8yD9gTbmcQAS6nRc0vSZB6L0UTX8LzKmkHzi70FsTw2gpm\n9QM4XfVXpT3a/bUdjgWXb6MHpCUmOzgAlI/TqMQ/2RUwbF4wzCQzkJI/81a5vPx4\n3BidsKpTImedsYF4r5oGazI3T3O6aNb+zPUIvdOgBZWxujtTOWAs1bY5xbeWOo26\nr/IJHhON6NcaepkUnBVFyqhb44oR1ZEm8golNegoXxgld/MWbu1cYQyGzVwGOueZ\n4D/W1h10RTvXTEzKYR61WRMCAwEAAQ==\n-----END PUBLIC KEY-----\n",
+  "sign": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEey0fUER7THVk0iIPm4crmLqSfs9k\nHit7AxmLt5bGC5HFnkPKVavqGVyd+IZgMVH1yf2mKFGUYKh49QzFfTWFAA==\n-----END PUBLIC KEY-----\n",
+  "label": "videos.b-promptugal",
+  "fingerprint": "sha256:0609e5f610785868",
+  "signing_fingerprint": "sha256:44ce13a193253220"
+}

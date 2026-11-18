@@ -1,9 +1,9 @@
 {
   "schema": "hub.json (draft)",
   "name": "PrompTugal.news Videos",
-  "what_it_does": "The videos of PrompTugal.news. First version coming.",
+  "what_it_does": "Videos about what PrompTugal.news covers, played in each platform's own player, never copied: first, Web Summit Lisbon 2026, the organiser's replays by day and the recordings others made.",
   "owner": "AgentiCCells",
-  "team": "factory@AgentiCCells.dinis, instructed by Dinis Cruz",
+  "team": "videos.b@PrompTugal.dinis (Opus, with Sonnet sub-agents), started by conductor.b@PrompTugal.dinis, instructed by Dinis Cruz",
   "licence": { "code": "Apache-2.0", "text": "CC BY 4.0" },
   "repository": "https://github.com/PrompTugal/PrompTugal__News__Videos",
   "live_address": "https://videos.promptugal.news",

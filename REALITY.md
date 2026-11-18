@@ -3,3 +3,26 @@
 - Seeded by the AgentiCCells site factory on 2026-11-18 from AgentiCCells/AgentiCCells__Site__Template@dev.
 - Its live state is recorded in requests/2026-11-18__videos-promptugal-news/status.json in AgentiCCells__Site__Factory.
 - 2026-11-18: cells@AgentiCCells.dinis, at Dinis's word (~15:17 UTC), replaced the seed page with a placeholder, wrote the README, added `LICENSE-TEXT` (CC BY 4.0) beside `LICENSE` (Apache-2.0), added `src/CNAME`, ignored `.credentials/` and `.sg-send/`, and created `main` from this commit. The factory's collaborators step found `riskmandate-agent` already had write access.
+
+## First version, 18 November 2026 (videos.b@PrompTugal.dinis, from about 15:20 UTC)
+
+Started by conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session on 18 November 2026 (a site for videos, and audio once we have it). Exists in `dev` (live once CI deploys it):
+
+- **The data, JSON first:** `data/videos.json`, a seed of 20 videos and one collection (Web Summit Lisbon 2026), copied by hand from social.watch@PrompTugal.dinis's coverage record (PrompTugal__News__Website `board/team/social.watch/coverage.json` at 142060e2), found in its sweeps of 10 November 2026 and checked then with YouTube's oEmbed. 19 on YouTube, 1 on CNBC's site (linked only). Nothing was read again from YouTube or websummit.com. Three videos by private people are a count and theme only.
+- **The collection by day:** Opening Night (9 Nov) and Day One (10 Nov) with the organiser's replays; Day Two (11 Nov) cancelled by Storm Charles, with the organisers' statement and two press reports linked and the Storm archive on weather.promptugal.news; Day Three (12 Nov): the replay is not in our evidence, said so.
+- **Pages** (`scripts/build.mjs`, Node 18+, no dependencies, no network): `/`, `/collections/web-summit-lisbon-2026/`, `/videos/` and a page per video `/videos/<id>/` (the player and the card: what, who, when with its precision, where, source, licence "the platform's terms" linked, how we found it with the evidence, call number), `/playlists/` and 18 playlist pages (by kind, organisation and topic where two or more videos, place, Storm Charles), `/how/`, `/security/`, `/api/`, `/404.html`; a markdown twin (`index.md`) for each, `llms.txt`, `version.json`.
+- **The JSON API** under `/api/v1/`: `videos/index.json`, `videos/<id>.json`, `collections/`, `playlists/`, `security/findings.json`.
+- **The player** (`src/assets/player.js`): click to load; nothing is requested from YouTube until play; then one sandboxed iframe from `https://www.youtube-nocookie.com/embed/<11-character id>`. Every page carries a Content Security Policy that allows frames from that host only and no inline script or style.
+- **The frame:** the masthead, the "Pay for what you read · free here" chip, the sites rail (Videos, Library, Events, Weather, Civic, Startups, Travel, Data), the take-down disclaimer, the principles line linking promptugal.news/principles/ and /report/, /security/, how the page was made, the version.
+- **Threat models:** `docs/threat-models/build-and-pages.md`, `docs/threat-models/embeds.md`, linked from /how/ and /security/.
+- **The key** `videos.b-promptugal` (encryption sha256:0609e5f610785868, signing sha256:44ce13a193253220), made with `sgit pki keygen`; public bundle `team/keys/videos-b-promptugal.json`, listed in `board/keys.json`. The private half stays in this session's container.
+- **The commit check** accepts role@PrompTugal.dinis, as in the Weather and Events repositories.
+- `board/team/videos/status.json` and the first debrief.
+
+Does not exist yet:
+
+- Talks by timestamp (the field exists, empty): the summit's agenda is Web Summit's data, which the team does not use (Dinis, 11 November); an ask to Dinis is in status.json.
+- Any read from library.promptugal.news or data.promptugal.news: neither publishes videos yet (404 on 18 November, about 15:25 UTC). No collector runs here.
+- Audio; other events, places and organisations' collections; the Day Three replay.
+- Observability (an obs.js lane), the brand fonts, a `/design/` page, a scheduled rebuild, GitHub issue forms (a plain "new issue" link stands in).
+- A check of any page by a person.
