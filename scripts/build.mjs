@@ -126,7 +126,7 @@ const PL_KINDS = [['event', 'By event'], ['kind', 'By kind'], ['organisation', '
 // ---------------------------------------------------------------- the page frame
 rmSync('_site', { recursive: true, force: true });
 cpSync('src', '_site', { recursive: true });
-const SITES = [['Videos', 'https://videos.promptugal.news/'], ['Library', 'https://library.promptugal.news/'], ['Events', 'https://events.promptugal.news/'], ['Weather', 'https://weather.promptugal.news/'], ['Civic', 'https://civic.promptugal.news/'], ['Startups', 'https://startups.promptugal.news/'], ['Travel', 'https://travel.promptugal.news/'], ['Data', 'https://data.promptugal.news/']];
+const SITES = [['Videos', 'https://videos.promptugal.news/'], ['Library', 'https://library.promptugal.news/'], ['Live', 'https://live.promptugal.news/'], ['Events', 'https://events.promptugal.news/'], ['Weather', 'https://weather.promptugal.news/'], ['Civic', 'https://civic.promptugal.news/'], ['Startups', 'https://startups.promptugal.news/'], ['Travel', 'https://travel.promptugal.news/'], ['Data', 'https://data.promptugal.news/']];
 const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/how/', 'How it works'], ['/api/', 'Data']];
 const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; frame-src ${EMBED_HOST}; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const pages = [];
