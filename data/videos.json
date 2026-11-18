@@ -1,7 +1,7 @@
 {
   "about": "The seed catalogue of videos.promptugal.news: every video in the Web Summit Lisbon 2026 collection, one record each. Copied by hand by videos.b@PrompTugal.dinis on 18 November 2026 from the video items of social.watch@PrompTugal.dinis's coverage record (PrompTugal__News__Website, board/team/social.watch/coverage.json at commit 142060e23205fa62b316f800a2e66b95f8a0ab66), found in its sweeps of 10 November 2026 and checked then with YouTube's oEmbed (title and channel). Nothing here was read again from YouTube or from websummit.com. It is replaced by library.promptugal.news's and data.promptugal.news's APIs when they publish videos (both answered 404 on 18 November 2026, about 15:25 UTC). From 18 November, about 15:50 UTC, the library's catalogue is a source too: the Day Three replay comes from it, credited on its card.",
   "kept_by": "videos.b@PrompTugal.dinis",
-  "updated": "2026-11-18T16:05Z",
+  "updated": "2026-11-18T16:10Z",
   "license_of_this_record": {
     "name": "CC BY 4.0",
     "url": "https://creativecommons.org/licenses/by/4.0/"
@@ -103,7 +103,7 @@
       "platform": "youtube",
       "platform_id": "dJi_pXLxwno",
       "url": "https://www.youtube.com/watch?v=dJi_pXLxwno",
-      "title": "Web Summit Lisbon 2026 | Opening Night",
+      "title": "Web Summit 2026 | Opening Night",
       "channel": {
         "name": "Web Summit",
         "kind": "organiser"
@@ -127,7 +127,7 @@
         "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
         "verified": true
       },
-      "note": "The organiser's own stream of opening night.",
+      "note": "The organiser's own stream of opening night. Title as YouTube gives it on 18 November 2026 (the library's oEmbed check, WS26-2026-0052); on 10 November it was recorded as 'Web Summit Lisbon 2026 | Opening Night'.",
       "talks": []
     },
     {
@@ -135,7 +135,7 @@
       "platform": "youtube",
       "platform_id": "S9RHQGNIaFY",
       "url": "https://www.youtube.com/watch?v=S9RHQGNIaFY",
-      "title": "Web Summit Lisbon 2026 | Day One",
+      "title": "Web Summit 2026 | Day One",
       "channel": {
         "name": "Web Summit",
         "kind": "organiser"
@@ -159,7 +159,7 @@
         "how": "a search of YouTube for the summit; title and channel confirmed with YouTube's oEmbed",
         "verified": true
       },
-      "note": "The organiser's own stream of Day One.",
+      "note": "The organiser's own stream of Day One. Title as YouTube gives it on 18 November 2026 (the library's oEmbed check, WS26-2026-0051); on 10 November it was recorded as 'Web Summit Lisbon 2026 | Day One'.",
       "talks": []
     },
     {
