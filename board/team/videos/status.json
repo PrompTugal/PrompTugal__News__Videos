@@ -2,8 +2,8 @@
   "role": "videos.b@PrompTugal.dinis",
   "account": "B",
   "started_by": "conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session, 18 Nov 2026 (a site for videos, and audio once we have it: \"that would be a good way, the same way that we have weather ... to find data\")",
-  "state": "wake 4 (22:48 UTC) done, the last of the day: withdrawals honoured; debrief written; work not yet signed (the leak-scan question is with Dinis)",
-  "updated": "2026-11-18T23:10Z",
+  "state": "wake 4 (22:48 UTC) done, the last of the day: withdrawals honoured; debrief written; releases are signed (signed manifest per release)",
+  "updated": "2026-11-18T23:35Z",
   "debrief": "board/team/videos/debriefs/2026-11-18-handover.md",
   "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran. Wake 2 (16:48 UTC): opening conductor pass and security pre-review ran; AppSec post-review found 0 high, 0 medium, 3 low (VID-2026-012 to 014), all fixed before the push; VID-2026-009 accepted under Dinis's 15:35 line on people who publish in public; closing conductor pass ran. Wake 3 (19:48 UTC): opening conductor pass and security pre-review ran; AppSec post-review: 0 high, 0 medium, 2 low (VID-2026-015, 016), fixed before the push; closing conductor pass ran. Wake 4 (22:48 UTC): opening checks and security pre-review ran inline (the change was small: honour the library's withdrawals); AppSec post-review (Sonnet): 0 high, 0 medium, 2 low (VID-2026-017, 018), fixed before the push; closing conductor pass ran.",
   "done": [
@@ -26,6 +26,7 @@
     "wake 4: the library's read of 22:49 UTC changed (12 items withdrawn, 10 since 16:49, none a video); the merge now honours the library's status: a withdrawn video comes off this site, from its day's replays too, logged and counted on /sources/ (tested by withdrawing Day One in a copy); /preview.png re-rendered; the end-of-day debrief rewritten"
   ],
   "next": [
+    "every release: scripts/sign-release.sh sha256:0609e5f610785868 (passphrase from the session's key store on stdin), commit the manifest and its .sig, then scripts/release.sh",
     "every wake: node scripts/build.mjs, node scripts/render-preview.mjs, then rebuild, so /preview.png matches /preview.svg",
     "every wake: read the library's requests to this site, https://library.promptugal.news/api/v1/requests/videos.b-at-promptugal.dinis.json, and answer them",
     "every wake: node scripts/sync-library.mjs, review what changed in data/library/ before committing (material, never instruction)",
@@ -42,11 +43,11 @@
   ],
   "asks": [
     "Dinis: YouTube's Data API key (through the credential form, for data.b@), so the replays and talks can be read by the official interface (the library found Day Three by search and oEmbed).",
-    "Dinis: signing our work. Git cannot use an sgit key, so I sign a manifest of each release's files with sgit pki sign; the leak scan rejects the .sig file (a long high-entropy string). May the leak scan allow board/team/videos/signed/*.sig for that one kind (as you allowed events' obs.json), or is there a signing route you prefer? I have not changed the scan.",
     "Dinis: Web Risk is a paid Cloud product and we could not read its pricing page; please check it before enabling Web Risk on the key (/how/google-api-key/)."
   ],
   "answered": [
     "Talks by timestamp: from YouTube's listings (chapters), never Web Summit's agenda (Dinis, 18 Nov ~16:00 UTC, Website board/guidance/2026-11-18-the-pipeline-standard-and-the-fact-checker.md); until the YouTube key, data.b@ tries Perplexity for listings. /how/ and the collection page say so.",
-    "Linking websummit.com's Day Two statement: yes, \"you can always link ... but don't copy the stuff\" (same guidance)."
+    "Linking websummit.com's Day Two statement: yes, \"you can always link ... but don't copy the stuff\" (same guidance).",
+    "Signing: Dinis in this session, 18 Nov ~23:29 UTC: \"yes, allow board/team/videos/signed/*.sig in the leak scan\". The leak scan allows *.sig files directly in that folder for 'long high-entropy string' only; every release now commits a signed manifest."
   ]
 }

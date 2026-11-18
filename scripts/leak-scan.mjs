@@ -89,7 +89,15 @@ function highEntropy(line) {
 const ALLOW = [
   // (none yet)
 ];
-const allowed = (path, kind) => ALLOW.some(([p, k]) => p === path && k === kind);
+// Narrow pattern allowlist: [path pattern, kind, reason]. One folder, one kind.
+const ALLOW_PATTERN = [
+  // Detached signatures of release manifests (sgit pki sign, ECDSA P-256, base64) are high-entropy by nature
+  // and public by design: they prove the agent signed the manifest. Only *.sig files directly in this folder,
+  // and only for 'long high-entropy string'; every other check still applies to them.
+  // Dinis Cruz, in videos.b@'s session, 18 Nov 2026 ~23:29 UTC: "yes, allow board/team/videos/signed/*.sig in the leak scan".
+  [/^board\/team\/videos\/signed\/[0-9TZ-]+\.json\.sig$/, 'long high-entropy string', 'release-manifest signatures (Dinis, 18 Nov 2026)'],
+];
+const allowed = (path, kind) => ALLOW.some(([p, k]) => p === path && k === kind) || ALLOW_PATTERN.some(([re, k]) => re.test(path) && k === kind);
 
 const PUBLIC_KEY_FILES = (p) => p === 'team/keys.json' || /^team\/keys\/[a-z0-9-]+\.json$/.test(p);
 

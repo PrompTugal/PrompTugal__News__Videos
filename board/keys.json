@@ -12,5 +12,5 @@
       "tool": "sgit-ai v0.27.0 (sgit pki keygen), as conductor.b@'s brief says, following Dinis's word of 18 Nov 2026 (~15:10 UTC, Website board/guidance/2026-11-18-keys-issues-rebuilds-observability.md)"
     }
   ],
-  "gap": "The private half stays in this session's container, protected by a passphrase kept beside it outside the repository (never committed, never printed); it lives only as long as this container. Not yet registered on pki.sgit.ai. Git commits are not signed with it (git cannot use an sgit key). scripts/sign-release.sh signs a manifest of each release's files with it, but the signature file trips the leak scan, so none is committed yet: an ask to Dinis in board/team/videos/status.json."
+  "gap": "The private half stays in this session's container, protected by a passphrase kept beside it outside the repository (never committed, never printed); it lives only as long as this container. Not yet registered on pki.sgit.ai. Git commits are not signed with it (git cannot use an sgit key); each release commits a manifest of every tracked file's sha256 signed with it (scripts/sign-release.sh, board/team/videos/signed/; check with sgit pki verify against team/keys/videos-b-promptugal.json). The leak scan allows those .sig files at Dinis's word (18 Nov 2026, ~23:29 UTC)."
 }
