@@ -17,7 +17,7 @@
    "state": "fixed",
    "detail": "The page showed an open finding by title, severity and state only, but the JSON copy was written raw, with its detail and fix. Latent: no finding existed yet. Never published.",
    "fix": "The JSON now carries only id, title, severity, state and date for any finding not fixed.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-002",
@@ -29,7 +29,7 @@
    "state": "fixed",
    "detail": "An https URL holding \") [text](\" passed the https check and was written raw into the markdown twins, where it would end the link and start another. Never published: no such URL is in the data.",
    "fix": "URLs in markdown are normalised and ( ) [ ] < > quotes, spaces, backslashes, backticks and bars are percent-encoded; bare URLs are wrapped in angle brackets.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-003",
@@ -41,7 +41,7 @@
    "state": "fixed",
    "detail": "Line breaks in a title or channel name survived into the markdown twins and llms.txt, which language models read: a way to slip text that looks like an instruction onto its own line. Never published.",
    "fix": "Every field is reduced to one line: control characters removed, whitespace collapsed.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-004",
@@ -53,7 +53,7 @@
    "state": "fixed",
    "detail": "U+200E, U+200F, U+061C, zero-width characters and U+FEFF passed through; they can make text read differently from what it holds. The Arabic title carried a right-to-left mark.",
    "fix": "Removed with the other control and direction-override characters.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-005",
@@ -65,7 +65,7 @@
    "state": "fixed",
    "detail": "The place was written raw into the twin's \"Where\" line. Never exploitable with the data as it is (one fixed place).",
    "fix": "Escaped as the other fields.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-006",
@@ -77,7 +77,7 @@
    "state": "fixed",
    "detail": "It said the twins escape markdown and that bidi characters are removed; findings 2 to 5 made that partly untrue.",
    "fix": "Updated after the fixes.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-007",
@@ -89,7 +89,7 @@
    "state": "fixed",
    "detail": "A record could embed one YouTube id while its source link pointed to another video.",
    "fix": "The build stops unless the source URL's v= is the embedded id.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-008",
@@ -101,7 +101,7 @@
    "state": "fixed",
    "detail": "Each video's JSON was its record spread whole, so a field added by mistake (a private note) would be published.",
    "fix": "The API publishes only a fixed list of fields.",
-   "commit": ""
+   "commit": "26f72a1"
   },
   {
    "id": "VID-2026-009",
