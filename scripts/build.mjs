@@ -8,6 +8,7 @@
 // or the build stops. Embeds come from one host only (EMBED_HOST), built from an 11-character YouTube id.
 import { cpSync, rmSync, readdirSync, readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { loadLibrary, mergeLibrary } from './library-merge.mjs';
 
 const version = process.env.SITE_VERSION || 'dev';
 const SITE = 'https://videos.promptugal.news';
@@ -53,6 +54,10 @@ for (const [k, p] of Object.entries(PLATFORMS)) {
   need(p.embed_host === null || p.embed_host === EMBED_HOST, `platform ${k}: the only embed host allowed is ${EMBED_HOST}`);
 }
 const videos = Array.isArray(data.videos) ? data.videos : [];
+// The library's catalogue, as last read by scripts/sync-library.mjs (no network here).
+const libraryRead = loadLibrary();
+const merged = mergeLibrary(videos, libraryRead, clean);
+for (const s of merged.skipped) console.warn(`library item skipped: ${s}`);
 const seen = new Set();
 for (const v of videos) {
   const id = v?.id;
@@ -89,13 +94,13 @@ if (!okHttps(data.evidence_base)) problems.push('evidence_base must be https');
 if (problems.length) { console.error(problems.join('\n')); console.error(`FAILED: ${problems.length} problem(s) in data/videos.json`); process.exit(1); }
 
 // The API publishes only these fields of a video (VID-2026-008).
-const FIELDS = ['id', 'platform', 'platform_id', 'url', 'title', 'channel', 'people', 'published', 'place', 'collection', 'day', 'kind', 'topics', 'storm', 'found', 'note', 'talks'];
+const FIELDS = ['id', 'platform', 'platform_id', 'url', 'title', 'channel', 'people', 'published', 'place', 'collection', 'day', 'kind', 'topics', 'storm', 'found', 'note', 'talks', 'library'];
 const pick = (v) => Object.fromEntries(FIELDS.map((k) => [k, v[k] ?? null]));
 const byId = new Map(videos.map((v) => [v.id, v]));
 const licOf = (v) => ({ name: "the platform's terms", url: PLATFORMS[v.platform].terms });
 const KIND = { 'official-replay': "The organiser's replay", recording: 'A recording at the summit', press: 'Press coverage' };
 const KIND_PL = { 'official-replay': "The organiser's replays", recording: 'Recordings by companies and governments', press: 'Press coverage' };
-const CH_KIND = { organiser: 'the organiser', company: 'a company', government: 'a government body', press: 'a broadcaster or publisher' };
+const CH_KIND = { organiser: 'the organiser', company: 'a company', government: 'a government body', press: 'a broadcaster or publisher', channel: 'a YouTube channel publishing in public' };
 const PLACES = { lisboa: 'Lisboa' };
 const placeName = (p) => PLACES[p] || clean(p);
 
@@ -201,7 +206,8 @@ function dayLabel(v) { const c = collections.find((x) => x.id === v.collection);
 const cards = (ids, o) => ids.length ? `<ul class="vids">${ids.map((i) => card(byId.get(i), o)).join('\n')}</ul>` : '<p class="none">None yet.</p>';
 const mdList = (ids) => ids.map((i) => { const v = byId.get(i); return `- ${mdLink(`/videos/${v.id}/`, v.title)}: ${md(v.channel.name)}${v.published.date ? `, ${fmtDay(v.published.date)}` : ''}`; }).join('\n');
 const fromLibrary = videos.filter((v) => /^library\./.test(v.found.by)).length;
-const seed = `<p class="fresh">The catalogue is a seed: ${videos.length - fromLibrary} videos copied from the team's own record of the summit's coverage (found ${esc(fmtStamp('2026-11-10T18:48Z'))} to ${esc(fmtStamp('2026-11-10T20:53Z'))}, each checked then with YouTube's oEmbed)${fromLibrary ? ` and ${fromLibrary} from ${link('https://library.promptugal.news/', 'the library')}'s catalogue` : ''}. It is not everything that was published. ${link('/how/', 'How it works')}.</p>`;
+const libraryNote = libraryRead.readAt ? ` The library's catalogue was last read ${esc(fmtStamp(libraryRead.readAt))}.` : '';
+const seed = `<p class="fresh">The catalogue is a seed: ${videos.length - fromLibrary} videos copied from the team's own record of the summit's coverage (found ${esc(fmtStamp('2026-11-10T18:48Z'))} to ${esc(fmtStamp('2026-11-10T20:53Z'))}, each checked then with YouTube's oEmbed)${fromLibrary ? ` and ${fromLibrary} from ${link('https://library.promptugal.news/', 'the library')}'s catalogue` : ''}. It is not everything that was published.${libraryNote} ${link('/how/', 'How it works')}.</p>`;
 
 // ---------------------------------------------------------------- the collection
 const C = collections[0];
@@ -266,7 +272,7 @@ ${player(v)}
 <dt>Source</dt><dd>${link(v.url, v.url)}</dd>
 <dt>Licence</dt><dd><a class="lic" href="${href(lic.url)}">${esc(lic.name)}</a> (${esc(PLATFORMS[v.platform].name)}'s). Our card: <a class="lic" href="${CCBY}">CC BY 4.0</a>.</dd>
 <dt>Found</dt><dd>By ${esc(clean(v.found.by))}, ${esc(fmtStamp(v.found.at))}: ${esc(clean(v.found.how))}.${v.found.verified ? '' : ' <b>Not fully checked.</b>'} ${link(v.found.evidence || data.evidence_base, 'The evidence')}.</dd>
-<dt>Call number</dt><dd><code>${esc(v.id)}</code> · ${link(`/api/v1/videos/${v.id}.json`, 'as JSON')}</dd>
+<dt>Call number</dt><dd><code>${esc(v.id)}</code> · ${link(`/api/v1/videos/${v.id}.json`, 'as JSON')}${v.library ? ` · in the library as ${link(v.library.page, v.library.call_number)}` : ''}</dd>
 </dl></section>
 <section><h2 id="talks">Talks by timestamp</h2>${talks}</section>
 ${pls.length ? `<section><h2>In the playlists</h2><ul>${pls.map((p) => `<li>${link(plPath(p), p.title)} <span class="small">(${p.ids.length})</span></li>`).join('')}</ul></section>` : ''}
@@ -333,7 +339,7 @@ page({
   description: 'Where the videos come from, how they are played, what we never do, the licences, and what is missing.',
   body: `<h1>How it works</h1>
 <section><h2>Where the videos come from</h2>
-<p>Today, from two places. First, the team's own record of what was published about Web Summit Lisbon 2026, kept by social.watch@PrompTugal.dinis during the summit (${link(data.evidence_base, 'coverage.json')}). Its sweeps of 10 November 2026 searched YouTube and the press for the summit and checked each video's title and channel with YouTube's oEmbed. We copied ${videos.length - fromLibrary} videos from it into <code>data/videos.json</code> by hand on 18 November; nothing was read again. Second, the library (${link('https://library.promptugal.news/', 'library.promptugal.news')}), the team's catalogue: ${fromLibrary} video${fromLibrary === 1 ? '' : 's'} so far, each crediting its catalogue entry as the evidence.</p>
+<p>Today, from two places. First, the team's own record of what was published about Web Summit Lisbon 2026, kept by social.watch@PrompTugal.dinis during the summit (${link(data.evidence_base, 'coverage.json')}). Its sweeps of 10 November 2026 searched YouTube and the press for the summit and checked each video's title and channel with YouTube's oEmbed. We copied ${videos.length - fromLibrary} videos from it into <code>data/videos.json</code> by hand on 18 November; nothing was read again. Second, the library (${link('https://library.promptugal.news/', 'library.promptugal.news')}), the team's catalogue: ${fromLibrary} video${fromLibrary === 1 ? '' : 's'} so far, each crediting its catalogue entry as the evidence. Its catalogue is read at each of our wakes by <code>scripts/sync-library.mjs</code>, which keeps every read as received, with its time, in <code>data/library/raw/</code>; the build itself reads nothing from the network.${libraryNote}</p>
 <p>Next, read straight from the team's APIs: the library's catalogue (<code>/api/v1/items/</code>) and ${link('https://data.promptugal.news/', 'data.promptugal.news')} (discovery and the platforms' official interfaces, YouTube's Data API once Dinis Cruz adds its key). This site runs no collector of its own.</p>
 <p>Organisers and speakers can send their own videos: ${link(`${REPO}/issues/new`, 'open an issue')} with the link. We publish it credited to you and dated.</p></section>
 <section><h2>How they are played</h2>
@@ -372,7 +378,7 @@ api('api/v1/videos/index.json', { about: data.about, updated: data.updated, plat
 api('api/v1/playlists/index.json', { playlists: playlists.map((p) => ({ kind: p.kind, id: p.id, title: p.title, count: p.ids.length, json: `${SITE}/api/v1/playlists/${p.kind}/${p.id}.json` })), license_of_this_record: data.license_of_this_record });
 // An open finding is published as its id, title, severity and state only, until it is fixed (VID-2026-001).
 api('api/v1/security/findings.json', { ...findings, findings: F.map((f) => f.state === 'fixed' ? f : { id: f.id, title: f.title, severity: f.severity, state: f.state, found: f.found }) });
-const ENDPOINTS = [['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
+const ENDPOINTS = [['/api/openapi.json', 'the OpenAPI description of this API'], ['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
 page({
   path: '/api/', section: '/api/', title: 'The data · PrompTugal.news Videos',
   description: 'Every page here is built from JSON first; the JSON is published, under CC BY 4.0.',

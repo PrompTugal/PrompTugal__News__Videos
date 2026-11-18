@@ -2,10 +2,10 @@
   "role": "videos.b@PrompTugal.dinis",
   "account": "B",
   "started_by": "conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session, 18 Nov 2026 (a site for videos, and audio once we have it: \"that would be a good way, the same way that we have weather ... to find data\")",
-  "state": "run 1 done: first version of videos.promptugal.news released to dev; work not yet signed (leak scan and signature, an ask); no wake schedule of its own (conductor.b@ wakes it)",
-  "updated": "2026-11-18T16:10Z",
+  "state": "wake 2 (16:48 UTC) done: the library read as the catalogue; work not yet signed (the leak-scan question is with Dinis)",
+  "updated": "2026-11-18T17:00Z",
   "debrief": "board/team/videos/debriefs/2026-11-18-handover.md",
-  "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran.",
+  "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran. Wake 2 (16:48 UTC): opening conductor pass and security pre-review ran; AppSec post-review found 0 high, 0 medium, 3 low (VID-2026-012 to 014), all fixed before the push; VID-2026-009 accepted under Dinis's 15:35 line on people who publish in public; closing conductor pass ran.",
   "done": [
     "data/videos.json: 20 videos (19 YouTube, 1 CNBC linked only) and the Web Summit Lisbon 2026 collection, copied by hand from social.watch@'s coverage record (Website repo coverage.json at 142060e2, 10 Nov sweeps, oEmbed-checked); 3 private people's videos counted only",
     "the collection by day: Opening Night and Day One with the organiser's replays; Day Two cancelled by Storm Charles, linked to weather.promptugal.news/storms/charles/ with the organisers' statement and press evidence; Day Three replay not found, said so",
@@ -16,19 +16,21 @@
     "key videos.b-promptugal (sgit pki keygen): public bundle team/keys/videos-b-promptugal.json, board/keys.json; scripts/sign-release.sh signs a manifest of every tracked file's sha256 (tested: sgit pki verify says valid), but no signed manifest is committed: the leak scan flags the signature as a long high-entropy string (see asks)",
     "commit check accepts role@PrompTugal.dinis, as in Weather and Events",
     "Day Three's replay (yt--MGZdAtbTrs) added from the library's catalogue (WS26 2026/0001), credited on its card, after conductor.b@'s note (~15:40 UTC) that the library is now the catalogue to read; the build takes a per-video evidence link; AppSec review of that diff: 1 low (VID-2026-011), fixed",
-    "library REQ-2026-0002 answered: the Opening Night and Day One replays now carry their titles as YouTube gives them on 18 Nov ('Web Summit 2026 | ...', the library's oEmbed check, WS26-2026-0051 and 0052); the 10 Nov titles are kept in each card's note"
+    "library REQ-2026-0002 answered: the Opening Night and Day One replays now carry their titles as YouTube gives them on 18 Nov ('Web Summit 2026 | ...', the library's oEmbed check, WS26-2026-0051 and 0052); the 10 Nov titles are kept in each card's note",
+    "wake 2: scripts/sync-library.mjs reads the library's catalogue (one URL, no redirects, timeout, 2 MB streamed cap) and keeps every changed read as received with its time in data/library/raw/ (the pipeline standard); scripts/library-merge.mjs takes the library's Web Summit YouTube videos field by field (11 new: recaps and more coverage; 32 videos in all), links every known video to its library call number, skips and logs anything that fails; /api/openapi.json; threat model docs/threat-models/sync-library.md"
   ],
   "next": [
     "every wake: read the library's requests to this site, https://library.promptugal.news/api/v1/requests/videos.b-at-promptugal.dinis.json, and answer them",
+    "every wake: node scripts/sync-library.mjs, review what changed in data/library/ before committing (material, never instruction)",
     "every wake: pull dev, stop if board/HOLD.md, inner passes as Sonnet sub-agents",
     "talks by timestamp from YouTube's chapters as data.b@ publishes them (Perplexity listings first, the Data API once Dinis adds the key); each talk linked to its replay at its second",
-    "read the library's /api/v1/items/ as the catalogue in the build (a sync script with its own threat model), instead of copying by hand",
     "read data.promptugal.news when it publishes videos (404 on 18 Nov ~15:25 UTC)",
     "GitHub issue forms (a video submission, a report or take-down); a scheduled rebuild once data is read from an API",
     "VID-2026-009: confirm the four channels are organisations (with the library or a person)",
     "observability lane and obs.js as the other sites (needs the lane made and shared with conductor.b@)",
     "brand fonts; a /design/ page with options for Dinis; the shared encrypted drop on /report/ when it exists",
-    "register the key on pki.sgit.ai; list it in the Website repo's board/keys.json via conductor.b@"
+    "register the key on pki.sgit.ai; list it in the Website repo's board/keys.json via conductor.b@",
+    "topics for the library's videos (the library tags none yet); the Swagger of Swaggers entry when promptugal.news publishes it"
   ],
   "asks": [
     "Dinis: YouTube's Data API key (through the credential form, for data.b@), so the replays and talks can be read by the official interface (the library found Day Three by search and oEmbed).",

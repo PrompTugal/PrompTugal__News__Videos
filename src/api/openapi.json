@@ -1,0 +1,56 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PrompTugal.news Videos API",
+    "version": "__VERSION__",
+    "description": "Static JSON files, rebuilt on every push to dev. Our records are CC BY 4.0; each video stays under its platform's terms, linked in its record. Read-only: GET only, no authentication, no personal data.",
+    "license": { "name": "CC BY 4.0 (the records); Apache-2.0 (the code)", "url": "https://creativecommons.org/licenses/by/4.0/" },
+    "contact": { "name": "Report an issue", "url": "https://github.com/PrompTugal/PrompTugal__News__Videos/issues/new" }
+  },
+  "servers": [{ "url": "https://videos.promptugal.news" }],
+  "paths": {
+    "/api/v1/videos/index.json": { "get": { "summary": "Every video, short", "responses": { "200": { "description": "count, platforms and a short record per video", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VideoIndex" } } } } } } },
+    "/api/v1/videos/{id}.json": { "get": { "summary": "One video: its whole card", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^(yt-[A-Za-z0-9_-]{11}|[a-z0-9]+(-[a-z0-9]+)+)$" } }], "responses": { "200": { "description": "the card", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Video" } } } }, "404": { "description": "no such video" } } } },
+    "/api/v1/collections/index.json": { "get": { "summary": "The collections", "responses": { "200": { "description": "id, title and link per collection" } } } },
+    "/api/v1/collections/{id}.json": { "get": { "summary": "A collection with its days", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" } }], "responses": { "200": { "description": "the collection, its days (replays, a cancelled day's evidence, gaps) and its videos" }, "404": { "description": "no such collection" } } } },
+    "/api/v1/playlists/index.json": { "get": { "summary": "Every playlist", "responses": { "200": { "description": "kind, id, title and count per playlist" } } } },
+    "/api/v1/playlists/{kind}/{id}.json": { "get": { "summary": "One playlist", "parameters": [{ "name": "kind", "in": "path", "required": true, "schema": { "type": "string", "enum": ["event", "kind", "organisation", "topic", "place"] } }, { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" } }], "responses": { "200": { "description": "the playlist's video ids and links" }, "404": { "description": "no such playlist" } } } },
+    "/api/v1/security/findings.json": { "get": { "summary": "The security findings", "responses": { "200": { "description": "every finding: a fixed one in full, an open one by id, title, severity, state and date only" } } } },
+    "/version.json": { "get": { "summary": "The version and commit of this build", "responses": { "200": { "description": "version, commit, built" } } } }
+  },
+  "components": {
+    "schemas": {
+      "Licence": { "type": "object", "required": ["name", "url"], "properties": { "name": { "type": "string" }, "url": { "type": "string", "format": "uri" } } },
+      "Video": {
+        "type": "object",
+        "required": ["id", "platform", "url", "title", "channel", "license", "found"],
+        "properties": {
+          "id": { "type": "string", "description": "our call number: yt-<YouTube id> or a slug" },
+          "platform": { "type": "string", "enum": ["youtube", "cnbc"] },
+          "platform_id": { "type": ["string", "null"] },
+          "url": { "type": "string", "format": "uri", "description": "the video on its platform" },
+          "embed": { "type": ["string", "null"], "description": "the only embed address used: https://www.youtube-nocookie.com/embed/<id>" },
+          "title": { "type": "string", "description": "as published" },
+          "channel": { "type": "object", "properties": { "name": { "type": "string" }, "kind": { "type": "string", "enum": ["organiser", "company", "government", "press", "channel"] } } },
+          "people": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "role": { "type": "string" } } }, "description": "public and professional only, as named by the publisher" },
+          "published": { "type": "object", "properties": { "date": { "type": ["string", "null"], "format": "date" }, "precision": { "type": "string" } } },
+          "place": { "type": "string" },
+          "collection": { "type": "string" },
+          "day": { "type": ["string", "null"], "format": "date" },
+          "kind": { "type": "string", "enum": ["official-replay", "recording", "press"] },
+          "topics": { "type": "array", "items": { "type": "string" } },
+          "storm": { "type": "boolean" },
+          "found": { "type": "object", "properties": { "by": { "type": "string" }, "at": { "type": "string" }, "how": { "type": "string" }, "verified": { "type": "boolean" }, "evidence": { "type": "string", "format": "uri" } } },
+          "note": { "type": "string" },
+          "talks": { "type": "array", "items": { "type": "object", "properties": { "start": { "type": "integer", "minimum": 0 }, "title": { "type": "string" } } } },
+          "library": { "type": ["object", "null"], "description": "the item in library.promptugal.news's catalogue", "properties": { "id": { "type": "string" }, "call_number": { "type": "string" }, "page": { "type": "string", "format": "uri" }, "api": { "type": "string", "format": "uri" } } },
+          "license": { "$ref": "#/components/schemas/Licence" },
+          "license_of_this_record": { "$ref": "#/components/schemas/Licence" },
+          "evidence": { "type": "string", "format": "uri" },
+          "page": { "type": "string", "format": "uri" }
+        }
+      },
+      "VideoIndex": { "type": "object", "properties": { "about": { "type": "string" }, "updated": { "type": "string" }, "count": { "type": "integer" }, "videos": { "type": "array", "items": { "type": "object" } } } }
+    }
+  }
+}

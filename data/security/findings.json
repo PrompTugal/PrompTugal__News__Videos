@@ -110,10 +110,11 @@
    "file": "data/videos.json",
    "found": "2026-11-18 ~15:45 UTC",
    "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the first push",
-   "state": "open",
+   "state": "accepted",
    "detail": "The reviewer could not confirm that SECTIES PB, The Spotlight: Beyond Profession, VOICE OF NEPAL TV - VON and RVTV are organisations rather than private people.",
-   "fix": "To confirm by a person or the library; kept meanwhile because each publishes under a channel or broadcaster name, not a personal one, and social.watch@ and security@ kept them during the summit.",
-   "commit": ""
+   "fix": "Accepted under Dinis's line of 18 November 2026 (~15:35 UTC, Website board/guidance/2026-11-18-people-blogs-cyber-and-simulated-payments.md): anyone who publishes in public is named and linked by the name they published under; never private information or a personal contact; take-down on request. Each channel is shown by its published name only.",
+   "commit": "",
+   "closed": "2026-11-18 ~16:55 UTC"
   },
   {
    "id": "VID-2026-010",
@@ -137,6 +138,42 @@
    "state": "fixed",
    "detail": "new URL() turns its argument into a string, so a one-item list holding an https address passed the check; the HTML escaped it, but the JSON would have carried a list where a string belongs. Never published.",
    "fix": "The URL checks accept strings only.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-012",
+   "severity": "low",
+   "title": "The size cap was checked only after the whole answer was read",
+   "file": "scripts/sync-library.mjs",
+   "found": "2026-11-18 ~16:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "The library's answer was read into memory in full before its size was compared with the 2 MB cap, so a compromised host could have sent far more within the timeout. Never happened: the answers so far are about 50 KB.",
+   "fix": "The bytes are counted as they arrive and the read stops at the cap.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-013",
+   "severity": "low",
+   "title": "A failed read overwrote the record of the last good one",
+   "file": "scripts/sync-library.mjs",
+   "found": "2026-11-18 ~16:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "A failure rewrote sync.json, so the site would have shown the failure's time as the last read and the next read would have kept a duplicate raw copy. Never happened.",
+   "fix": "A failure is written to sync-error.json; sync.json keeps describing the copy on disk.",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-014",
+   "severity": "low",
+   "title": "Impossible dates from the library were accepted",
+   "file": "scripts/library-merge.mjs",
+   "found": "2026-11-18 ~16:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "detail": "A date was checked by its shape only, so 2026-99-99 would have shown as nonsense on a card. Never happened.",
+   "fix": "Only real calendar dates are taken; others are left out.",
    "commit": ""
   }
  ]
