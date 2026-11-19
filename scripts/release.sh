@@ -7,30 +7,33 @@ cd "$(dirname "$0")/.."
 [ -e board/HOLD.md ] && { echo "board/HOLD.md exists: no release while it does" >&2; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "uncommitted changes: commit or stash them first" >&2; exit 1; }
 git fetch -q origin dev
-# Every security check runs from origin/dev's copy, never from the commits it checks (security@'s control 7, widened, 19 Nov
-# 2026): the signatures, the trailers, the leak scan (with its exemptions) and the sites bar's pin. The copy is written into
-# scripts/ under an ignored name, so each finds the repository as it always has; no copy on origin/dev, no push (fails closed).
+# The anchor (security@'s fourth ruling, 19 Nov 2026): the newest commit a passing run verified. Here, the commit the live
+# site's /version.json reports, which a successful deploy writes (a pusher who edits the workflow could deploy too: only branch
+# protection and a dev-only github-pages environment close that, Dinis's to set). Every security check
+# runs from the anchor's copy (control 7, widened), never from the commits it checks, over the range anchor..HEAD; the copy is
+# written into scripts/ under an ignored name so each finds the repository as it always has; no anchor or no copy, no push.
+ANCHOR=$(curl -fsS -m 20 --max-redirs 0 https://videos.promptugal.news/version.json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const c=JSON.parse(s).commit;if(!/^[0-9a-f]{40}$/.test(c))process.exit(1);console.log(c)})') || { echo "cannot read the anchor (the deployed commit): refusing" >&2; exit 1; }
+GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$ANCHOR^{commit}" 2>/dev/null || { echo "the anchor $ANCHOR is not in this clone: refusing" >&2; exit 1; }
 trusted() {
   local name=$1 t s=0; shift; t="scripts/trusted-$name"
   rm -f "$t"   # never write through a link left at that path
-  if ! GIT_NO_REPLACE_OBJECTS=1 git show "origin/dev:scripts/$name" > "$t" 2>/dev/null; then rm -f "$t"; echo "origin/dev has no scripts/$name: refusing" >&2; return 1; fi
+  if ! GIT_NO_REPLACE_OBJECTS=1 git show "$ANCHOR:scripts/$name" > "$t" 2>/dev/null; then rm -f "$t"; echo "the anchor has no scripts/$name: refusing" >&2; return 1; fi
   NODE_OPTIONS= node "$t" "$@" || s=$?
   rm -f "$t"; return "$s"
 }
 # The trailer check reads scripts/commit-exemptions.json from the tree: a push may not add or change it (a person exempts a commit).
-exemptions_unchanged() { GIT_NO_REPLACE_OBJECTS=1 git diff --quiet origin/dev HEAD -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed in this push: refusing" >&2; return 1; }; }
-# Our vendored sites bar against the live registry's pin: the one check the repo cannot vouch for itself (VID-2026-022).
-# The checks run from origin/dev, the commit dev pointed to before this push; the push must build on it (control 7, third ruling).
-refuse_unless_forward() { GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor origin/dev HEAD || { echo "origin/dev is not an ancestor of HEAD: refusing" >&2; return 1; }; }
+exemptions_unchanged() { GIT_NO_REPLACE_OBJECTS=1 git diff --quiet "$ANCHOR" HEAD -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed since the anchor: refusing" >&2; return 1; }; }
+# The push must build on the anchor.
+refuse_unless_forward() { GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$ANCHOR" HEAD || { echo "the anchor is not an ancestor of HEAD: refusing" >&2; return 1; }; }
 trusted sync-sites.mjs --check
 node scripts/build.mjs
 node scripts/validate.mjs
 node scripts/test-leak-scan.mjs
 trusted leak-scan.mjs
 exemptions_unchanged
-trusted check-commits.mjs origin/dev HEAD
+trusted check-commits.mjs "$ANCHOR" HEAD
 node scripts/test-check-signatures.mjs
-trusted check-signatures.mjs origin/dev HEAD
+trusted check-signatures.mjs "$ANCHOR" HEAD
 for i in 1 2 3 4 5; do
   git fetch -q origin dev
   git rebase -q origin/dev
@@ -41,8 +44,8 @@ for i in 1 2 3 4 5; do
   trusted leak-scan.mjs >/dev/null
   refuse_unless_forward
   exemptions_unchanged
-  trusted check-commits.mjs origin/dev HEAD >/dev/null
-  trusted check-signatures.mjs origin/dev HEAD >/dev/null
+  trusted check-commits.mjs "$ANCHOR" HEAD >/dev/null
+  trusted check-signatures.mjs "$ANCHOR" HEAD >/dev/null
   if git -c push.negotiate=true push -q origin HEAD:dev; then echo "released $(git rev-parse --short HEAD) to dev"; exit 0; fi
   sleep $((i * 3))
 done

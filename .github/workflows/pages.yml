@@ -8,6 +8,8 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  # read the github-pages deployments: the anchor of the security checks (security@'s fourth ruling)
+  deployments: read
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -42,22 +44,34 @@ jobs:
         with:
           node-version: 22
       - name: Every commit since the last release carries an Agent trailer
-        # From BEFORE (github.event.before, the commit dev pointed to before this push) or the last release tag reachable
-        # from it: GitHub drops a pending run when a newer one queues, so BEFORE may be the head of a push whose run never ran
-        # (specialist.code@ finding 3b); the tag, an ancestor of BEFORE, was checked when it was released.
+        # Anchored on the last successful github-pages deployment, not on a tag or github.event.before: GitHub drops a pending
+        # run when a newer one queues, so the commits of a dropped push are covered by the range anchor..AFTER (specialist.code@
+        # finding 3b; security@'s fourth ruling).
         env:
-          BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # The checker and its range start come from BEFORE (the commit dev pointed to before this push), or from the last
-          # release tag reachable from BEFORE: always an ancestor of BEFORE, and released, so checked even when GitHub dropped
-          # the run of the push that made BEFORE. BEFORE must exist and be an ancestor of AFTER (security@'s control 7, third
-          # ruling); a missing copy of a check there is refused.
+          # The anchor A (security@'s fourth ruling, 19 Nov 2026): the newest commit a passing run verified, read from CI's own
+          # record: the newest github-pages deployment that ever succeeded, with this run's read token. A pusher who edits this
+          # workflow, or holds a write token, could still make such a record: only branch protection and a dev-only rule on the
+          # github-pages environment close that (Dinis's to set).
+          # Tags are not used. A must be in this clone and an ancestor of AFTER; the range checked is A..AFTER, so commits of
+          # dropped pushes are covered, and every check runs from A's copy. No A, or no copy there: the run fails.
           base_of() {
-            if [ -z "$BEFORE" ] || [ -z "${BEFORE//0/}" ]; then echo "no BEFORE (a new branch or a first push): refusing" >&2; return 1; fi
-            GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$BEFORE" "$AFTER" || { echo "BEFORE is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
-            local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$BEFORE" 2>/dev/null || true)
-            echo "${last:-$BEFORE}"
+            local api="https://api.github.com/repos/$GITHUB_REPOSITORY" h1="Authorization: Bearer $GH_TOKEN" h2="Accept: application/vnd.github+json" list row id sha state
+            list=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments?environment=github-pages&per_page=50") || { echo "cannot read the deployments: refusing" >&2; return 1; }
+            for row in $(printf '%s' "$list" | jq -r '.[] | "\(.id):\(.sha)"'); do
+              id=${row%%:*}; sha=${row#*:}
+              # any success: deploy-pages marks an older deployment inactive after a newer one succeeds, and that commit stayed verified
+              state=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments/$id/statuses?per_page=100" | jq -r 'if any(.[]; .state == "success") then "success" else "" end') || state=""
+              if [ "$state" = "success" ]; then
+                [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "a deployment sha that is not a commit id: refusing" >&2; return 1; }
+                GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$sha^{commit}" 2>/dev/null || { echo "the anchor $sha is not in this clone: refusing" >&2; return 1; }
+                GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$sha" "$AFTER" || { echo "the anchor is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
+                echo "$sha"; return 0
+              fi
+            done
+            echo "no successful github-pages deployment to anchor on: refusing" >&2; return 1
           }
           # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
           # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
@@ -79,18 +93,30 @@ jobs:
       - run: node scripts/validate.mjs
       - name: Leak scan (tracked files and the built site) from the trusted base's copy, then the pushed copy's own tests
         env:
-          BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # The checker and its range start come from BEFORE (the commit dev pointed to before this push), or from the last
-          # release tag reachable from BEFORE: always an ancestor of BEFORE, and released, so checked even when GitHub dropped
-          # the run of the push that made BEFORE. BEFORE must exist and be an ancestor of AFTER (security@'s control 7, third
-          # ruling); a missing copy of a check there is refused.
+          # The anchor A (security@'s fourth ruling, 19 Nov 2026): the newest commit a passing run verified, read from CI's own
+          # record: the newest github-pages deployment that ever succeeded, with this run's read token. A pusher who edits this
+          # workflow, or holds a write token, could still make such a record: only branch protection and a dev-only rule on the
+          # github-pages environment close that (Dinis's to set).
+          # Tags are not used. A must be in this clone and an ancestor of AFTER; the range checked is A..AFTER, so commits of
+          # dropped pushes are covered, and every check runs from A's copy. No A, or no copy there: the run fails.
           base_of() {
-            if [ -z "$BEFORE" ] || [ -z "${BEFORE//0/}" ]; then echo "no BEFORE (a new branch or a first push): refusing" >&2; return 1; fi
-            GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$BEFORE" "$AFTER" || { echo "BEFORE is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
-            local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$BEFORE" 2>/dev/null || true)
-            echo "${last:-$BEFORE}"
+            local api="https://api.github.com/repos/$GITHUB_REPOSITORY" h1="Authorization: Bearer $GH_TOKEN" h2="Accept: application/vnd.github+json" list row id sha state
+            list=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments?environment=github-pages&per_page=50") || { echo "cannot read the deployments: refusing" >&2; return 1; }
+            for row in $(printf '%s' "$list" | jq -r '.[] | "\(.id):\(.sha)"'); do
+              id=${row%%:*}; sha=${row#*:}
+              # any success: deploy-pages marks an older deployment inactive after a newer one succeeds, and that commit stayed verified
+              state=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments/$id/statuses?per_page=100" | jq -r 'if any(.[]; .state == "success") then "success" else "" end') || state=""
+              if [ "$state" = "success" ]; then
+                [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "a deployment sha that is not a commit id: refusing" >&2; return 1; }
+                GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$sha^{commit}" 2>/dev/null || { echo "the anchor $sha is not in this clone: refusing" >&2; return 1; }
+                GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$sha" "$AFTER" || { echo "the anchor is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
+                echo "$sha"; return 0
+              fi
+            done
+            echo "no successful github-pages deployment to anchor on: refusing" >&2; return 1
           }
           # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
           # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
