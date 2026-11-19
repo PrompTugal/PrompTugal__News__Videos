@@ -46,6 +46,8 @@ trusted check-commits.mjs "$ANCHOR" HEAD
 node scripts/test-check-signatures.mjs
 node scripts/test-check-links.mjs
 trusted check-signatures.mjs "$ANCHOR" HEAD
+# No symbolic links (security@'s control 10), from the anchor's copy, over the range, the tree, the checkout and the site.
+trusted check-links.mjs "$ANCHOR" "$(git rev-parse HEAD)" _site
 for i in 1 2 3 4 5; do
   git fetch -q origin dev
   git rebase -q origin/dev
@@ -58,6 +60,7 @@ for i in 1 2 3 4 5; do
   exemptions_unchanged
   trusted check-commits.mjs "$ANCHOR" HEAD >/dev/null
   trusted check-signatures.mjs "$ANCHOR" HEAD >/dev/null
+  trusted check-links.mjs "$ANCHOR" "$(git rev-parse HEAD)" _site >/dev/null
   if git -c push.negotiate=true push -q origin HEAD:dev; then echo "released $(git rev-parse --short HEAD) to dev"; exit 0; fi
   sleep $((i * 3))
 done

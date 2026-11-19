@@ -155,6 +155,8 @@ jobs:
           # Signed commits (Dinis, 19 Nov 2026): every commit in A..AFTER is signed by its Agent:'s published key; nothing is exempt.
           trusted check-signatures.mjs "$base" "$AFTER"
           trusted leak-scan.mjs
+          # No symbolic links (security@'s control 10): the range, the head's tree, the checkout, and the unpacked site.
+          trusted check-links.mjs "$base" "$AFTER" _site
   deploy:
     needs: [build, checks]
     if: needs.build.outputs.deploy == 'true' && github.ref == 'refs/heads/dev'
