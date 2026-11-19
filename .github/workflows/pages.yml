@@ -43,97 +43,97 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Every commit since the last release carries an Agent trailer
-        # Anchored on the last successful github-pages deployment, not on a tag or github.event.before: GitHub drops a pending
-        # run when a newer one queues, so the commits of a dropped push are covered by the range anchor..AFTER (specialist.code@
-        # finding 3b; security@'s fourth ruling).
-        env:
-          AFTER: ${{ github.sha }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # The anchor A (security@'s fourth ruling, 19 Nov 2026): the newest commit a passing run verified, read from CI's own
-          # record: the newest github-pages deployment that ever succeeded, with this run's read token. A pusher who edits this
-          # workflow, or holds a write token, could still make such a record: only branch protection and a dev-only rule on the
-          # github-pages environment close that (Dinis's to set).
-          # Tags are not used. A must be in this clone and an ancestor of AFTER; the range checked is A..AFTER, so commits of
-          # dropped pushes are covered, and every check runs from A's copy. No A, or no copy there: the run fails.
-          base_of() {
-            local api="https://api.github.com/repos/$GITHUB_REPOSITORY" h1="Authorization: Bearer $GH_TOKEN" h2="Accept: application/vnd.github+json" list row id sha state
-            list=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments?environment=github-pages&per_page=50") || { echo "cannot read the deployments: refusing" >&2; return 1; }
-            for row in $(printf '%s' "$list" | jq -r '.[] | "\(.id):\(.sha)"'); do
-              id=${row%%:*}; sha=${row#*:}
-              # any success: deploy-pages marks an older deployment inactive after a newer one succeeds, and that commit stayed verified
-              state=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments/$id/statuses?per_page=100" | jq -r 'if any(.[]; .state == "success") then "success" else "" end') || state=""
-              if [ "$state" = "success" ]; then
-                [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "a deployment sha that is not a commit id: refusing" >&2; return 1; }
-                GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$sha^{commit}" 2>/dev/null || { echo "the anchor $sha is not in this clone: refusing" >&2; return 1; }
-                GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$sha" "$AFTER" || { echo "the anchor is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
-                echo "$sha"; return 0
-              fi
-            done
-            echo "no successful github-pages deployment to anchor on: refusing" >&2; return 1
-          }
-          # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
-          # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
-          # each is written into scripts/ under an ignored name (any link there removed first);
-          # a base without one is refused (fails closed).
-          trusted() { local name=$1 rc=0; shift; rm -f "scripts/trusted-$name"; GIT_NO_REPLACE_OBJECTS=1 git show "$base:scripts/$name" > "scripts/trusted-$name" 2>/dev/null || { rm -f "scripts/trusted-$name"; echo "the trusted base has no scripts/$name: refusing" >&2; exit 1; }; NODE_OPTIONS= node "scripts/trusted-$name" "$@" || rc=$?; rm -f "scripts/trusted-$name"; [ "$rc" = 0 ] || exit "$rc"; }
-          base=$(base_of)
-          # The trailer check reads scripts/commit-exemptions.json from the tree: a push may not add or change it.
-          GIT_NO_REPLACE_OBJECTS=1 git diff --quiet "$base" "$AFTER" -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed in this push: refusing" >&2; exit 1; }
-          trusted check-commits.mjs "$base" "$AFTER"
-          # Signed commits (Dinis, 19 Nov 2026): every commit in the range is signed by its Agent:'s published key; nothing
-          # is exempt: this workflow makes no commits.
-          trusted check-signatures.mjs "$base" "$AFTER"
-          # Only then the pushed copy's own tests.
-          node scripts/test-check-signatures.mjs
       - run: node scripts/build.mjs
         env:
           SITE_VERSION: ${{ steps.version.outputs.version }}
       - run: node scripts/validate.mjs
-      - name: Leak scan (tracked files and the built site) from the trusted base's copy, then the pushed copy's own tests
-        env:
-          AFTER: ${{ github.sha }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # The anchor A (security@'s fourth ruling, 19 Nov 2026): the newest commit a passing run verified, read from CI's own
-          # record: the newest github-pages deployment that ever succeeded, with this run's read token. A pusher who edits this
-          # workflow, or holds a write token, could still make such a record: only branch protection and a dev-only rule on the
-          # github-pages environment close that (Dinis's to set).
-          # Tags are not used. A must be in this clone and an ancestor of AFTER; the range checked is A..AFTER, so commits of
-          # dropped pushes are covered, and every check runs from A's copy. No A, or no copy there: the run fails.
-          base_of() {
-            local api="https://api.github.com/repos/$GITHUB_REPOSITORY" h1="Authorization: Bearer $GH_TOKEN" h2="Accept: application/vnd.github+json" list row id sha state
-            list=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments?environment=github-pages&per_page=50") || { echo "cannot read the deployments: refusing" >&2; return 1; }
-            for row in $(printf '%s' "$list" | jq -r '.[] | "\(.id):\(.sha)"'); do
-              id=${row%%:*}; sha=${row#*:}
-              # any success: deploy-pages marks an older deployment inactive after a newer one succeeds, and that commit stayed verified
-              state=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments/$id/statuses?per_page=100" | jq -r 'if any(.[]; .state == "success") then "success" else "" end') || state=""
-              if [ "$state" = "success" ]; then
-                [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "a deployment sha that is not a commit id: refusing" >&2; return 1; }
-                GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$sha^{commit}" 2>/dev/null || { echo "the anchor $sha is not in this clone: refusing" >&2; return 1; }
-                GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$sha" "$AFTER" || { echo "the anchor is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
-                echo "$sha"; return 0
-              fi
-            done
-            echo "no successful github-pages deployment to anchor on: refusing" >&2; return 1
-          }
-          # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
-          # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
-          # each is written into scripts/ under an ignored name (any link there removed first);
-          # a base without one is refused (fails closed).
-          trusted() { local name=$1 rc=0; shift; rm -f "scripts/trusted-$name"; GIT_NO_REPLACE_OBJECTS=1 git show "$base:scripts/$name" > "scripts/trusted-$name" 2>/dev/null || { rm -f "scripts/trusted-$name"; echo "the trusted base has no scripts/$name: refusing" >&2; exit 1; }; NODE_OPTIONS= node "scripts/trusted-$name" "$@" || rc=$?; rm -f "scripts/trusted-$name"; [ "$rc" = 0 ] || exit "$rc"; }
-          base=$(base_of)
-          trusted leak-scan.mjs
-          node scripts/test-leak-scan.mjs
+      # The pushed copies' own tests: functional gates on the pushed tree, like the build and the validator.
+      - run: node scripts/test-check-signatures.mjs
+      - run: node scripts/test-leak-scan.mjs
       - if: steps.mode.outputs.deploy == 'true'
         uses: actions/configure-pages@v5
       - if: steps.mode.outputs.deploy == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-  deploy:
+  checks:
+    # Security@'s control 9 (fifth ruling, 19 Nov 2026): the signature, trailer and leak checks run in their own job, which runs
+    # no pushed code: it checks out the pushed tree as data, takes each checker from the anchor A's tree, and runs it with an
+    # absolute node, NODE_OPTIONS cleared and replaced objects ignored. The build's output reaches it only as data (an artifact).
+    # GITHUB_ENV and GITHUB_PATH are per job, so nothing the pushed build writes there reaches this job. Deploy needs this job.
     needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The very artifact deploy publishes, as data, so the leak scan sees what goes live (post-review of control 9).
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/pages
+      - name: Unpack the Pages artifact, as data
+        run: |
+          rm -rf _site && mkdir _site
+          tar -xf "$RUNNER_TEMP/pages/artifact.tar" -C _site --no-same-owner --no-same-permissions
+          if find _site -type l | grep -q .; then echo "a link in the Pages artifact: refusing" >&2; exit 1; fi
+      - name: Trailers, signatures and the leak scan, from the anchor's copies
+        env:
+          AFTER: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+          GIT_NO_REPLACE_OBJECTS: '1'
+          NODE_OPTIONS: ''
+        run: |
+          set -euo pipefail
+          NODE=$(command -v node); case "$NODE" in /*) ;; *) echo "node is not an absolute path" >&2; exit 1;; esac
+          if [ -e board/HOLD.md ]; then echo "board/HOLD.md exists" >&2; exit 1; fi
+          [ "$(git rev-parse --is-shallow-repository)" = "false" ] || { echo "a shallow checkout: refusing" >&2; exit 1; }
+          # The anchor A (security@'s fourth and fifth rulings): the newest commit a passing run verified, read from GitHub's API,
+          # never from git: the newest github-pages deployment that ever succeeded. A pusher who edits this workflow, or holds a
+          # write token, could still make such a record: only branch protection and a dev-only rule on the github-pages
+          # environment close that (Dinis's to set). Tags and BEFORE are not used; a manual run checks A..HEAD the same way.
+          base_of() {
+            local api="https://api.github.com/repos/$GITHUB_REPOSITORY" h1="Authorization: Bearer $GH_TOKEN" h2="Accept: application/vnd.github+json" list row id sha state
+            list=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments?environment=github-pages&per_page=50") || { echo "cannot read the deployments: refusing" >&2; return 1; }
+            for row in $(printf '%s' "$list" | jq -r '.[] | "\(.id):\(.sha)"'); do
+              id=${row%%:*}; sha=${row#*:}
+              # any success: deploy-pages marks an older deployment inactive after a newer one succeeds, and that commit stayed verified
+              # a status that cannot be read stops the run, never falls through to an older deployment
+              state=$(curl -fsS -H "$h1" -H "$h2" "$api/deployments/$id/statuses?per_page=100" | jq -r 'if any(.[]; .state == "success") then "success" else "" end') || { echo "cannot read a deployment's statuses: refusing" >&2; return 1; }
+              if [ "$state" = "success" ]; then
+                [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "a deployment sha that is not a commit id: refusing" >&2; return 1; }
+                GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$sha^{commit}" 2>/dev/null || { echo "the anchor $sha is not in this clone: refusing" >&2; return 1; }
+                GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$sha" "$AFTER" || { echo "the anchor is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
+                echo "$sha"; return 0
+              fi
+            done
+            echo "no successful github-pages deployment to anchor on: refusing" >&2; return 1
+          }
+          base=$(base_of)
+          echo "anchor: $base"
+          # Each checker from A's tree, written into scripts/ under an ignored name so it finds the repository as before; any
+          # file or link at that path is removed first, and a link there afterwards is refused; no copy at A, no run.
+          trusted() {
+            local name=$1 t="scripts/trusted-$1" rc=0; shift
+            rm -f "$t"; git show "$base:scripts/$name" > "$t" 2>/dev/null || { rm -f "$t"; echo "the anchor has no scripts/$name: refusing" >&2; exit 1; }
+            [ -f "$t" ] && [ ! -L "$t" ] || { echo "$t is not a plain file: refusing" >&2; exit 1; }
+            "$NODE" "$t" "$@" || rc=$?; rm -f "$t"; [ "$rc" = 0 ] || exit "$rc"
+          }
+          # The trailer check reads scripts/commit-exemptions.json from the tree: a push may not add or change it.
+          git diff --quiet "$base" "$AFTER" -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed since the anchor: refusing" >&2; exit 1; }
+          trusted check-commits.mjs "$base" "$AFTER"
+          # Signed commits (Dinis, 19 Nov 2026): every commit in A..AFTER is signed by its Agent:'s published key; nothing is exempt.
+          trusted check-signatures.mjs "$base" "$AFTER"
+          trusted leak-scan.mjs
+  deploy:
+    needs: [build, checks]
     if: needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -146,8 +146,8 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
   tag:
-    needs: [build, deploy]
-    if: ${{ always() && needs.build.result == 'success' && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') }}
+    needs: [build, checks, deploy]
+    if: ${{ always() && needs.build.result == 'success' && needs.checks.result == 'success' && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
