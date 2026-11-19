@@ -12,7 +12,18 @@ git fetch -q origin dev
 # repository is public, so no token is needed). Every security check runs from the anchor's copy (control 7, widened), never from
 # the commits it checks, over anchor..HEAD; the copy is written into scripts/ under an ignored name so each finds the repository
 # as it always has; no anchor or no copy, no push.
-ANCHOR=$(curl -fsS -m 20 --max-redirs 0 -H 'Accept: application/vnd.github+json' -H 'User-Agent: videos-release' 'https://api.github.com/repos/PrompTugal/PrompTugal__News__Videos/actions/workflows/pages.yml/runs?branch=dev&event=push&status=success&per_page=20' | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=(JSON.parse(s).workflow_runs||[]).find(x=>x.path===".github/workflows/pages.yml"&&x.head_branch==="dev"&&x.event==="push"&&x.conclusion==="success");if(!r||!/^[0-9a-f]{40}$/.test(r.head_sha))process.exit(1);console.log(r.head_sha)})') || { echo "cannot read the anchor (the last successful run): refusing" >&2; exit 1; }
+gh_get() { curl -fsS -m 20 --max-redirs 0 -H 'Accept: application/vnd.github+json' -H 'User-Agent: videos-release' "https://api.github.com/repos/PrompTugal/PrompTugal__News__Videos/$1"; }
+# The newest such run in which the job named checks passed (live.b@ finding a4c6fce): a workflow without it never anchors.
+anchor_of() {
+  local runs id sha
+  runs=$(gh_get 'actions/workflows/pages.yml/runs?branch=dev&event=push&status=success&per_page=20' | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{for(const x of JSON.parse(s).workflow_runs||[])if(x.path===".github/workflows/pages.yml"&&x.head_branch==="dev"&&x.event==="push"&&x.conclusion==="success"&&/^[0-9]+$/.test(String(x.id))&&/^[0-9a-f]{40}$/.test(x.head_sha))console.log(x.id+":"+x.head_sha)})') || return 1
+  for id in $runs; do
+    gh_get "actions/runs/${id%%:*}/jobs?per_page=50" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.exit((JSON.parse(s).jobs||[]).some(x=>x.name==="checks"&&x.conclusion==="success")?0:3))' && { sha=${id#*:}; break; } || { [ "$?" = 3 ] || return 1; }
+  done
+  [ -n "${sha:-}" ] || return 1
+  echo "$sha"
+}
+ANCHOR=$(anchor_of) || { echo "cannot read the anchor (the last run whose checks job passed): refusing" >&2; exit 1; }
 GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$ANCHOR^{commit}" 2>/dev/null || { echo "the anchor $ANCHOR is not in this clone: refusing" >&2; exit 1; }
 trusted() {
   local name=$1 t s=0; shift; t="scripts/trusted-$name"

@@ -60,6 +60,8 @@ jobs:
     # absolute node, NODE_OPTIONS cleared and replaced objects ignored. The build's output reaches it only as data (an artifact).
     # GITHUB_ENV and GITHUB_PATH are per job, so nothing the pushed build writes there reaches this job. Deploy needs this job.
     needs: build
+    # only for dev: a manual run on another branch never checks, deploys or tags (live.b@'s a4c6fce)
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,7 +74,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # The very artifact deploy publishes, as data, so the leak scan sees what goes live (post-review of control 9).
+      # Before anything is downloaded: a pushed _site (a link could steer the unpacking into .git) is refused, and any pushed
+      # .gitattributes is removed (live.b@'s a4c6fce).
+      - name: Refuse a pushed _site, remove pushed .gitattributes
+        run: |
+          if [ -n "$(git ls-files -- _site)" ] || [ -e _site ] || [ -L _site ]; then echo "a pushed _site path: refusing" >&2; exit 1; fi
+          git ls-files -z -- '.gitattributes' '**/.gitattributes' | xargs -0 -r rm -f --
+      # The very artifact deploy publishes, as data, so the leak scan sees what goes live (post-review of control 9). It lands in
+      # RUNNER_TEMP, is vetted there, and only then unpacked into place.
       - uses: actions/download-artifact@v4
         with:
           name: github-pages
@@ -108,7 +117,16 @@ jobs:
             # that concluded success; only GitHub Actions creates runs. Every field is checked, not only the query.
             local api="https://api.github.com/repos/$GITHUB_REPOSITORY" json sha
             json=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "User-Agent: videos-checks" "$api/actions/workflows/pages.yml/runs?branch=dev&event=push&status=success&per_page=20") || { echo "cannot read the workflow runs: refusing" >&2; return 1; }
-            sha=$(printf '%s' "$json" | jq -r '[.workflow_runs[] | select(.path == ".github/workflows/pages.yml" and .head_branch == "dev" and .event == "push" and .conclusion == "success")][0].head_sha // ""') || { echo "cannot read the workflow runs: refusing" >&2; return 1; }
+            # The run must also have a job named checks that passed (live.b@'s a4c6fce): a pushed workflow without the security job
+            # "succeeds" too, and must never become the anchor. A workflow that keeps the name but weakens the job is closed only
+            # by branch protection (Dinis's to set).
+            local ids id jobs
+            ids=$(printf '%s' "$json" | jq -r '.workflow_runs[] | select(.path == ".github/workflows/pages.yml" and .head_branch == "dev" and .event == "push" and .conclusion == "success") | "\(.id):\(.head_sha)"') || { echo "cannot read the workflow runs: refusing" >&2; return 1; }
+            sha=""
+            for id in $ids; do
+              jobs=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "User-Agent: videos-checks" "$api/actions/runs/${id%%:*}/jobs?per_page=50") || { echo "cannot read a run's jobs: refusing" >&2; return 1; }
+              if printf '%s' "$jobs" | jq -e 'any(.jobs[]; .name == "checks" and .conclusion == "success")' >/dev/null; then sha=${id#*:}; break; fi
+            done
             [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "no successful push run of this workflow on dev to anchor on: refusing" >&2; return 1; }
             GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$sha^{commit}" 2>/dev/null || { echo "the anchor $sha is not in this clone: refusing" >&2; return 1; }
             GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$sha" "$AFTER" || { echo "the anchor is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
@@ -132,7 +150,7 @@ jobs:
           trusted leak-scan.mjs
   deploy:
     needs: [build, checks]
-    if: needs.build.outputs.deploy == 'true'
+    if: needs.build.outputs.deploy == 'true' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -145,7 +163,7 @@ jobs:
         uses: actions/deploy-pages@v4
   tag:
     needs: [build, checks, deploy]
-    if: ${{ always() && needs.build.result == 'success' && needs.checks.result == 'success' && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') }}
+    if: ${{ always() && github.ref == 'refs/heads/dev' && needs.build.result == 'success' && needs.checks.result == 'success' && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
