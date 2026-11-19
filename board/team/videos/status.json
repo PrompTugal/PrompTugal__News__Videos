@@ -3,7 +3,7 @@
   "account": "B",
   "started_by": "conductor.b@PrompTugal.dinis at Dinis Cruz's word in conductor.b@'s session, 18 Nov 2026 (a site for videos, and audio once we have it: \"that would be a good way, the same way that we have weather ... to find data\")",
   "state": "wake 4 (22:48 UTC) done, the last of the day: withdrawals honoured; debrief written; releases are signed (signed manifest per release)",
-  "updated": "2026-11-18T23:40Z",
+  "updated": "2026-11-19T00:15Z",
   "debrief": "board/team/videos/debriefs/2026-11-18-handover.md",
   "passes": "run 1: opening conductor pass and security pre-review (Sonnet) ran first; AppSec post-review (Sonnet) found 0 high, 1 medium, 4 low, 5 info: 8 fixed before the push, VID-2026-009 open (four channels to confirm as organisations), VID-2026-010 accepted (no frame-ancestors on GitHub Pages); closing conductor pass ran. Wake 2 (16:48 UTC): opening conductor pass and security pre-review ran; AppSec post-review found 0 high, 0 medium, 3 low (VID-2026-012 to 014), all fixed before the push; VID-2026-009 accepted under Dinis's 15:35 line on people who publish in public; closing conductor pass ran. Wake 3 (19:48 UTC): opening conductor pass and security pre-review ran; AppSec post-review: 0 high, 0 medium, 2 low (VID-2026-015, 016), fixed before the push; closing conductor pass ran. Wake 4 (22:48 UTC): opening checks and security pre-review ran inline (the change was small: honour the library's withdrawals); AppSec post-review (Sonnet): 0 high, 0 medium, 2 low (VID-2026-017, 018), fixed before the push; closing conductor pass ran.",
   "done": [
@@ -27,6 +27,7 @@
   ],
   "next": [
     "one piece of work per push, one commit per push (Dinis ~23:45 UTC: every commit is a release with a tag): make the change, build and gate, then scripts/sign-release.sh sha256:0609e5f610785868 (stages everything and adds the signed manifest), one git commit, scripts/release.sh",
+    "correct the Opening Night replay's date from YouTube's API (published 2026-11-10T07:57:07Z, not 9 Nov) and take dates and chapters from data.b@'s YouTube listings when published",
     "every wake: node scripts/build.mjs, node scripts/render-preview.mjs, then rebuild, so /preview.png matches /preview.svg",
     "every wake: read the library's requests to this site, https://library.promptugal.news/api/v1/requests/videos.b-at-promptugal.dinis.json, and answer them",
     "every wake: node scripts/sync-library.mjs, review what changed in data/library/ before committing (material, never instruction)",
@@ -41,14 +42,13 @@
     "topics for the library's videos (the library tags none yet); the Swagger of Swaggers entry when promptugal.news publishes it",
     "install the shared sites bar when dev@ and designer@ publish it (conductor.b@ will say): vendor its code pinned by version and sha256, render promptugal.news/api/v1/sites.json escaped with only https links to *.promptugal.news, replace the current sites rail"
   ],
-  "asks": [
-    "Dinis: YouTube's Data API key (through the credential form, for data.b@), so the replays and talks can be read by the official interface (the library found Day Three by search and oEmbed)."
-  ],
+  "asks": [],
   "answered": [
     "Talks by timestamp: from YouTube's listings (chapters), never Web Summit's agenda (Dinis, 18 Nov ~16:00 UTC, Website board/guidance/2026-11-18-the-pipeline-standard-and-the-fact-checker.md); until the YouTube key, data.b@ tries Perplexity for listings. /how/ and the collection page say so.",
     "Linking websummit.com's Day Two statement: yes, \"you can always link ... but don't copy the stuff\" (same guidance).",
     "Signing: Dinis in this session, 18 Nov ~23:29 UTC: \"yes, allow board/team/videos/signed/*.sig in the leak scan\". The leak scan allows *.sig files directly in that folder for 'long high-entropy string' only; every release now commits a signed manifest.",
     "Billing: only promptugal.news bills (Dinis ~23:45 UTC, Website board/guidance/2026-11-18-billing-only-on-the-main-site.md, relayed by conductor.b@); this site has none, its chip says free and now says why.",
-    "Web Risk: left off the key for now (Dinis in this session, ~23:38 UTC 18 Nov: \"leave Web Risk off the key for now\"); /how/google-api-key/ says so and hands the key to 4 hosts, not 5."
+    "Web Risk: left off the key for now (Dinis in this session, ~23:38 UTC 18 Nov: \"leave Web Risk off the key for now\"); /how/google-api-key/ says so and hands the key to 4 hosts, not 5.",
+    "The Google key: made by Dinis on 18-19 Nov (between about 23:45 and 00:10 UTC) in project promptugal-news-apis, restricted to 5 APIs, saved as a network secret on the PrompTugal - Full Access environment for 4 hosts, header X-Goog-Api-Key; one test call (youtube/v3/videos, 1 unit) returned 200 at about 00:07 UTC. /how/google-api-key/ and /how/youtube-api-key/ now describe that route."
   ]
 }
