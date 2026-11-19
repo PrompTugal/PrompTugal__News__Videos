@@ -49,25 +49,43 @@ jobs:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
         run: |
-          last=$(git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$AFTER" 2>/dev/null || true)
-          node scripts/check-commits.mjs "${last:-$BEFORE}" "$AFTER"
-          # Signed commits (Dinis, 19 Nov 2026): every commit in the range is signed by its Agent:'s published key. The check
-          # runs from the trusted base's copy (the last tag's, or the previous head's), never from the commits it checks; since
-          # the bootstrap (de181ef) a base without one is refused. Nothing is exempt: this workflow makes no commits.
-          node scripts/test-check-signatures.mjs
-          base="${last:-$BEFORE}"
+          base_of() { local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$AFTER" 2>/dev/null || true); echo "${last:-$BEFORE}"; }
+          # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
+          # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
+          # each is written into scripts/ under an ignored name (any link there removed first);
+          # a base without one is refused (fails closed).
+          trusted() { local name=$1 rc=0; shift; rm -f "scripts/trusted-$name"; GIT_NO_REPLACE_OBJECTS=1 git show "$base:scripts/$name" > "scripts/trusted-$name" 2>/dev/null || { rm -f "scripts/trusted-$name"; echo "the trusted base has no scripts/$name: refusing" >&2; exit 1; }; NODE_OPTIONS= node "scripts/trusted-$name" "$@" || rc=$?; rm -f "scripts/trusted-$name"; [ "$rc" = 0 ] || exit "$rc"; }
+          base=$(base_of)
           # No trusted base (no tag, no previous head): refuse rather than trust this commit's copy (VID-2026-029).
-          if [ -z "$base" ] || [ -z "${base//0/}" ]; then echo "no trusted base for the signature check" >&2; exit 1; fi
-          if git cat-file -e "$base:scripts/check-signatures.mjs" 2>/dev/null; then git show "$base:scripts/check-signatures.mjs" > "$RUNNER_TEMP/check-signatures.mjs"; else echo "the trusted base has no signature check: refusing" >&2; exit 1; fi
-          node "$RUNNER_TEMP/check-signatures.mjs" "$base" "$AFTER"
+          if [ -z "$base" ] || [ -z "${base//0/}" ]; then echo "no trusted base for the checks" >&2; exit 1; fi
+          # The trailer check reads scripts/commit-exemptions.json from the tree: a push may not add or change it.
+          GIT_NO_REPLACE_OBJECTS=1 git diff --quiet "$base" "$AFTER" -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed in this push: refusing" >&2; exit 1; }
+          trusted check-commits.mjs "$base" "$AFTER"
+          # Signed commits (Dinis, 19 Nov 2026): every commit in the range is signed by its Agent:'s published key; nothing
+          # is exempt: this workflow makes no commits.
+          trusted check-signatures.mjs "$base" "$AFTER"
+          # Only then the pushed copy's own tests.
+          node scripts/test-check-signatures.mjs
       - run: node scripts/build.mjs
         env:
           SITE_VERSION: ${{ steps.version.outputs.version }}
       - run: node scripts/validate.mjs
-      - name: Leak scan (tracked files and the built site), and its own tests
+      - name: Leak scan (tracked files and the built site) from the trusted base's copy, then the pushed copy's own tests
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
         run: |
+          base_of() { local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$AFTER" 2>/dev/null || true); echo "${last:-$BEFORE}"; }
+          # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
+          # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
+          # each is written into scripts/ under an ignored name (any link there removed first);
+          # a base without one is refused (fails closed).
+          trusted() { local name=$1 rc=0; shift; rm -f "scripts/trusted-$name"; GIT_NO_REPLACE_OBJECTS=1 git show "$base:scripts/$name" > "scripts/trusted-$name" 2>/dev/null || { rm -f "scripts/trusted-$name"; echo "the trusted base has no scripts/$name: refusing" >&2; exit 1; }; NODE_OPTIONS= node "scripts/trusted-$name" "$@" || rc=$?; rm -f "scripts/trusted-$name"; [ "$rc" = 0 ] || exit "$rc"; }
+          base=$(base_of)
+          # No trusted base (no tag, no previous head): refuse rather than trust this commit's copy (VID-2026-029).
+          if [ -z "$base" ] || [ -z "${base//0/}" ]; then echo "no trusted base for the checks" >&2; exit 1; fi
+          trusted leak-scan.mjs
           node scripts/test-leak-scan.mjs
-          node scripts/leak-scan.mjs
       - if: steps.mode.outputs.deploy == 'true'
         uses: actions/configure-pages@v5
       - if: steps.mode.outputs.deploy == 'true'

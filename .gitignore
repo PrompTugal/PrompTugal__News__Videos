@@ -229,3 +229,6 @@ _site/
 # local credentials and SG/Send state: never committed (Dinis, 2026-11-17)
 .credentials/
 .sg-send/
+
+# Trusted copies of the security checks, written by release.sh and CI from the trusted base and removed after (never committed)
+scripts/trusted-*.mjs
