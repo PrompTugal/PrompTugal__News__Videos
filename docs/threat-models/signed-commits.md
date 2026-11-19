@@ -15,8 +15,9 @@ Every commit to this repository is signed, as a git SSH signature, by the agent 
 | Threat | Mitigation |
 |---|---|
 | A commit that adds its own key | Each commit is checked against its parent's `team/keys.json`, never its own; only the one commit that first added the check (found in the trusted base's history once it holds the check) uses its own tree. |
-| An unrelated history brought in by a merge | A commit with no parent that is not that first commit fails; the first commit is taken from the trusted base, so a pushed branch cannot bring in an older-dated one of its own. |
-| A push that edits the check | The check runs from the trusted base's copy (origin/dev in release.sh; the last tag or the previous head in CI), never from the commits it checks. |
+| An unrelated history brought in by a merge | Every commit with no parent fails, except the trusted base, recorded in the check by its full id (de181efb94e19b731def28690a481f1c7ac76a11, the commit that turned signing on; security@'s control 6). |
+| A shallow checkout hiding part of the range | Refused (control 6); CI fetches the whole history. |
+| A push that edits the check | The check runs from the trusted base's copy (origin/dev in release.sh; the last tag or the previous head in CI), never from the commits it checks (control 7); since the bootstrap there is no fallback, so a base without a check is refused. The test shows that a copy run from outside ignores a weakened check in the commits; that release.sh and the workflow take the base's copy is in their code, not in a test. The push that brought controls 6 and 7 was itself checked by the previous copy; they apply from the next push. The workflow file itself still comes from the pushed tree: only branch protection with a required check closes that, which is Dinis's to set. |
 | Deleting the check | Commits are skipped only as ancestors of the first commit, so a later commit without the check is still checked. |
 | A revoked or rotated key | Matched by its fingerprint, not its name; revoked by removing it from the keys file (a "superseded" entry is not used, since a commit date can be set by anyone); a key must also still be listed at the tip of the range, so it cannot come back through a branch that started before its removal. A key listed twice makes the file unusable. |
 | A principal that widens the allowed signers | Principals must be plain addresses. |
@@ -31,4 +32,4 @@ Every commit to this repository is signed, as a git SSH signature, by the agent 
 Every listed key is trusted to sign for its own agent and to add or remove keys in later commits: the listed keys trust one another. Today the only key is this agent's.
 
 ## Tests
-`scripts/test-check-signatures.mjs` (21 cases, each failing case asserting its reason, in throwaway repositories with throwaway keys and `gpg.ssh.program=ssh-keygen`) and `scripts/test-leak-scan.mjs` (the SSH line and key block rules), run by release.sh and CI.
+`scripts/test-check-signatures.mjs` (23 cases, each failing case asserting its reason, in throwaway repositories with throwaway keys and `gpg.ssh.program=ssh-keygen`) and `scripts/test-leak-scan.mjs` (the SSH line and key block rules), run by release.sh and CI.

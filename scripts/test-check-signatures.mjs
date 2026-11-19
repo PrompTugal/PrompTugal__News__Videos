@@ -43,7 +43,15 @@ function repo(name) {
     g(...args); return g('rev-parse', 'HEAD');
   };
   // the check is run as a trusted copy from outside the repository under test, as release.sh and the workflow do
-  const check = (before, after) => spawnSync('node', [CHECK, before, after], { cwd: d, encoding: 'utf8' });
+  // with this repository's own bootstrap commit as the recorded trusted base (the real file names the real one)
+  const check = (before, after) => {
+    const boot = g('log', '--full-history', '--format=%H', '--diff-filter=A', '--reverse', '--all', '--', 'scripts/check-signatures.mjs').split('\n')[0] || '0'.repeat(40);
+    const copy = join(tmp, `check-${name}.mjs`);
+    const src = readFileSync(CHECK, 'utf8').replace(/const FIRST = '[0-9a-f]{40}';/, `const FIRST = '${boot}';`);
+    if (!src.includes(`const FIRST = '${boot}';`)) throw new Error('the test could not set its trusted base in the check');
+    writeFileSync(copy, src);
+    return spawnSync('node', [copy, before, after], { cwd: d, encoding: 'utf8' });
+  };
   return { d, g, commit, check };
 }
 // a failing case passes only when the check fails for the expected reason
@@ -81,6 +89,11 @@ const setup = name => { const r = repo(name); const base = r.commit('bootstrap',
   r.g('-c', 'gpg.format=ssh', '-c', `user.signingkey=${A.f}`, 'merge', '-q', '-S', '--no-ff', '-m', 'merge', '-m', `Agent: ${AGENT}\nClaude-Session: ${SESSION}`, 'old');
   expect('a removed key cannot come back through a branch from before its removal', r.check(r.base, 'HEAD'), false, 'no longer listed at the tip'); }
 { const r = setup('dupkey'); r.commit('lists A twice, signed with A', { key: A, files: { 'team/keys.json': keysWith(entry('a', A), entry('a2', A)) } }); r.commit('signed with A', { key: A, files: { 'x.txt': '1' } }); expect('a key listed twice makes the file unusable', r.check(r.base, 'HEAD'), false, 'listed twice'); }
+{ const r = setup('weakened'); r.commit('weakens the check and adds an unsigned commit', { files: { 'scripts/check-signatures.mjs': "console.log('OK')\n", 'x.txt': '1' } }); expect('(7) a push that weakens the check and adds an unsigned commit still fails', r.check(r.base, 'HEAD'), false, 'not signed by a key'); }
+{ const r = setup('shallow'); r.commit('signed', { key: A, files: { 'x.txt': '1' } }); r.commit('signed 2', { key: A, files: { 'x.txt': '2' } });
+  const s = join(tmp, 'shallow-clone'); execFileSync('git', ['clone', '-q', '--depth', '1', `file://${r.d}`, s]);
+  const copy = join(tmp, 'check-shallow.mjs'); writeFileSync(copy, readFileSync(CHECK, 'utf8'));
+  expect('(6) a shallow checkout is refused', spawnSync('node', [copy, '', 'HEAD'], { cwd: s, encoding: 'utf8' }), false, 'a shallow checkout'); }
 { const r = setup('twoagents'); r.commit('two agents', { key: A, agent: `${AGENT}\nAgent: other@Example.test`, files: { 'x.txt': '1' } }); expect('two Agent: trailers fail', r.check(r.base, 'HEAD'), false, 'exactly one Agent:'); }
 { const r = setup('principal'); r.commit('a wide principal, signed with A', { key: A, files: { 'team/keys.json': keysWith({ ...entry('b', B), ssh: { public_key_pem: B.pem, principals: ['*'] } }, entry('a', A)) } }); r.commit('signed with B', { key: B, files: { 'x.txt': '1' } }); expect('a principal that is not a plain address is not used', r.check(r.base, 'HEAD'), false, 'not signed by a key'); }
 

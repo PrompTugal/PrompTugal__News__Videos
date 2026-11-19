@@ -46,11 +46,13 @@ const blobOf = (pem) => {
   return Buffer.concat([len(t.length), t, len(x.length), x]);
 };
 const fpOf = (blob) => 'SHA256:' + createHash('sha256').update(blob).digest('base64').replace(/=+$/, '');
-// The first commit that added this file. Taken from the trusted base's history whenever the base already holds the check, so a
-// pushed branch cannot bring in an older-dated commit of its own that 'adds' it; only the bootstrap push itself uses the pushed
-// history (when the base does not hold the check yet).
-const baseHasCheck = before && spawnSync('git', ['cat-file', '-e', `${before}:${SELF}`]).status === 0;
-const first = lines(git('log', '--full-history', '--format=%H', '--diff-filter=A', '--reverse', baseHasCheck ? before : after, '--', SELF))[0] || null;
+// The trusted base: the one commit that first added this check, recorded by its full id (security@'s control 6, 19 Nov 2026).
+// It alone may use its own tree's keys; every other commit with no parent is refused, wherever it comes from. Commits that are
+// its ancestors are older than the check and skipped. The tests substitute their own throwaway id here.
+const FIRST = 'de181efb94e19b731def28690a481f1c7ac76a11';
+const first = /^[0-9a-f]{40}$/.test(FIRST) && spawnSync('git', ['cat-file', '-e', `${FIRST}^{commit}`]).status === 0 ? FIRST : null;
+// A shallow checkout cannot show the whole range or the trusted base: refuse it (control 6).
+if (git('rev-parse', '--is-shallow-repository') === 'true') { console.error('check-signatures: a shallow checkout; fetch the whole history (fetch-depth 0)'); process.exit(1); }
 const dir = mkdtempSync(join(tmpdir(), 'sigs-'));
 let fileN = 0;
 const keysAt = (rev) => {

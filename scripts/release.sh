@@ -8,10 +8,10 @@ cd "$(dirname "$0")/.."
 [ -z "$(git status --porcelain)" ] || { echo "uncommitted changes: commit or stash them first" >&2; exit 1; }
 git fetch -q origin dev
 # Signed commits (Dinis, 19 Nov 2026): every commit since origin/dev is signed by its Agent:'s published key. The check runs
-# from origin/dev's copy, never from the commits it checks; only the bootstrap push (origin/dev has no copy yet) uses this one.
+# from origin/dev's copy, never from the commits it checks; since the bootstrap (de181ef) there is no fallback: no copy, no push.
 sigcheck() {
   local d t s=0; d=$(mktemp -d); t="$d/check-signatures.mjs"   # a .mjs name, or node refuses the file (VID-2026-027)
-  if git cat-file -e origin/dev:scripts/check-signatures.mjs 2>/dev/null; then git show origin/dev:scripts/check-signatures.mjs > "$t"; else cp scripts/check-signatures.mjs "$t"; fi
+  if git cat-file -e origin/dev:scripts/check-signatures.mjs 2>/dev/null; then git show origin/dev:scripts/check-signatures.mjs > "$t"; else echo "origin/dev has no signature check: refusing" >&2; rm -rf "$d"; return 1; fi
   node "$t" origin/dev HEAD || s=$?
   rm -rf "$d"; return "$s"
 }

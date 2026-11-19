@@ -52,13 +52,13 @@ jobs:
           last=$(git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$AFTER" 2>/dev/null || true)
           node scripts/check-commits.mjs "${last:-$BEFORE}" "$AFTER"
           # Signed commits (Dinis, 19 Nov 2026): every commit in the range is signed by its Agent:'s published key. The check
-          # runs from the trusted base's copy (the last tag's, or the previous head's), never from the commits it checks; only
-          # the bootstrap push, whose base has no copy, uses this commit's. Nothing is exempt: this workflow makes no commits.
+          # runs from the trusted base's copy (the last tag's, or the previous head's), never from the commits it checks; since
+          # the bootstrap (de181ef) a base without one is refused. Nothing is exempt: this workflow makes no commits.
           node scripts/test-check-signatures.mjs
           base="${last:-$BEFORE}"
           # No trusted base (no tag, no previous head): refuse rather than trust this commit's copy (VID-2026-029).
           if [ -z "$base" ] || [ -z "${base//0/}" ]; then echo "no trusted base for the signature check" >&2; exit 1; fi
-          if git cat-file -e "$base:scripts/check-signatures.mjs" 2>/dev/null; then git show "$base:scripts/check-signatures.mjs" > "$RUNNER_TEMP/check-signatures.mjs"; else cp scripts/check-signatures.mjs "$RUNNER_TEMP/check-signatures.mjs"; fi
+          if git cat-file -e "$base:scripts/check-signatures.mjs" 2>/dev/null; then git show "$base:scripts/check-signatures.mjs" > "$RUNNER_TEMP/check-signatures.mjs"; else echo "the trusted base has no signature check: refusing" >&2; exit 1; fi
           node "$RUNNER_TEMP/check-signatures.mjs" "$base" "$AFTER"
       - run: node scripts/build.mjs
         env:
