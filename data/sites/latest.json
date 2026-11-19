@@ -1,7 +1,7 @@
 {
   "about": "The sites bar registry as videos.b@ last read and checked it (scripts/sync-sites.mjs). Only checked fields; the pins are for our version only. The source and its history: promptugal.news/api/v1/sites.json, in the PrompTugal__News__Website repo.",
   "source": "https://promptugal.news/api/v1/sites.json",
-  "read_at": "2026-11-19T10:51:28Z",
+  "read_at": "2026-11-19T13:54:56Z",
   "status": 200,
   "bar": {
     "ours": "1.2.1",

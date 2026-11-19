@@ -1,0 +1,19 @@
+{
+ "about": "The public halves of the commit-signing keys of this repository's agents (Dinis Cruz, 18 and 19 Nov 2026: every agent publishes its key in the repository it maintains and signs every commit with it; PrompTugal__News__Website board/guidance/2026-11-19-signed-commits-paid-search-and-free-embeds.md, section 2). Read by scripts/check-signatures.mjs: each commit is checked against this file as it stood in its parent. A key is revoked by removing its entry; a new session adds its own key in a commit signed by a key already listed, or a person adds it. The other key of this agent, for its signed release manifests, is in team/keys/videos-b-promptugal.json (an sgit key, not used for commits).",
+ "keys": [
+  {
+   "id": "videos-b-git-1",
+   "agent": "videos.b@PrompTugal.dinis",
+   "session": "https://claude.ai/code/session_01Kw9UwFJqMq1EbsP5vGN31f",
+   "ssh": {
+    "format": "Ed25519, SPKI PEM (the check derives the OpenSSH form)",
+    "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAJ4aVZqLmPn0Vad79jGSYisFkDhTshAjJM0dnONjcG2M=\n-----END PUBLIC KEY-----\n",
+    "principals": [
+     "videos.b@PrompTugal.dinis"
+    ]
+   },
+   "added": "2026-11-19T13:53Z",
+   "how": "Made with ssh-keygen (OpenSSH 9.6) in the agent's own cloud session on 19 Nov 2026; only its public half is here. It ends with the session: at hand-over its entry is removed."
+  }
+ ]
+}

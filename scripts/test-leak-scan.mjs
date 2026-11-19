@@ -24,5 +24,16 @@ expect('a sha512 value fails', kinds(PIN_FILE, doc({ integrity: { ...real, css: 
 expect('a fourth key in integrity fails', kinds(PIN_FILE, doc({ integrity: { ...real, extra: OTHER } })), [H, H, H, H]);
 expect('another version holding our pins fails', kinds(PIN_FILE, doc({ version: '9.9.9' })), [H, H, H]);
 expect('a file that is not JSON gets no exemption', kinds(PIN_FILE, doc().replace('{', '[')), [H, H, H]);
+// SSH public key lines fail everywhere, every kind, certificates included (built from parts).
+const B64 = 'AAAA' + 'C3NzaC1lZDI1NTE5' + 'AAAAIFakeFakeFake';
+for (const kind of ['ssh-' + 'ed25519', 'ssh-' + 'rsa', 'ssh-' + 'dss', 'ecdsa-' + 'sha2-nistp256', 'ecdsa-' + 'sha2-nistp384', 'ecdsa-' + 'sha2-nistp521', 'sk-' + 'ssh-ed25519@openssh.com', 'sk-' + 'ecdsa-sha2-nistp256@openssh.com', 'ssh-' + 'ed25519-cert-v01@openssh.com'])
+  for (const path of ['README.md', 'team/keys.json']) expect(`an SSH public key line (${kind}) fails in ${path}`, kinds(path, `{"k": "${kind} ${B64}"}`).includes('SSH public key line'), true);
+// A public key block in a keys file must parse as a key; a payload dressed as one fails.
+const D5 = '-'.repeat(5);
+const pem = (await import('node:crypto')).generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'pem' });
+expect('a real public key block in team/keys.json passes', kinds('team/keys.json', JSON.stringify({ keys: [{ pem }] })), []);
+expect('a fake public key block in team/keys.json fails', kinds('team/keys.json', JSON.stringify({ keys: [{ pem: `${D5}BEGIN PUBLIC KEY${D5}\nbm90IGEga2V5\n${D5}END PUBLIC KEY${D5}\n` }] })), ['public key block that is not a valid public key']);
+{ const der = Buffer.from(pem.replace(/-----[^-]+-----|\s/g, ''), 'base64'); const padded = Buffer.concat([der, Buffer.from('extra bytes riding along')]).toString('base64');
+  expect('a public key block with bytes after the key fails', kinds('team/keys.json', JSON.stringify({ keys: [{ pem: `${D5}BEGIN PUBLIC KEY${D5}\n${padded}\n${D5}END PUBLIC KEY${D5}\n` }] })), ['public key block that is not a valid public key']); }
 if (bad) { console.error(`FAILED (${bad})`); process.exit(1); }
 console.log('OK (leak-scan exemption tests)');

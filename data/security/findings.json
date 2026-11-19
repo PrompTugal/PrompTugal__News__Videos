@@ -319,6 +319,66 @@
    "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
    "state": "fixed",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-027",
+   "severity": "high",
+   "title": "release.sh's signature check could never pass",
+   "file": "scripts/release.sh",
+   "detail": "The trusted copy of the check was written to a mktemp name without the .mjs ending, which node refuses, so every release would have stopped (it failed closed). Never pushed.",
+   "fix": "The copy is written as check-signatures.mjs in a temporary folder.",
+   "found": "2026-11-19 ~13:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-028",
+   "severity": "medium",
+   "title": "A removed key could come back through an old branch",
+   "file": "scripts/check-signatures.mjs",
+   "detail": "Each commit was checked only against its parent's keys, so a commit signed by a removed key, on a branch from before its removal, passed when merged by a signed merge. Never happened.",
+   "fix": "A key must also be listed at the tip of the range; a key listed twice makes the file unusable; a test for each.",
+   "found": "2026-11-19 ~13:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-029",
+   "severity": "low",
+   "title": "CI could run the check from the commits it checks",
+   "file": ".github/workflows/pages.yml",
+   "detail": "With no tag and no previous head, the base was empty and this commit's copy would have run. Never happened (tags exist).",
+   "fix": "CI refuses when there is no trusted base.",
+   "found": "2026-11-19 ~13:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-030",
+   "severity": "low",
+   "title": "Replaced objects could change what the check sees",
+   "file": "scripts/check-signatures.mjs",
+   "detail": "A local refs/replace or grafts file could have changed the commits checked by release.sh. Never happened.",
+   "fix": "The check runs with GIT_NO_REPLACE_OBJECTS=1.",
+   "found": "2026-11-19 ~13:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-031",
+   "severity": "low",
+   "title": "A public key block could carry bytes after the key",
+   "file": "scripts/leak-scan.mjs",
+   "detail": "Node accepts a valid key with trailing bytes appended, so a payload could have ridden inside a key block that the scan blanks. Never happened.",
+   "fix": "The block must re-export to the same bytes and be Ed25519, RSA or EC; a test.",
+   "found": "2026-11-19 ~13:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
   }
  ]
 }

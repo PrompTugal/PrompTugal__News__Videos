@@ -23,7 +23,7 @@ import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, createPublicKey } from 'node:crypto';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -46,6 +46,9 @@ const SHAPES = [
   ['Google API key', /\bAIza[0-9A-Za-z_-]{35}\b/],
   ['Slack token', /\bxox[abprs]-[A-Za-z0-9-]{10,}/],
   ['Anthropic or OpenAI API key', /\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}/],
+  // An SSH public key as a line, anywhere: ours is published only as a PEM block in team/keys.json, so no SSH line is ever
+  // expected (security@, Website 1acd10498; library.b@'s LIB-2026-060: ecdsa-sha2-* and sk- forms too; certificates too).
+  ['SSH public key line', /\b(?:sk-)?(?:ssh-(?:ed25519|rsa|dss)|ecdsa-sha2-nistp(?:256|384|521))(?:-cert-v01)?(?:@openssh\.com)?\s+AAAA[A-Za-z0-9+/]{16,}/],
 ];
 
 // sgit vault key without its prefix: {passphrase}:{vault_id}. sgit generates a
@@ -142,6 +145,14 @@ export function scanText(path, text, read = readTree) {
   let body = path === PIN_FILE ? blankPins(text, read) : text;
   if (PUBLIC_KEY_FILES(path)) {
     if (/private|passphrase|secret|seed/i.test(text)) add(0, 'public key file mentions a private part');
+    // Each public key block must be a real public key (videos.b@'s pre-review, 19 Nov 2026), so nothing else can hide inside one.
+    // Re-exported, it must give the same bytes, so nothing can ride after the key inside the block (VID-2026-031).
+    const pemBody = (s) => s.replace(/\\n/g, '\n').replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+    for (const b of text.match(PUBLIC_BLOCK) || []) {
+      let ok = false;
+      try { const k = createPublicKey(b.replace(/\\n/g, '\n')); ok = ['ed25519', 'rsa', 'ec'].includes(k.asymmetricKeyType) && pemBody(k.export({ type: "spki", format: "pem" })) === pemBody(b); } catch { ok = false; }
+      if (!ok) add(0, 'public key block that is not a valid public key');
+    }
     // Blank the allowed public key blocks, keeping line numbers.
     body = text.replace(PUBLIC_BLOCK, (b) => b.replace(/[^\n]/g, ' '));
   }
