@@ -79,8 +79,14 @@ jobs:
           path: ${{ runner.temp }}/pages
       - name: Unpack the Pages artifact, as data
         run: |
+          set -euo pipefail
+          a="$RUNNER_TEMP/pages/artifact.tar"
+          # Vet the listing first (events.b@'s 188bcf8): plain files and directories only, no absolute path and no "..".
+          tar -tvf "$a" | awk '{ t = substr($1, 1, 1); if (t != "-" && t != "d") { print "not a plain file or directory: " $0 > "/dev/stderr"; bad = 1 } } END { exit bad }'
+          if tar -tf "$a" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then echo "an absolute or .. path in the Pages artifact: refusing" >&2; exit 1; fi
+          # Unpacked before any trusted copy exists (they are written in the next step), then checked for links again.
           rm -rf _site && mkdir _site
-          tar -xf "$RUNNER_TEMP/pages/artifact.tar" -C _site --no-same-owner --no-same-permissions
+          tar -xf "$a" -C _site --no-same-owner --no-same-permissions
           if find _site -type l | grep -q .; then echo "a link in the Pages artifact: refusing" >&2; exit 1; fi
       - name: Trailers, signatures and the leak scan, from the anchor's copies
         env:

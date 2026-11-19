@@ -2,7 +2,7 @@
 // videos.b@PrompTugal.dinis, 19 Nov 2026. Code: Apache-2.0.
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { scanText, PIN_FILE } from './leak-scan.mjs';
+import { scanText, scanBinary, PIN_FILE } from './leak-scan.mjs';
 import { BAR_VERSION, BAR_DIR, BAR_FILES } from './sync-sites.mjs';
 const fp = (f) => 'sha256-' + createHash('sha256').update(readFileSync(`${BAR_DIR}/${f}`)).digest('base64');
 const real = Object.fromEntries(Object.entries(BAR_FILES).map(([k, f]) => [k, fp(f)]));
@@ -35,5 +35,8 @@ expect('a real public key block in team/keys.json passes', kinds('team/keys.json
 expect('a fake public key block in team/keys.json fails', kinds('team/keys.json', JSON.stringify({ keys: [{ pem: `${D5}BEGIN PUBLIC KEY${D5}\nbm90IGEga2V5\n${D5}END PUBLIC KEY${D5}\n` }] })), ['public key block that is not a valid public key']);
 { const der = Buffer.from(pem.replace(/-----[^-]+-----|\s/g, ''), 'base64'); const padded = Buffer.concat([der, Buffer.from('extra bytes riding along')]).toString('base64');
   expect('a public key block with bytes after the key fails', kinds('team/keys.json', JSON.stringify({ keys: [{ pem: `${D5}BEGIN PUBLIC KEY${D5}\n${padded}\n${D5}END PUBLIC KEY${D5}\n` }] })), ['public key block that is not a valid public key']); }
+// A binary file (a NUL byte) is still scanned for the exact secret shapes, not skipped (LIB-2026-067).
+expect('a key inside a binary file fails', scanBinary(Buffer.concat([Buffer.from([0, 1, 2]), Buffer.from('ghp_' + 'A'.repeat(18) + 'b'.repeat(18))])), ['GitHub token']);
+expect('a plain binary file passes', scanBinary(Buffer.from([0, 255, 1, 2, 3])), []);
 if (bad) { console.error(`FAILED (${bad})`); process.exit(1); }
 console.log('OK (leak-scan exemption tests)');
