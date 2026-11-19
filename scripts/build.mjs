@@ -16,6 +16,10 @@ const SITE = 'https://videos.promptugal.news';
 const REPO = 'https://github.com/PrompTugal/PrompTugal__News__Videos';
 const CCBY = 'https://creativecommons.org/licenses/by/4.0/';
 const EMBED_HOST = 'https://www.youtube-nocookie.com';
+// YouTube's own preview images, loaded from YouTube's image host and never copied
+// (Dinis Cruz, 19 Nov 2026 ~01:34 UTC: yes; rights@ conditions T1 to T4, b523d57c8).
+const THUMB_HOST = 'https://i.ytimg.com';
+const THUMB_CREDIT = 'The preview image comes from YouTube.';
 const builtAt = new Date();
 
 // ---------------------------------------------------------------- safe text
@@ -132,7 +136,7 @@ rmSync('_site', { recursive: true, force: true });
 cpSync('src', '_site', { recursive: true });
 const SITES = [['Videos', 'https://videos.promptugal.news/'], ['Library', 'https://library.promptugal.news/'], ['Live', 'https://live.promptugal.news/'], ['Events', 'https://events.promptugal.news/'], ['Weather', 'https://weather.promptugal.news/'], ['Civic', 'https://civic.promptugal.news/'], ['Startups', 'https://startups.promptugal.news/'], ['Travel', 'https://travel.promptugal.news/'], ['Data', 'https://data.promptugal.news/']];
 const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/how/', 'How it works'], ['/api/', 'Data']];
-const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; frame-src ${EMBED_HOST}; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'`;
+const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}; frame-src ${EMBED_HOST}; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const pages = [];
 function page({ path, title, description, section, body, mdBody }) {
   if (!okRel(path)) throw new Error(`bad page path ${path}`);
@@ -194,20 +198,29 @@ function api(path, obj) {
 // ---------------------------------------------------------------- pieces
 const when = (v) => v.published.date ? `${fmtDay(v.published.date)} <span class="small">(${esc(clean(v.published.precision))})</span>` : `<span class="small">${esc(clean(v.published.precision))}</span>`;
 const people = (v) => v.people.length ? v.people.map((p) => `${esc(clean(p.name))}${p.role ? ` <span class="small">(${esc(clean(p.role))})</span>` : ''}`).join(', ') : '';
+// The thumbnail address, only for a checked YouTube id; anything else stops the build (never skipped quietly).
+function thumbUrl(v, size) {
+  if (v.platform !== 'youtube' || !YT.test(v.platform_id || '')) throw new Error(`no thumbnail for ${String(v.id).slice(0, 40)}: not a checked YouTube id`);
+  return `${THUMB_HOST}/vi/${v.platform_id}/${size === 'hq' ? 'hq' : 'mq'}default.jpg`;
+}
+// Unaltered (no crop, filter or overlay: rights@ T1); no referrer sent for the image only. The player keeps its own policy.
+const thumbImg = (v, size, w, h, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${esc(thumbUrl(v, size))}" alt="" width="${w}" height="${h}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
 function player(v, start = 0) {
   if (v.platform !== 'youtube') return `<div class="player player-link"><p>This video is on ${esc(PLATFORMS[v.platform].name)}'s own site; we only embed from YouTube.</p><p>${link(v.url, `Watch it on ${PLATFORMS[v.platform].name}`)}</p></div>`;
   return `<div class="player" data-yt="${esc(v.platform_id)}" data-title="${esc(clean(v.title))}"${start ? ` data-start="${start}"` : ''}>
-<button type="button" class="play"><span class="tri" aria-hidden="true"></span><span>Play here, in YouTube's player</span></button>
-<p class="small">Nothing is loaded from YouTube until you press play (then YouTube's privacy-enhanced player, <code>youtube-nocookie.com</code>, under <a href="${href(PLATFORMS.youtube.terms)}">YouTube's terms</a>). Or ${link(v.url, 'watch it on YouTube')}.</p>
+<div class="screen">${thumbImg(v, 'hq', 480, 360, 'poster')}</div>
+<div class="controls"><button type="button" class="play"><span class="tri" aria-hidden="true"></span><span>Play here, in YouTube's player</span></button>
+<p class="small">${THUMB_CREDIT} The video itself loads only when you press play, in YouTube's privacy-enhanced player (<code>youtube-nocookie.com</code>), under <a href="${href(PLATFORMS.youtube.terms)}">YouTube's terms</a>. Or ${link(v.url, 'watch it on YouTube')}.</p></div>
 </div>`;
 }
 function card(v, { heading = 'h3', showDay = true } = {}) {
+  const thumb = v.platform === 'youtube' ? `<a class="thumb" href="/videos/${esc(v.id)}/" tabindex="-1" aria-hidden="true">${thumbImg(v, 'mq', 320, 180)}</a>\n` : '';
   return `<li class="vid vid-${esc(v.kind)}">
-<p class="badge">${esc(KIND[v.kind] || 'Video')}${v.storm ? ' · Storm Charles' : ''}${v.found.verified ? '' : ' · not fully checked'}</p>
+${thumb}<p class="badge">${esc(KIND[v.kind] || 'Video')}${v.storm ? ' · Storm Charles' : ''}${v.found.verified ? '' : ' · not fully checked'}</p>
 <${heading} class="vid-title"><a href="/videos/${esc(v.id)}/">${esc(clean(v.title))}</a></${heading}>
 <dl class="facts"><dt>Who</dt><dd>${esc(clean(v.channel.name))}${v.people.length ? `; with ${people(v)}` : ''}</dd>
 <dt>When</dt><dd>${v.published.date ? esc(fmtDay(v.published.date)) : 'date not known'}${showDay && v.day ? ` · <span class="small">${esc(dayLabel(v))}</span>` : ''}</dd>
-<dt>Where</dt><dd>${esc(PLATFORMS[v.platform].name)}${v.platform === 'youtube' ? ', played here' : ', linked'}</dd></dl>
+<dt>Where</dt><dd>${esc(PLATFORMS[v.platform].name)}${v.platform === 'youtube' ? ', played here <span class="small">(the preview image comes from YouTube)</span>' : ', linked'}</dd></dl>
 </li>`;
 }
 function dayLabel(v) { const c = collections.find((x) => x.id === v.collection); const d = c?.days?.find((x) => x.date === v.day); return d ? `${d.label}, ${weekday(d.date)}` : ''; }
@@ -352,8 +365,8 @@ page({
 <p>Organisers and speakers can send their own videos: ${link(`${REPO}/issues/new`, 'open an issue')} with the link. We publish it credited to you and dated.</p></section>
 <section><h2>How they are played</h2>
 <ul><li><b>The platform's own player only.</b> A YouTube video plays in YouTube's privacy-enhanced player from <code>www.youtube-nocookie.com</code>, the one host this site may frame (the page's Content Security Policy says so).</li>
-<li><b>Nothing loads until you press play.</b> Until then your browser makes no request to YouTube. Without JavaScript, each video links to its page on YouTube.</li>
-<li><b>Never copied.</b> We never download, copy or host a video, a thumbnail, a still or a transcript. Titles and channel names are shown as published, as a search engine would.</li>
+<li><b>The preview image is YouTube's own.</b> Each card and player shows YouTube's thumbnail, unaltered, loaded from YouTube's image host <code>i.ytimg.com</code> (the one outside host this site may load images from). Your browser fetches it when the page opens, so YouTube sees that request, but we send no referrer with it. The video itself loads only when you press play. Without JavaScript, each video links to its page on YouTube. (Dinis Cruz decided this on 19 November 2026, for usability.)</li>
+<li><b>Never copied.</b> We never download, copy or host a video, a thumbnail, a still or a transcript: the preview image is loaded from YouTube each time, never kept by us. Titles and channel names are shown as published, as a search engine would.</li>
 <li>A video on another site (CNBC's own player, for one) is linked, not embedded.</li></ul></section>
 <section><h2 id="talks">Talks by timestamp</h2>
 <p>Each replay is hours long; the aim is to reach each talk by its start time. ${esc(clean(C.talks_note))} Every card already has the place for them, and the player can start at a given second.</p></section>
@@ -365,7 +378,7 @@ page({
 <section><h2>The sources</h2><p>${link('/sources/', 'Every source this site reads')}: what, where from, how often, the licence, what we do with it, and every read kept.</p></section>
 <section><h2>For the operator</h2><p>${link('/how/google-api-key/', 'One Google API key for the free APIs')}: YouTube, Fact Check Tools, Knowledge Graph Search, PageSpeed Insights, Books and Web Risk, in one restricted key. ${link('/how/youtube-api-key/', 'The YouTube part on its own')}: how Dinis Cruz creates, restricts, hands over and revokes the key that will let the agents list the official replays and their chapters.</p></section>
 <section><h2>Who made it</h2><p>videos.b@PrompTugal.dinis, an AI agent (Claude, Opus, with Sonnet sub-agents for the reviews), started by conductor.b@PrompTugal.dinis at Dinis Cruz's word on 18 November 2026. No person has checked these pages yet.</p></section>`,
-  mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), nothing loaded until you press play; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
+  mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), loaded when you press play; the preview image is YouTube's own, loaded from i.ytimg.com with no referrer; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
 });
 
 // ---------------------------------------------------------------- the operator's page: making the YouTube API key

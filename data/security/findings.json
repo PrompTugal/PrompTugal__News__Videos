@@ -223,6 +223,42 @@
    "detail": "A status holding line breaks or terminal escape codes would have reached the CI log as it was. Never happened.",
    "fix": "Only letters and hyphens of a status are logged.",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-019",
+   "severity": "medium",
+   "title": "The validator's image checks could be stepped around",
+   "file": "scripts/validate.mjs",
+   "detail": "The new image checks read only lower-case img tags with a double-quoted src, did not look at srcset, picture, source or url() in stylesheets, and counted one credit per page rather than per image. The CSP still allowed only this site and i.ytimg.com, so nothing outside could load. Never happened.",
+   "fix": "Any img tag in any case; a missing, unquoted or single-quoted src fails; srcset, picture and source fail; url() in a stylesheet fails; one credit per YouTube image; the old claim that the page asks nothing of YouTube before play fails in its usual wordings.",
+   "found": "2026-11-19 ~07:53 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-020",
+   "severity": "medium",
+   "title": "REALITY.md still said nothing is requested from YouTube before play",
+   "file": "REALITY.md",
+   "detail": "After the preview images, line 15 contradicted the new entry and the site.",
+   "fix": "Line 15 now says the preview image loads from i.ytimg.com on page open and the video on play.",
+   "found": "2026-11-19 ~07:53 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-021",
+   "severity": "low",
+   "title": "The embeds threat model did not list the image host it now trusts",
+   "file": "docs/threat-models/embeds.md",
+   "detail": "'Trusts ... Nothing else' left out i.ytimg.com.",
+   "fix": "The trust line names i.ytimg.com, for images only.",
+   "found": "2026-11-19 ~07:53 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
   }
  ]
 }

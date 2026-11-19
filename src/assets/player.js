@@ -1,5 +1,6 @@
-// The click-to-load player: nothing is requested from YouTube until the reader presses play.
-// Then one iframe from YouTube's privacy-enhanced host, built only from an 11-character id.
+// The click-to-load player: the page shows YouTube's preview image (built into the page from i.ytimg.com);
+// when the reader presses play or clicks the image, one iframe from YouTube's privacy-enhanced host,
+// built only from an 11-character id, replaces the image.
 // videos.b@PrompTugal.dinis, 18 November 2026. Code: Apache-2.0.
 (function () {
   'use strict';
@@ -18,17 +19,20 @@
     f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
     f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-popups');
     f.className = 'frame';
-    var old = box.querySelector('iframe');
+    var screen = box.querySelector('.screen') || box;
+    var old = screen.querySelector('iframe');
     if (old) old.remove();
+    var img = screen.querySelector('img.poster');
+    if (img) img.remove();
     var btn = box.querySelector('button.play');
     if (btn) btn.remove();
     box.classList.add('loaded');
-    box.insertBefore(f, box.firstChild);
+    screen.insertBefore(f, screen.firstChild);
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest ? e.target.closest('button.play, button.seek') : null;
+    var t = e.target.closest ? e.target.closest('button.play, button.seek, .player img.poster') : null;
     if (!t) return;
-    if (t.classList.contains('play')) { load(t.closest('.player')); return; }
+    if (!t.classList.contains('seek')) { load(t.closest('.player')); return; }
     var box = document.querySelector('.player[data-yt]');
     if (box) { load(box, t.getAttribute('data-start')); box.scrollIntoView({ block: 'start' }); }
   });

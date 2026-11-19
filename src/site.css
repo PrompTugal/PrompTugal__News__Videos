@@ -88,6 +88,8 @@ a.button:hover{background:var(--red);color:var(--paper)}
 ul.vids{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:12px}
 section>ul.vids{max-width:none}
 .vid{background:var(--panel);border:1px solid var(--rule);border-top:3px solid var(--green);padding:.7rem .9rem;font-size:.9rem;min-width:0}
+.thumb{display:block;margin:-.7rem -.9rem .6rem;aspect-ratio:16/9;background:#121317}
+.thumb img{display:block;width:100%;height:100%;object-fit:contain}
 .vid-press{border-top-color:var(--muted)}.vid-official-replay{border-top-color:var(--red)}
 .vid-title{font-family:var(--serif);font-size:1.1rem;font-weight:600;margin:0 0 .4rem;overflow-wrap:anywhere}
 .vid-h1{overflow-wrap:anywhere}
@@ -95,12 +97,15 @@ section>ul.vids{max-width:none}
 .facts dt{color:var(--muted);font-size:.8rem;padding-top:.1rem}
 .facts dd{margin:0;overflow-wrap:anywhere}
 .facts.big{grid-template-columns:7rem 1fr;gap:.4rem .8rem;max-width:52rem;font-size:.95rem}
-.player{position:relative;max-width:56rem;aspect-ratio:16/9;background:#121317;color:#f6f3ec;border:1px solid var(--rule);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem;padding:1rem;margin:.6rem 0 1rem;text-align:center}
+.player{max-width:56rem;background:#121317;color:#f6f3ec;border:1px solid var(--rule);margin:.6rem 0 1rem;text-align:center}
+.player .screen{position:relative;aspect-ratio:16/9;background:#000}
+.player img.poster{display:block;width:100%;height:100%;object-fit:contain;cursor:pointer}
+.player .controls{display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:.8rem 1rem}
 .player .small{color:#cfd0c8;max-width:36rem}.player a{color:#f6f3ec}
-.player.loaded{padding:0;background:#000}
+.player.loaded .controls{padding:.4rem 1rem}
 .player .frame{position:absolute;inset:0;width:100%;height:100%;border:0}
 .player.loaded .small{display:none}
-.player-link{aspect-ratio:auto;min-height:8rem}
+.player-link{min-height:8rem;padding:1rem;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem}
 button.play{font:600 1.05rem var(--sans);background:var(--red);color:#fff;border:0;border-radius:3px;padding:.7rem 1.2rem;cursor:pointer;display:inline-flex;align-items:center;gap:.6rem}
 button.play:hover,button.play:focus-visible{background:#fff;color:#121317;outline:2px solid var(--red)}
 .tri{width:0;height:0;border-left:14px solid currentColor;border-top:9px solid transparent;border-bottom:9px solid transparent}
