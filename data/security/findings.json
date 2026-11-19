@@ -259,6 +259,66 @@
    "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
    "state": "fixed",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-022",
+   "severity": "medium",
+   "title": "The sites bar's pin was checked only against our own copy",
+   "file": "scripts/build.mjs",
+   "detail": "A change editing both the vendored bar files and the stored pin in data/sites/latest.json would have passed the build, the validator and the leak scan; only the wake-time sync compared with the live registry. Never happened.",
+   "fix": "release.sh now runs scripts/sync-sites.mjs --check before every push: our vendored files against the live registry's pin, failing closed if it cannot confirm them.",
+   "found": "2026-11-19 ~10:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-023",
+   "severity": "medium",
+   "title": "The leak scan's pin exemption was wider than the pins",
+   "file": "scripts/leak-scan.mjs",
+   "detail": "Any version key and any sha256, sha384 or sha512 value of 43 to 86 characters under js, css or render was exempt, so a secret dressed as such a value could have hidden there. Never happened.",
+   "fix": "Exempt only bar.versions[bar.ours].integrity with exactly the keys js, css and render, each exactly sha256-<43>=, and each equal to the fingerprint of our own vendored file of that version; ten tests.",
+   "found": "2026-11-19 ~10:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-024",
+   "severity": "medium",
+   "title": "The served bar files were not the checked bytes",
+   "file": "scripts/build.mjs",
+   "detail": "The build checked the vendored files but served the copy of src/ made before the check, and the validator never hashed what is served. Never happened.",
+   "fix": "The build writes the checked bytes into _site; the validator hashes the served files against the stored pin, requires version 1.2.1, and checks every link in the bar is https *.promptugal.news.",
+   "found": "2026-11-19 ~10:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-025",
+   "severity": "low",
+   "title": "The build skipped some of the sync's checks on the sites",
+   "file": "scripts/build.mjs",
+   "detail": "The build did not repeat the checks for duplicate ids or hosts and for promptugal.news first. Not exploitable: the CSP still only held *.promptugal.news hosts.",
+   "fix": "One shared siteHosts() check, used by the sync and the build.",
+   "found": "2026-11-19 ~10:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-026",
+   "severity": "low",
+   "title": "Small gaps in the sync script and the checks",
+   "file": "scripts/sync-sites.mjs",
+   "detail": "A stale sync-error.json stayed after a later success; the temporary file had a fixed name; the stored read time was logged as written; the preview and stylesheet checks missed the /on...= and image-set() forms; the embeds threat model said images came only from i.ytimg.com.",
+   "fix": "Cleared on success; a temporary name per process; the read time logged only in its exact shape; both forms now fail; the threat models updated.",
+   "found": "2026-11-19 ~10:57 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
   }
  ]
 }

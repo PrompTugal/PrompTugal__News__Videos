@@ -23,6 +23,7 @@ import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -97,15 +98,48 @@ const ALLOW_PATTERN = [
   // Dinis Cruz, in videos.b@'s session, 18 Nov 2026 ~23:29 UTC: "yes, allow board/team/videos/signed/*.sig in the leak scan".
   [/^board\/team\/videos\/signed\/[0-9TZ-]+\.json\.sig$/, 'long high-entropy string', 'release-manifest signatures (Dinis, 18 Nov 2026)'],
 ];
+// The sites bar's pins in our registry copy (security@'s ruling, Website 5109e7a09, last addendum): exempt only by all of these
+// together: this one file; the field bar.versions["<ours>"].integrity, where <ours> is bar.ours, holding exactly the keys js, css
+// and render (found by parsing the JSON, not by the line); each value exactly sha256-<43 base64>=; and each equal to the
+// fingerprint of our own vendored file of that version (VID-2026-023). So the exemption can only ever hide the three public
+// fingerprints of files in this repository. Anything else in the file, any other version, or any other key-shaped string
+// still fails (scripts/test-leak-scan.mjs). Lines are blanked, keeping their numbers, before the checks run.
+export const PIN_FILE = 'data/sites/latest.json';
+const PIN_VALUE = /^sha256-[A-Za-z0-9+/]{43}=$/;
+const BAR_FILE = { js: 'sites-bar.js', css: 'sites-bar.css', render: 'sites-bar-render.mjs' };
+const fingerprint = (buf) => 'sha256-' + createHash('sha256').update(buf).digest('base64');
+// read(path) returns a Buffer or null: the working tree, or a commit in the history scan.
+function blankPins(text, read) {
+  let d; try { d = JSON.parse(text); } catch { return text; }
+  const ours = d && d.bar && typeof d.bar.ours === 'string' && /^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(d.bar.ours) ? d.bar.ours : null;
+  const integ = ours && d.bar.versions && typeof d.bar.versions === 'object' && d.bar.versions[ours] && d.bar.versions[ours].integrity;
+  if (!integ || typeof integ !== 'object' || Array.isArray(integ) || Object.keys(integ).sort().join() !== 'css,js,render') return text;
+  for (const [k, f] of Object.entries(BAR_FILE)) {
+    const buf = read(`src/assets/sites-bar/${ours}/${f}`);
+    if (typeof integ[k] !== 'string' || !PIN_VALUE.test(integ[k]) || !buf || fingerprint(buf) !== integ[k]) return text;
+  }
+  const want = new Map(Object.keys(BAR_FILE).map((k) => [`${k}\t${integ[k]}`, 1]));
+  // Only a line that is exactly "<key>": "<that value>" inside an integrity object, once each.
+  let inInteg = false;
+  return text.split('\n').map((line) => {
+    if (/^\s*"integrity": \{\s*$/.test(line)) { inInteg = true; return line; }
+    if (inInteg && /^\s*\},?\s*$/.test(line)) { inInteg = false; return line; }
+    const m = inInteg && line.match(/^\s*"(js|css|render)": "([^"]+)",?\s*$/);
+    const key = m && `${m[1]}\t${m[2]}`;
+    if (key && want.get(key) > 0) { want.set(key, 0); return ''; }
+    return line;
+  }).join('\n');
+}
+const readTree = (p) => { try { return readFileSync(join(root, p)); } catch { return null; } };
 const allowed = (path, kind) => ALLOW.some(([p, k]) => p === path && k === kind) || ALLOW_PATTERN.some(([re, k]) => re.test(path) && k === kind);
 
 const PUBLIC_KEY_FILES = (p) => p === 'team/keys.json' || /^team\/keys\/[a-z0-9-]+\.json$/.test(p);
 
 // Returns a list of {line, kind} for one file's text. Never returns the match.
-export function scanText(path, text) {
+export function scanText(path, text, read = readTree) {
   const found = [];
   const add = (line, kind) => { if (!allowed(path, kind)) found.push({ line, kind }); };
-  let body = text;
+  let body = path === PIN_FILE ? blankPins(text, read) : text;
   if (PUBLIC_KEY_FILES(path)) {
     if (/private|passphrase|secret|seed/i.test(text)) add(0, 'public key file mentions a private part');
     // Blank the allowed public key blocks, keeping line numbers.
@@ -173,7 +207,10 @@ function scanHistory() {
   const flush = () => {
     for (const [key, lines] of byFile) {
       const [c, f] = key.split('\t');
-      const found = scanText(f, lines.join('\n'));
+      // The pin file is scanned whole at that commit, so its field rule still applies (added lines alone carry no fields).
+      const text = f === PIN_FILE ? (() => { try { return execFileSync('git', ['show', `${c}:${f}`], { cwd: root }).toString(); } catch { return lines.join('\n'); } })() : lines.join('\n');
+      const atCommit = (p) => { try { return execFileSync('git', ['show', `${c}:${p}`], { cwd: root }); } catch { return null; } };
+      const found = scanText(f, text, atCommit);
       for (const x of found) errors.push(`${c.slice(0, 7)} ${f}: ${x.kind}`);
     }
     byFile.clear();

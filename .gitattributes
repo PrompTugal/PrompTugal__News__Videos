@@ -1,1 +1,3 @@
 .sg_vault/** binary -diff -merge
+# The vendored sites bar is checked byte for byte against the registry's pin: never convert its line endings.
+src/assets/sites-bar/** -text

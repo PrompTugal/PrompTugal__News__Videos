@@ -10,6 +10,7 @@ import { cpSync, rmSync, readdirSync, readFileSync, writeFileSync, statSync, exi
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { loadLibrary, mergeLibrary } from './library-merge.mjs';
+import { BAR_VERSION, BAR_DIR, BAR_FILES, sri, importVerified, pinsFor, siteHosts } from './sync-sites.mjs';
 
 const version = process.env.SITE_VERSION || 'dev';
 const SITE = 'https://videos.promptugal.news';
@@ -134,9 +135,41 @@ const PL_KINDS = [['event', 'By event'], ['kind', 'By kind'], ['organisation', '
 // ---------------------------------------------------------------- the page frame
 rmSync('_site', { recursive: true, force: true });
 cpSync('src', '_site', { recursive: true });
-const SITES = [['Videos', 'https://videos.promptugal.news/'], ['Library', 'https://library.promptugal.news/'], ['Live', 'https://live.promptugal.news/'], ['Events', 'https://events.promptugal.news/'], ['Weather', 'https://weather.promptugal.news/'], ['Civic', 'https://civic.promptugal.news/'], ['Startups', 'https://startups.promptugal.news/'], ['Travel', 'https://travel.promptugal.news/'], ['Data', 'https://data.promptugal.news/']];
+// The shared sites bar, one way to move between the sites (Dinis Cruz, 19 Nov 2026, about 03:18 UTC; 1.2.1, security@'s go,
+// Website 2d812d6da). Drawn at build from the registry copy that scripts/sync-sites.mjs read and checked at the wake. The build
+// re-checks it all: our vendored files against the stored pin (a different file under the same version stops the build), the
+// renderer imported from the very bytes it hashed, its check() on the stored sites. If the registry no longer lists our version,
+// or nothing usable is stored, the bar is left out and the CSP stays as it was; it is never replaced by a hand-kept list.
+const SITE_HOST = 'videos.promptugal.news';
+const BAR_HOST = /^(?:[a-z0-9-]+\.)*promptugal\.news$/;
+const bar_ok_dir = () => Object.values(BAR_FILES).every((f) => existsSync(`${BAR_DIR}/${f}`));
+const bar = await (async () => {
+  let reg; try { reg = JSON.parse(readFileSync('data/sites/latest.json', 'utf8')); } catch { return { on: false, why: 'no registry read yet' }; }
+  const b = (reg && reg.bar) || {};
+  if (!bar_ok_dir()) return { on: false, why: 'the vendored files are missing' };
+  if (!Array.isArray(b.listed) || !b.listed.includes(BAR_VERSION)) return { on: false, why: `the registry names ${String(b.current || '').replace(/[^0-9.]/g, '').slice(0, 12) || 'another version'}` };
+  const pins = pinsFor(b, BAR_VERSION);
+  if (!pins) return { on: false, why: 'no pin for our version in the stored registry' };
+  const bytes = Object.fromEntries(Object.entries(BAR_FILES).map(([k, f]) => [k, readFileSync(`${BAR_DIR}/${f}`)]));
+  for (const k of Object.keys(BAR_FILES)) if (sri(bytes[k]) !== pins[k]) throw new Error(`sites bar ${BAR_VERSION}: ${BAR_FILES[k]} does not match its pin; the build stops`);
+  const { render, check } = await importVerified(bytes.render);
+  const sites = check({ sites: reg.sites });
+  if (!sites) return { on: false, why: 'the renderer refused the stored registry' };
+  const sh = siteHosts(sites);
+  if (sh.why) return { on: false, why: sh.why };
+  const html = render({ sites: reg.sites }, { here: SITE_HOST });
+  if (!html) return { on: false, why: 'the renderer returned nothing' };
+  // What is served is the bytes that were checked, written over the copy of src/ (VID-2026-024).
+  rmSync(`_site/assets/sites-bar`, { recursive: true, force: true });
+  mkdirSync(`_site/assets/sites-bar/${BAR_VERSION}`, { recursive: true });
+  for (const [k, f] of Object.entries(BAR_FILES)) writeFileSync(`_site/assets/sites-bar/${BAR_VERSION}/${f}`, bytes[k]);
+  const hosts = sh.hosts.filter((h) => BAR_HOST.test(h) && h !== SITE_HOST).sort().slice(0, 32);
+  return { on: true, html, hosts, readAt: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(reg.read_at) ? reg.read_at : 'at an unknown time' };
+})();
+console.log(bar.on ? `sites bar ${BAR_VERSION} on (${bar.hosts.length} other hosts, registry read ${bar.readAt})` : `sites bar ${BAR_VERSION} off: ${bar.why}`);
+const BAR_SRC = bar.on ? bar.hosts.map((h) => ` https://${h}`).join('') : '';
 const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/how/', 'How it works'], ['/api/', 'Data']];
-const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}; frame-src ${EMBED_HOST}; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'`;
+const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}${BAR_SRC}; frame-src ${EMBED_HOST}; connect-src 'self'${BAR_SRC}; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const pages = [];
 function page({ path, title, description, section, body, mdBody }) {
   if (!okRel(path)) throw new Error(`bad page path ${path}`);
@@ -157,9 +190,9 @@ function page({ path, title, description, section, body, mdBody }) {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/site.css?v=${esc(version)}">
 <script defer src="/assets/player.js?v=${esc(version)}"></script>
-</head>
+${bar.on ? `<link rel="stylesheet" href="/assets/sites-bar/${BAR_VERSION}/sites-bar.css">\n<script defer src="/assets/sites-bar/${BAR_VERSION}/sites-bar.js"></script>\n` : ''}</head>
 <body>
-<a class="skip" href="#main">Skip to the content</a>
+${bar.on ? bar.html + '\n' : ''}<a class="skip" href="#main">Skip to the content</a>
 <div class="version-bar"><span>Version ${esc(version)}</span><span><a href="${path}index.md">This page as markdown</a></span></div>
 <header class="masthead">
   <div class="masthead-row">
@@ -168,7 +201,6 @@ function page({ path, title, description, section, body, mdBody }) {
   </div>
   <nav class="nav" aria-label="Sections">${NAV.map(([h, t]) => `<a href="${h}"${h === section ? ' aria-current="page"' : ''}>${t}</a>`).join('')}</nav>
 </header>
-<nav class="em-net" aria-label="The PrompTugal.news sites"><span>Also from <a href="https://promptugal.news/">PrompTugal.news</a></span>${SITES.map(([t, u]) => `<a href="${u}"${t === 'Videos' ? ' aria-current="page"' : ''}>${t}</a>`).join('')}</nav>
 <main id="main">
 ${body}
 </main>
@@ -365,9 +397,10 @@ page({
 <p>Organisers and speakers can send their own videos: ${link(`${REPO}/issues/new`, 'open an issue')} with the link. We publish it credited to you and dated.</p></section>
 <section><h2>How they are played</h2>
 <ul><li><b>The platform's own player only.</b> A YouTube video plays in YouTube's privacy-enhanced player from <code>www.youtube-nocookie.com</code>, the one host this site may frame (the page's Content Security Policy says so).</li>
-<li><b>The preview image is YouTube's own.</b> Each card and player shows YouTube's thumbnail, unaltered, loaded from YouTube's image host <code>i.ytimg.com</code> (the one outside host this site may load images from). Your browser fetches it when the page opens, so YouTube sees that request, but we send no referrer with it. The video itself loads only when you press play. Without JavaScript, each video links to its page on YouTube. (Dinis Cruz decided this on 19 November 2026, for usability.)</li>
+<li><b>The preview image is YouTube's own.</b> Each card and player shows YouTube's thumbnail, unaltered, loaded from YouTube's image host <code>i.ytimg.com</code> (the only outside host this site may load images from, apart from the other PrompTugal.news sites' own preview images in the sites bar). Your browser fetches it when the page opens, so YouTube sees that request, but we send no referrer with it. The video itself loads only when you press play. Without JavaScript, each video links to its page on YouTube. (Dinis Cruz decided this on 19 November 2026, for usability.)</li>
 <li><b>Never copied.</b> We never download, copy or host a video, a thumbnail, a still or a transcript: the preview image is loaded from YouTube each time, never kept by us. Titles and channel names are shown as published, as a search engine would.</li>
-<li>A video on another site (CNBC's own player, for one) is linked, not embedded.</li></ul></section>
+<li>A video on another site (CNBC's own player, for one) is linked, not embedded.</li>
+<li><b>The sites bar.</b> The row of PrompTugal.news sites at the top of every page is the shared sites bar (version ${BAR_VERSION}), drawn when this site is built from the sites registry at <code>promptugal.news/api/v1/sites.json</code>, read and checked at each of our wakes. When you point at or tab to a site's name, your browser fetches that site's own preview image and <code>version.json</code> from that site, with no cookies and no referrer; nothing else is loaded and nothing is stored or sent. Its code is a copy kept in this site, checked against the registry's fingerprint, never loaded from another site.</li></ul></section>
 <section><h2 id="talks">Talks by timestamp</h2>
 <p>Each replay is hours long; the aim is to reach each talk by its start time. ${esc(clean(C.talks_note))} Every card already has the place for them, and the player can start at a given second.</p></section>
 <section><h2>What a card says</h2>
@@ -378,7 +411,7 @@ page({
 <section><h2>The sources</h2><p>${link('/sources/', 'Every source this site reads')}: what, where from, how often, the licence, what we do with it, and every read kept.</p></section>
 <section><h2>For the operator</h2><p>${link('/how/google-api-key/', 'One Google API key for the free APIs')}: YouTube, Fact Check Tools, Knowledge Graph Search, PageSpeed Insights, Books and Web Risk, in one restricted key. ${link('/how/youtube-api-key/', 'The YouTube part on its own')}: how Dinis Cruz creates, restricts, hands over and revokes the key that will let the agents list the official replays and their chapters.</p></section>
 <section><h2>Who made it</h2><p>videos.b@PrompTugal.dinis, an AI agent (Claude, Opus, with Sonnet sub-agents for the reviews), started by conductor.b@PrompTugal.dinis at Dinis Cruz's word on 18 November 2026. No person has checked these pages yet.</p></section>`,
-  mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), loaded when you press play; the preview image is YouTube's own, loaded from i.ytimg.com with no referrer; never copied.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
+  mdBody: `Videos come from the team's coverage record (<${mdUrl(data.evidence_base)}>), copied by hand; next from library.promptugal.news and data.promptugal.news. Played only in the platform's own player (www.youtube-nocookie.com), loaded when you press play; the preview image is YouTube's own, loaded from i.ytimg.com with no referrer; never copied. The sites bar at the top of every page (version ${BAR_VERSION}) is drawn at build from the registry at promptugal.news/api/v1/sites.json; pointing at a site's name fetches that site's own preview image and version.json, with no cookies and no referrer.\n\nTalks by timestamp: ${md(C.talks_note)}\n\nLicences: ours CC BY 4.0; each video its platform's terms.`,
 });
 
 // ---------------------------------------------------------------- the operator's page: making the YouTube API key

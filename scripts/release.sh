@@ -7,8 +7,11 @@ cd "$(dirname "$0")/.."
 [ -e board/HOLD.md ] && { echo "board/HOLD.md exists: no release while it does" >&2; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "uncommitted changes: commit or stash them first" >&2; exit 1; }
 git fetch -q origin dev
+# Our vendored sites bar against the live registry's pin: the one check the repo cannot vouch for itself (VID-2026-022).
+node scripts/sync-sites.mjs --check
 node scripts/build.mjs
 node scripts/validate.mjs
+node scripts/test-leak-scan.mjs
 node scripts/leak-scan.mjs
 node scripts/check-commits.mjs origin/dev HEAD
 for i in 1 2 3 4 5; do
@@ -17,6 +20,7 @@ for i in 1 2 3 4 5; do
   # One gate per line: under set -e a failure inside an && chain does not stop the script (specialist.code@ finding 1).
   node scripts/build.mjs >/dev/null
   node scripts/validate.mjs >/dev/null
+  node scripts/test-leak-scan.mjs >/dev/null
   node scripts/leak-scan.mjs >/dev/null
   node scripts/check-commits.mjs origin/dev HEAD >/dev/null
   if git -c push.negotiate=true push -q origin HEAD:dev; then echo "released $(git rev-parse --short HEAD) to dev"; exit 0; fi
