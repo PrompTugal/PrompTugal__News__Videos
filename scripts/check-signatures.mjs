@@ -34,6 +34,10 @@ const PRINCIPAL = /^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+$/;
 const [beforeArg, afterArg] = process.argv.slice(2);
 const after = afterArg || 'HEAD';
 const before = beforeArg && !/^0+$/.test(beforeArg) && tryGit('rev-parse', '--verify', '--quiet', `${beforeArg}^{commit}`);
+// A start that was given but does not resolve is refused, never widened to the whole history.
+if (beforeArg && !/^0+$/.test(beforeArg) && !before) { console.error(`check-signatures: ${beforeArg} is not a commit here: refusing`); process.exit(1); }
+// The range must run forward: a start that is not an ancestor of the end (a force push) is refused (security@'s control 7, third ruling).
+if (before && spawnSync('git', ['merge-base', '--is-ancestor', before, after]).status !== 0) { console.error(`check-signatures: ${beforeArg} is not an ancestor of ${after} (a force push?): refusing`); process.exit(1); }
 const commits = lines(git('rev-list', before ? `${before}..${after}` : after));
 
 // An Ed25519 SPKI PEM to the OpenSSH form ssh-keygen reads (string "ssh-ed25519", then the 32-byte key, each length-prefixed),

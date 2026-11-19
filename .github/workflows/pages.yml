@@ -42,22 +42,29 @@ jobs:
         with:
           node-version: 22
       - name: Every commit since the last release carries an Agent trailer
-        # From the last release tag, not github.event.before: GitHub drops a pending run when a
-        # newer one queues, and the surviving run's "before" is the dropped push's head, so the
-        # dropped push's commits were never checked (specialist.code@ finding 3b).
+        # From BEFORE (github.event.before, the commit dev pointed to before this push) or the last release tag reachable
+        # from it: GitHub drops a pending run when a newer one queues, so BEFORE may be the head of a push whose run never ran
+        # (specialist.code@ finding 3b); the tag, an ancestor of BEFORE, was checked when it was released.
         env:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
         run: |
-          base_of() { local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$AFTER" 2>/dev/null || true); echo "${last:-$BEFORE}"; }
+          # The checker and its range start come from BEFORE (the commit dev pointed to before this push), or from the last
+          # release tag reachable from BEFORE: always an ancestor of BEFORE, and released, so checked even when GitHub dropped
+          # the run of the push that made BEFORE. BEFORE must exist and be an ancestor of AFTER (security@'s control 7, third
+          # ruling); a missing copy of a check there is refused.
+          base_of() {
+            if [ -z "$BEFORE" ] || [ -z "${BEFORE//0/}" ]; then echo "no BEFORE (a new branch or a first push): refusing" >&2; return 1; fi
+            GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$BEFORE" "$AFTER" || { echo "BEFORE is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
+            local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$BEFORE" 2>/dev/null || true)
+            echo "${last:-$BEFORE}"
+          }
           # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
           # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
           # each is written into scripts/ under an ignored name (any link there removed first);
           # a base without one is refused (fails closed).
           trusted() { local name=$1 rc=0; shift; rm -f "scripts/trusted-$name"; GIT_NO_REPLACE_OBJECTS=1 git show "$base:scripts/$name" > "scripts/trusted-$name" 2>/dev/null || { rm -f "scripts/trusted-$name"; echo "the trusted base has no scripts/$name: refusing" >&2; exit 1; }; NODE_OPTIONS= node "scripts/trusted-$name" "$@" || rc=$?; rm -f "scripts/trusted-$name"; [ "$rc" = 0 ] || exit "$rc"; }
           base=$(base_of)
-          # No trusted base (no tag, no previous head): refuse rather than trust this commit's copy (VID-2026-029).
-          if [ -z "$base" ] || [ -z "${base//0/}" ]; then echo "no trusted base for the checks" >&2; exit 1; fi
           # The trailer check reads scripts/commit-exemptions.json from the tree: a push may not add or change it.
           GIT_NO_REPLACE_OBJECTS=1 git diff --quiet "$base" "$AFTER" -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed in this push: refusing" >&2; exit 1; }
           trusted check-commits.mjs "$base" "$AFTER"
@@ -75,15 +82,22 @@ jobs:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
         run: |
-          base_of() { local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$AFTER" 2>/dev/null || true); echo "${last:-$BEFORE}"; }
+          # The checker and its range start come from BEFORE (the commit dev pointed to before this push), or from the last
+          # release tag reachable from BEFORE: always an ancestor of BEFORE, and released, so checked even when GitHub dropped
+          # the run of the push that made BEFORE. BEFORE must exist and be an ancestor of AFTER (security@'s control 7, third
+          # ruling); a missing copy of a check there is refused.
+          base_of() {
+            if [ -z "$BEFORE" ] || [ -z "${BEFORE//0/}" ]; then echo "no BEFORE (a new branch or a first push): refusing" >&2; return 1; fi
+            GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor "$BEFORE" "$AFTER" || { echo "BEFORE is not an ancestor of AFTER (a force push): refusing" >&2; return 1; }
+            local last; last=$(GIT_NO_REPLACE_OBJECTS=1 git describe --tags --abbrev=0 --match "v${VERSION_BASE}.*" "$BEFORE" 2>/dev/null || true)
+            echo "${last:-$BEFORE}"
+          }
           # Every security check runs from the trusted base's copy, never from the commits it checks (security@'s control 7,
           # widened); the trailer and signature checks run before any pushed code, the leak scan after the build it scans;
           # each is written into scripts/ under an ignored name (any link there removed first);
           # a base without one is refused (fails closed).
           trusted() { local name=$1 rc=0; shift; rm -f "scripts/trusted-$name"; GIT_NO_REPLACE_OBJECTS=1 git show "$base:scripts/$name" > "scripts/trusted-$name" 2>/dev/null || { rm -f "scripts/trusted-$name"; echo "the trusted base has no scripts/$name: refusing" >&2; exit 1; }; NODE_OPTIONS= node "scripts/trusted-$name" "$@" || rc=$?; rm -f "scripts/trusted-$name"; [ "$rc" = 0 ] || exit "$rc"; }
           base=$(base_of)
-          # No trusted base (no tag, no previous head): refuse rather than trust this commit's copy (VID-2026-029).
-          if [ -z "$base" ] || [ -z "${base//0/}" ]; then echo "no trusted base for the checks" >&2; exit 1; fi
           trusted leak-scan.mjs
           node scripts/test-leak-scan.mjs
       - if: steps.mode.outputs.deploy == 'true'

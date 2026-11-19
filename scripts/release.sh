@@ -20,6 +20,8 @@ trusted() {
 # The trailer check reads scripts/commit-exemptions.json from the tree: a push may not add or change it (a person exempts a commit).
 exemptions_unchanged() { GIT_NO_REPLACE_OBJECTS=1 git diff --quiet origin/dev HEAD -- scripts/commit-exemptions.json || { echo "scripts/commit-exemptions.json changed in this push: refusing" >&2; return 1; }; }
 # Our vendored sites bar against the live registry's pin: the one check the repo cannot vouch for itself (VID-2026-022).
+# The checks run from origin/dev, the commit dev pointed to before this push; the push must build on it (control 7, third ruling).
+refuse_unless_forward() { GIT_NO_REPLACE_OBJECTS=1 git merge-base --is-ancestor origin/dev HEAD || { echo "origin/dev is not an ancestor of HEAD: refusing" >&2; return 1; }; }
 trusted sync-sites.mjs --check
 node scripts/build.mjs
 node scripts/validate.mjs
@@ -37,6 +39,7 @@ for i in 1 2 3 4 5; do
   node scripts/validate.mjs >/dev/null
   node scripts/test-leak-scan.mjs >/dev/null
   trusted leak-scan.mjs >/dev/null
+  refuse_unless_forward
   exemptions_unchanged
   trusted check-commits.mjs origin/dev HEAD >/dev/null
   trusted check-signatures.mjs origin/dev HEAD >/dev/null

@@ -94,6 +94,11 @@ const setup = name => { const r = repo(name); const base = r.commit('bootstrap',
   const s = join(tmp, 'shallow-clone'); execFileSync('git', ['clone', '-q', '--depth', '1', `file://${r.d}`, s]);
   const copy = join(tmp, 'check-shallow.mjs'); writeFileSync(copy, readFileSync(CHECK, 'utf8'));
   expect('(6) a shallow checkout is refused', spawnSync('node', [copy, '', 'HEAD'], { cwd: s, encoding: 'utf8' }), false, 'a shallow checkout'); }
+{ const r = setup('forcepush'); const a = r.commit('signed', { key: A, files: { 'x.txt': '1' } }); r.g('reset', '-q', '--hard', r.base); r.commit('rewritten', { key: A, files: { 'x.txt': '2' } }); expect('(7) a start that is not an ancestor of the end (a force push) fails', r.check(a, 'HEAD'), false, 'not an ancestor'); }
+{ const r = setup('backdated'); r.g('checkout', '-q', '--orphan', 'old'); r.g('rm', '-rq', '--cached', '.');
+  execFileSync('git', ['-c', 'gpg.format=ssh', '-c', `user.signingkey=${B.f}`, 'commit', '-q', '-S', '--allow-empty', '-m', 'an older-dated root with its own check and key', '-m', `Agent: ${AGENT}\nClaude-Session: ${SESSION}`], { cwd: r.d, env: { ...process.env, GIT_COMMITTER_DATE: '2001-01-01T00:00:00Z', GIT_AUTHOR_DATE: '2001-01-01T00:00:00Z' } });
+  r.g('checkout', '-q', '-f', 'main'); r.g('-c', 'gpg.format=ssh', '-c', `user.signingkey=${A.f}`, 'merge', '-q', '-S', '--allow-unrelated-histories', '--no-ff', '-m', 'merge', '-m', `Agent: ${AGENT}\nClaude-Session: ${SESSION}`, 'old');
+  expect('(8) a backdated orphan merged in fails', r.check(r.base, 'HEAD'), false, 'not the one that added the check'); }
 { const r = setup('twoagents'); r.commit('two agents', { key: A, agent: `${AGENT}\nAgent: other@Example.test`, files: { 'x.txt': '1' } }); expect('two Agent: trailers fail', r.check(r.base, 'HEAD'), false, 'exactly one Agent:'); }
 { const r = setup('principal'); r.commit('a wide principal, signed with A', { key: A, files: { 'team/keys.json': keysWith({ ...entry('b', B), ssh: { public_key_pem: B.pem, principals: ['*'] } }, entry('a', A)) } }); r.commit('signed with B', { key: B, files: { 'x.txt': '1' } }); expect('a principal that is not a plain address is not used', r.check(r.base, 'HEAD'), false, 'not signed by a key'); }
 
