@@ -103,8 +103,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GIT_NO_REPLACE_OBJECTS: '1'
           NODE_OPTIONS: ''
+          # pushed .gitattributes are switched off, the index copy too (events.b@'s e774ff9): attributes from the empty tree
+          GIT_ATTR_SOURCE: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
         run: |
           set -euo pipefail
+          # GIT_ATTR_SOURCE needs git 2.42 or later
+          v=$(git version | awk '{print $3}'); IFS=. read -r ma mi _ <<< "$v" || true
+          [[ "${ma:-}" =~ ^[0-9]+$ && "${mi:-}" =~ ^[0-9]+$ ]] || { echo "cannot read the git version ($v): refusing" >&2; exit 1; }
+          if (( ma < 2 || (ma == 2 && mi < 42) )); then echo "git $v is older than 2.42: refusing" >&2; exit 1; fi
           NODE=$(command -v node); case "$NODE" in /*) ;; *) echo "node is not an absolute path" >&2; exit 1;; esac
           if [ -e board/HOLD.md ]; then echo "board/HOLD.md exists" >&2; exit 1; fi
           [ "$(git rev-parse --is-shallow-repository)" = "false" ] || { echo "a shallow checkout: refusing" >&2; exit 1; }
