@@ -7,12 +7,12 @@ cd "$(dirname "$0")/.."
 [ -e board/HOLD.md ] && { echo "board/HOLD.md exists: no release while it does" >&2; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "uncommitted changes: commit or stash them first" >&2; exit 1; }
 git fetch -q origin dev
-# The anchor (security@'s fourth ruling, 19 Nov 2026): the newest commit a passing run verified. Here, the commit the live
-# site's /version.json reports, which a successful deploy writes (a pusher who edits the workflow could deploy too: only branch
-# protection and a dev-only github-pages environment close that, Dinis's to set). Every security check
-# runs from the anchor's copy (control 7, widened), never from the commits it checks, over the range anchor..HEAD; the copy is
-# written into scripts/ under an ignored name so each finds the repository as it always has; no anchor or no copy, no push.
-ANCHOR=$(curl -fsS -m 20 --max-redirs 0 https://videos.promptugal.news/version.json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const c=JSON.parse(s).commit;if(!/^[0-9a-f]{40}$/.test(c))process.exit(1);console.log(c)})') || { echo "cannot read the anchor (the deployed commit): refusing" >&2; exit 1; }
+# The anchor (security@'s sixth ruling, 19 Nov 2026): the newest commit a passing run verified: the head_sha of the newest run of
+# the Pages workflow on dev, from a push, that concluded success, read from GitHub's API (only GitHub Actions creates runs; this
+# repository is public, so no token is needed). Every security check runs from the anchor's copy (control 7, widened), never from
+# the commits it checks, over anchor..HEAD; the copy is written into scripts/ under an ignored name so each finds the repository
+# as it always has; no anchor or no copy, no push.
+ANCHOR=$(curl -fsS -m 20 --max-redirs 0 -H 'Accept: application/vnd.github+json' -H 'User-Agent: videos-release' 'https://api.github.com/repos/PrompTugal/PrompTugal__News__Videos/actions/workflows/pages.yml/runs?branch=dev&event=push&status=success&per_page=20' | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=(JSON.parse(s).workflow_runs||[]).find(x=>x.path===".github/workflows/pages.yml"&&x.head_branch==="dev"&&x.event==="push"&&x.conclusion==="success");if(!r||!/^[0-9a-f]{40}$/.test(r.head_sha))process.exit(1);console.log(r.head_sha)})') || { echo "cannot read the anchor (the last successful run): refusing" >&2; exit 1; }
 GIT_NO_REPLACE_OBJECTS=1 git cat-file -e "$ANCHOR^{commit}" 2>/dev/null || { echo "the anchor $ANCHOR is not in this clone: refusing" >&2; exit 1; }
 trusted() {
   local name=$1 t s=0; shift; t="scripts/trusted-$name"
