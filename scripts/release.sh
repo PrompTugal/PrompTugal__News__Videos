@@ -44,6 +44,7 @@ trusted leak-scan.mjs
 exemptions_unchanged
 trusted check-commits.mjs "$ANCHOR" HEAD
 node scripts/test-check-signatures.mjs
+node scripts/test-check-links.mjs
 trusted check-signatures.mjs "$ANCHOR" HEAD
 for i in 1 2 3 4 5; do
   git fetch -q origin dev

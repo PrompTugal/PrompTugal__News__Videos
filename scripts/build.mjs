@@ -520,7 +520,7 @@ ${APIS.map((a) => `<tr><th scope="row">${link(a.docs, a.name)}</th><td>${esc(a.u
       id: 'library', name: "The library's catalogue (library.promptugal.news)",
       what: "Every item the library catalogues; we take its YouTube videos of the Web Summit Lisbon 2026 collection.",
       url: 'https://library.promptugal.news/api/v1/items/index.json',
-      how: "Read by scripts/sync-library.mjs when videos.b@ wakes (every three hours, 07:00 to 22:00 Lisbon); the build reads the copy on disk.",
+      how: "Read by scripts/sync-library.mjs when videos.b@ wakes (twice a day, at 08:48 and 19:48 Lisbon, since Dinis Cruz's decision of 19 November 2026); the build reads the copy on disk.",
       licence: { name: "CC BY 4.0 for the library's records; each video under YouTube's terms", url: CCBY },
       use: `Its YouTube videos become cards and players here (${fromLibrary} new so far), and every video it also holds is linked to its call number. A video it withdraws comes off this site at the next build (${merged.withdrawn.length} so far).`,
       last_read: lastOk, history,

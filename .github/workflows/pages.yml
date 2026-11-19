@@ -48,6 +48,7 @@ jobs:
       # The pushed copies' own tests: functional gates on the pushed tree, like the build and the validator.
       - run: node scripts/test-check-signatures.mjs
       - run: node scripts/test-leak-scan.mjs
+      - run: node scripts/test-check-links.mjs
       - if: steps.mode.outputs.deploy == 'true'
         uses: actions/configure-pages@v5
       - if: steps.mode.outputs.deploy == 'true'
