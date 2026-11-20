@@ -168,7 +168,7 @@ const bar = await (async () => {
 })();
 console.log(bar.on ? `sites bar ${BAR_VERSION} on (${bar.hosts.length} other hosts, registry read ${bar.readAt})` : `sites bar ${BAR_VERSION} off: ${bar.why}`);
 const BAR_SRC = bar.on ? bar.hosts.map((h) => ` https://${h}`).join('') : '';
-const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/how/', 'How it works'], ['/api/', 'Data']];
+const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/cameras/', 'Live cameras'], ['/how/', 'How it works'], ['/api/', 'Data']];
 const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}${BAR_SRC}; frame-src ${EMBED_HOST}; connect-src 'self'${BAR_SRC}; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const pages = [];
 function page({ path, title, description, section, body, mdBody }) {
@@ -400,6 +400,7 @@ page({
 <li><b>The preview image is YouTube's own.</b> Each card and player shows YouTube's thumbnail, unaltered, loaded from YouTube's image host <code>i.ytimg.com</code> (the only outside host this site may load images from, apart from the other PrompTugal.news sites' own preview images in the sites bar). Your browser fetches it when the page opens, so YouTube sees that request, but we send no referrer with it. The video itself loads only when you press play. Without JavaScript, each video links to its page on YouTube. (Dinis Cruz decided this on 19 November 2026, for usability.)</li>
 <li><b>Never copied.</b> We never download, copy or host a video, a thumbnail, a still or a transcript: the preview image is loaded from YouTube each time, never kept by us. Titles and channel names are shown as published, as a search engine would.</li>
 <li>A video on another site (CNBC's own player, for one) is linked, not embedded.</li>
+<li><b>Live cameras are links.</b> The Algarve's live beach cameras (${link('/cameras/', 'the list')}) are credited links to their operators' own pages: we embed or show in full only what we have full right to use (Dinis Cruz, 19 November 2026).</li>
 <li><b>The sites bar.</b> The row of PrompTugal.news sites at the top of every page is the shared sites bar (version ${BAR_VERSION}), drawn when this site is built from the sites registry at <code>promptugal.news/api/v1/sites.json</code>, read and checked at each of our wakes. When you point at or tab to a site's name, your browser fetches that site's own preview image and <code>version.json</code> from that site, with no cookies and no referrer; nothing else is loaded and nothing is stored or sent. Its code is a copy kept in this site, checked against the registry's fingerprint, never loaded from another site.</li></ul></section>
 <section><h2 id="talks">Talks by timestamp</h2>
 <p>Each replay is hours long; the aim is to reach each talk by its start time. ${esc(clean(C.talks_note))} Every card already has the place for them, and the player can start at a given second.</p></section>
@@ -527,6 +528,16 @@ ${APIS.map((a) => `<tr><th scope="row">${link(a.docs, a.name)}</th><td>${esc(a.u
       threat_model: `${REPO}/blob/dev/docs/threat-models/sync-library.md`,
     },
     {
+      id: 'cameras', name: "data.b@'s camera register (data.promptugal.news)",
+      what: "Public live cameras in the places PrompTugal.news covers; we take MEO BeachCam's and SkylineWebcams' Algarve cameras, link-only.",
+      url: 'https://data.promptugal.news/api/v1/cameras/index.json',
+      how: "Read by scripts/sync-cameras.mjs when videos.b@ wakes (twice a day); only the checked fields are kept, the register and its history stay on data.promptugal.news; the build reads the copy on disk.",
+      licence: { name: "CC BY 4.0 for the register's records; each camera under its operator's terms", url: CCBY },
+      use: 'The /cameras/ page: a credited link to each camera on its operator\'s own page. Never embedded, recorded or re-hosted.',
+      last_read: (() => { try { const r = JSON.parse(readFileSync('data/cameras/latest.json', 'utf8')).read_at; return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(r) ? r : null; } catch { return null; } })(), history: [],
+      threat_model: `${REPO}/blob/dev/docs/threat-models/cameras.md`,
+    },
+    {
       id: 'coverage-record', name: "social.watch@'s record of the summit's coverage (the seed)",
       what: 'The videos found in the team\'s coverage sweeps of 10 November 2026, each checked then with YouTube\'s oEmbed.',
       url: data.evidence_base,
@@ -609,7 +620,7 @@ api('api/v1/videos/index.json', { about: data.about, updated: data.updated, plat
 api('api/v1/playlists/index.json', { playlists: playlists.map((p) => ({ kind: p.kind, id: p.id, title: p.title, count: p.ids.length, json: `${SITE}/api/v1/playlists/${p.kind}/${p.id}.json` })), license_of_this_record: data.license_of_this_record });
 // An open finding is published as its id, title, severity and state only, until it is fixed (VID-2026-001).
 api('api/v1/security/findings.json', { ...findings, findings: F.map((f) => f.state === 'fixed' ? f : { id: f.id, title: f.title, severity: f.severity, state: f.state, found: f.found }) });
-const ENDPOINTS = [['/api/openapi.json', 'the OpenAPI description of this API'], ['/api/v1/sources/index.json', 'the sources this site reads, with every read kept'], ['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
+const ENDPOINTS = [['/api/openapi.json', 'the OpenAPI description of this API'], ['/api/v1/sources/index.json', 'the sources this site reads, with every read kept'], ['/api/v1/cameras/index.json', 'the live cameras listed as credited links'], ['/api/v1/videos/index.json', 'every video, short'], ['/api/v1/videos/<id>.json', 'one video: its whole card'], ['/api/v1/collections/index.json', 'the collections'], [`/api/v1/collections/${C.id}.json`, 'the collection with its days'], ['/api/v1/playlists/index.json', 'every playlist'], ['/api/v1/playlists/<kind>/<id>.json', 'one playlist'], ['/api/v1/security/findings.json', 'the security findings']];
 page({
   path: '/api/', section: '/api/', title: 'The data · PrompTugal.news Videos',
   description: 'Every page here is built from JSON first; the JSON is published, under CC BY 4.0.',
@@ -618,6 +629,47 @@ page({
 <p class="small">Static files, rebuilt on every push to <code>dev</code>. The source is <code>data/videos.json</code> in ${link(REPO, 'the repository')}.</p>`,
   mdBody: ENDPOINTS.map(([u, t]) => `- ${u}: ${t}`).join('\n'),
 });
+
+// ---------------------------------------------------------------- live cameras, as credited links
+// Dinis Cruz, 19 Nov 2026, about 17:40 UTC (Website board/guidance/2026-11-19-cameras-as-links-and-the-map.md): MEO BeachCam's
+// and SkylineWebcams' Algarve cameras on videos, live and weather, as credited links only; "these are for the videos that we
+// have full right to use". From data/cameras/latest.json, written at the wake by scripts/sync-cameras.mjs. Every link is
+// checked again here against its operator's own host; nothing is embedded, recorded or re-hosted; no embed field is read.
+{
+  const CAM_HOSTS = { 'MEO BeachCam': 'beachcam.meo.pt', SkylineWebcams: 'www.skylinewebcams.com' };
+  const PLACE_NAMES = { faro: 'Faro', portimao: 'Portimão', 'castro-marim': 'Castro Marim', albufeira: 'Albufeira', 'vila-do-bispo': 'Vila do Bispo', lagoa: 'Lagoa', silves: 'Silves', loule: 'Loulé', lagos: 'Lagos', aljezur: 'Aljezur', tavira: 'Tavira', olhao: 'Olhão' };
+  const STAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+  let cam = null; try { cam = JSON.parse(readFileSync('data/cameras/latest.json', 'utf8')); } catch { cam = null; }
+  const onHost = (u, credit) => { let x; try { x = new URL(u); } catch { throw new Error(`a camera link that is not a URL`); } if (x.protocol !== 'https:' || x.username || x.password || x.port || x.hostname !== CAM_HOSTS[credit]) throw new Error(`a camera link off its operator's host: ${String(u).slice(0, 80)}`); return x.href; };
+  const cams = (cam && Array.isArray(cam.cameras) ? cam.cameras : []).map((c) => {
+    if (!Object.hasOwn(CAM_HOSTS, c.operator?.credit ?? '') || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(c.id) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(c.place)) throw new Error(`a camera entry that is not ours to list: ${String(c.id).slice(0, 40)}`);
+    return { id: c.id, name: clean(c.name), place: c.place, operator: { name: clean(c.operator.name), credit: c.operator.credit, url: onHost(c.operator.url, c.operator.credit) }, page_url: onHost(c.page_url, c.operator.credit), terms: { url: onHost(c.terms.url, c.operator.credit), summary: clean(c.terms.summary) }, license: { name: clean(c.license.name), url: onHost(c.license.url, c.operator.credit) }, status: ['up', 'down', 'unknown'].includes(c.status) ? c.status : 'unknown' };
+  });
+  if (new Set(cams.map((c) => c.id)).size !== cams.length) throw new Error('a camera listed twice');
+  const pname = (p) => Object.hasOwn(PLACE_NAMES, p) ? PLACE_NAMES[p] : p;
+  const readAt = cam && STAMP.test(cam.read_at || '') ? cam.read_at : null, dataAt = cam && STAMP.test(cam.data_read_at || '') ? cam.data_read_at : null;
+  if (readAt && Date.parse(readAt) > Date.now() + 5 * 60 * 1000) throw new Error('the camera list was read in the future');
+  const stale = !readAt || Date.now() - Date.parse(readAt) > 7 * 24 * 3600 * 1000;
+  const out = (u, t) => `<a href="${href(u)}" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer">${esc(clean(t))}</a>`;
+  const places = [...new Set(cams.map((c) => c.place))].sort((a, b) => pname(a).localeCompare(pname(b), 'pt'));
+  const counts = Object.keys(CAM_HOSTS).map((k) => [k, cams.filter((c) => c.operator.credit === k).length]);
+  const state = (s) => s === 'unknown' ? 'not checked by us' : s === 'up' ? 'up when last checked' : 'down when last checked';
+  const camCard = (c) => `<li class="vid cam" id="${esc(c.id)}"><p class="badge">A live camera · a link</p>
+<h3 class="vid-title">${out(c.page_url, c.name)}</h3>
+<dl class="facts"><dt>Credit</dt><dd>${out(c.operator.url, c.operator.credit)}</dd>
+<dt>Why a link</dt><dd>${esc(c.terms.summary)} ${out(c.terms.url, 'Their terms')}.</dd>
+<dt>Status</dt><dd>${esc(state(c.status))}</dd></dl></li>`;
+  page({
+    path: '/cameras/', section: '/cameras/', title: 'Live cameras in the Algarve, as links · PrompTugal.news Videos',
+    description: `${cams.length} live beach cameras in the Algarve (${counts.map(([k, n]) => `${n} ${k}`).join(', ')}), each a credited link to its operator's own page; never embedded, recorded or re-hosted.`,
+    body: `<h1>Live cameras in the Algarve</h1>
+<p class="standfirst">${cams.length} live beach cameras, each a link to its operator's own page: ${counts.map(([k, n]) => `${esc(k)} (${n})`).join(' and ')}. We embed or show in full only what we have full right to use, and these operators' terms do not give it, so each is a credited link (Dinis Cruz, 19 November 2026). Nothing is embedded, recorded or re-hosted.</p>
+${stale ? '<p class="note"><b>This list may be out of date:</b> it has not been read for more than seven days.</p>' : ''}<p class="small">From data.b@'s camera register on ${link('https://data.promptugal.news/', 'data.promptugal.news')} (its read ${dataAt ? esc(fmtStamp(dataAt)) : 'not stated'}), as we read it ${readAt ? esc(fmtStamp(readAt)) : 'never'}; data.b@ collects twice a day. The register marks every one of these link-only; the terms are the operators'. MEO BeachCam's own pages could not be read by data.b@'s collector, so its terms are as data.b@ records them. The register's records: ${link(CCBY, 'CC BY 4.0')}; each camera: its operator's terms. ${link('/api/v1/cameras/index.json', 'This list as JSON')}.</p>
+${places.map((p) => `<section><h2>${esc(pname(p))}</h2><ul class="vids">${cams.filter((c) => c.place === p).map(camCard).join('\n')}</ul></section>`).join('\n')}`,
+    mdBody: `${cams.length} live beach cameras in the Algarve, each a credited link to its operator's own page; never embedded, recorded or re-hosted (Dinis Cruz, 19 November 2026). Read ${readAt ? fmtStamp(readAt) : 'never'} from data.b@'s register.\n\n${places.map((p) => `## ${md(pname(p))}\n\n${cams.filter((c) => c.place === p).map((c) => `- ${mdLink(c.page_url, c.name)}: ${md(c.operator.credit)}, a link (${mdLink(c.terms.url, 'their terms')})`).join('\n')}`).join('\n\n')}`,
+  });
+  api('/api/v1/cameras/index.json', { about: "The Algarve's live beach cameras this site lists as credited links (never embedded, recorded or re-hosted).", source: 'https://data.promptugal.news/api/v1/cameras/index.json', read_at: readAt, data_read_at: dataAt, license: { records: { name: 'CC BY 4.0', url: CCBY }, each_camera: "its operator's terms, linked in its entry" }, count: cams.length, cameras: cams });
+}
 
 // ---------------------------------------------------------------- 404, llms.txt, version
 page({ path: '/404/', section: '', title: 'Not found · PrompTugal.news Videos', description: 'This page does not exist.', body: `<h1>Not found</h1><p>This page does not exist. ${link('/', 'The videos')} · ${link('/videos/', 'every video')}.</p>`, mdBody: 'This page does not exist.' });

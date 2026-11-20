@@ -1,0 +1,438 @@
+{
+  "about": "The Algarve's MEO BeachCam and SkylineWebcams cameras as videos.b@ last read them from data.b@'s register (scripts/sync-cameras.mjs): only checked fields, for credited links. Nothing is embedded, recorded or re-hosted. The register and its history: data.promptugal.news.",
+  "source": "https://data.promptugal.news/api/v1/cameras/index.json",
+  "read_at": "2026-11-20T08:51:32Z",
+  "data_read_at": "2026-11-20T07:04:10Z",
+  "status": 200,
+  "register_license": {
+    "name": "CC BY 4.0 (PrompTugal.news: the records and derived values); each camera under its operator's terms",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "counts": {
+    "MEO BeachCam": 19,
+    "SkylineWebcams": 2
+  },
+  "skipped": [],
+  "cameras": [
+    {
+      "id": "meo-praia-de-faro-oeste",
+      "name": "MEO BeachCam, Praia de Faro Oeste",
+      "place": "faro",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/faro-oeste/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-ilha-do-farol",
+      "name": "MEO BeachCam, Ilha do Farol",
+      "place": "faro",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/ilha-do-farol/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-de-faro-este",
+      "name": "MEO BeachCam, Praia de Faro Este",
+      "place": "faro",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/faro/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-verde",
+      "name": "MEO BeachCam, Praia Verde",
+      "place": "castro-marim",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/praia-verde/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-da-alagoa",
+      "name": "MEO BeachCam, Praia da Alagoa",
+      "place": "castro-marim",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/praia-da-alagoa/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-da-rocha-panoramica",
+      "name": "MEO BeachCam, Praia da Rocha Panorâmica",
+      "place": "portimao",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/praia-da-rocha/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-do-vau",
+      "name": "MEO BeachCam, Praia do Vau",
+      "place": "portimao",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/praia-do-vau/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-alvor",
+      "name": "MEO BeachCam, Alvor",
+      "place": "portimao",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/alvor/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-alvor-nascente",
+      "name": "MEO BeachCam, Alvor Nascente",
+      "place": "portimao",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/alvor-nascente/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-do-alemao",
+      "name": "MEO BeachCam, Praia do Alemão",
+      "place": "portimao",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-carvoeiro",
+      "name": "MEO BeachCam, Carvoeiro",
+      "place": "lagoa",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/carvoeiro/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-armacao-de-pera",
+      "name": "MEO BeachCam, Armação de Pêra",
+      "place": "silves",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/armacao-de-pera/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-da-gale",
+      "name": "MEO BeachCam, Praia da Galé",
+      "place": "albufeira",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/praia-da-gale/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-praia-do-peneco",
+      "name": "MEO BeachCam, Praia do Peneco",
+      "place": "albufeira",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/praia-do-peneco/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-vilamoura",
+      "name": "MEO BeachCam, Vilamoura",
+      "place": "loule",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/vilamoura/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-meia-praia",
+      "name": "MEO BeachCam, Meia Praia",
+      "place": "lagos",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/praias/meia-praia/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-monte-clerigo",
+      "name": "MEO BeachCam, Monte Clérigo",
+      "place": "aljezur",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/monte-clerigo/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-sagres",
+      "name": "MEO BeachCam, Sagres",
+      "place": "vila-do-bispo",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/sagres/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "meo-cordoama",
+      "name": "MEO BeachCam, Cordoama",
+      "place": "vila-do-bispo",
+      "operator": {
+        "name": "MEO BeachCam",
+        "credit": "MEO BeachCam",
+        "url": "https://beachcam.meo.pt/"
+      },
+      "page_url": "https://beachcam.meo.pt/livecams/cordoama/",
+      "terms": {
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/",
+        "summary": "MEO BeachCam terms, section 1: retransmission by a third-party site needs MEO prior, express authorisation. Credited link only; never embedded, recorded or re-hosted."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://beachcam.meo.pt/termos-e-condicoes/"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "skyline-faro",
+      "name": "SkylineWebcams, Faro",
+      "place": "faro",
+      "operator": {
+        "name": "SkylineWebcams (VisioRay)",
+        "credit": "SkylineWebcams",
+        "url": "https://www.skylinewebcams.com/"
+      },
+      "page_url": "https://www.skylinewebcams.com/en/webcam/portugal/algarve/faro/faro-portugal.html",
+      "terms": {
+        "url": "https://www.skylinewebcams.com/en/terms-of-use.html",
+        "summary": "SkylineWebcams terms of use (read 19 Nov 2026 ~17:35 UTC): embedding only with its own Embed code, unmodified; without VisioRay written authorisation no commercial or journalistic use, no retransmission, no automated extraction. Credited link only."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://www.skylinewebcams.com/en/terms-of-use.html"
+      },
+      "status": "unknown"
+    },
+    {
+      "id": "skyline-portimao-marina",
+      "name": "SkylineWebcams, Portimão marina",
+      "place": "portimao",
+      "operator": {
+        "name": "SkylineWebcams (VisioRay)",
+        "credit": "SkylineWebcams",
+        "url": "https://www.skylinewebcams.com/"
+      },
+      "page_url": "https://www.skylinewebcams.com/en/webcam/portugal/algarve/portimao/marina.html",
+      "terms": {
+        "url": "https://www.skylinewebcams.com/en/terms-of-use.html",
+        "summary": "SkylineWebcams terms of use (read 19 Nov 2026 ~17:35 UTC): embedding only with its own Embed code, unmodified; without VisioRay written authorisation no commercial or journalistic use, no retransmission, no automated extraction. Credited link only."
+      },
+      "license": {
+        "name": "the operator's terms",
+        "url": "https://www.skylinewebcams.com/en/terms-of-use.html"
+      },
+      "status": "unknown"
+    }
+  ]
+}

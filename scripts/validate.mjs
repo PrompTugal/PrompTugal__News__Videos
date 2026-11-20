@@ -92,6 +92,23 @@ for (const f of [...files, 'hub.json', 'README.md']) {
     }
   }
 }
+// The live cameras page (videos.b@, 20 Nov 2026): credited links only. No embedded media of any kind, and every outside link
+// on it is on a camera operator's own host or one of this site's fixed hosts; its JSON holds no embed field.
+if (existsSync('_site/cameras/index.html')) {
+  const s = readFileSync('_site/cameras/index.html', 'utf8');
+  const main = (s.match(/<main id="main">([\s\S]*?)<\/main>/) || [])[1] || '';
+  if (/<(?:iframe|frame|img|video|audio|embed|object|source|picture|form|svg|math|script|link|meta|base)\b|\ssrcdoc\s*=|(?:href|src)\s*=\s*"(?:data|javascript):/i.test(main)) fail('_site/cameras/index.html: embedded media or an active link on the cameras page');
+  const OK_HOSTS = ['beachcam.meo.pt', 'www.skylinewebcams.com', 'data.promptugal.news', 'creativecommons.org'];
+  for (const m of main.matchAll(/\shref="([^"]*)"/g)) { const u = m[1].replace(/&amp;/g, '&'); if (u.startsWith('/')) continue; let h = ''; try { h = new URL(u).protocol === 'https:' ? new URL(u).hostname : ''; } catch { h = ''; } if (!OK_HOSTS.includes(h)) fail(`_site/cameras/index.html: a link off the allowed hosts (${u.slice(0, 60)})`); }
+  for (const m of main.matchAll(/<a href="https:\/\/(?:beachcam\.meo\.pt|www\.skylinewebcams\.com)\/[^"]*"([^>]*)>/g)) if (!/rel="noopener noreferrer nofollow"/.test(m[1]) || !/referrerpolicy="no-referrer"/.test(m[1])) fail('_site/cameras/index.html: an operator link without rel and referrer policy');
+  try {
+    const j = JSON.parse(readFileSync('_site/api/v1/cameras/index.json', 'utf8'));
+    if (!Array.isArray(j.cameras) || j.count !== j.cameras.length) fail('cameras JSON: count does not match');
+    if ((main.match(/class="vid cam"/g) || []).length !== j.cameras.length) fail('cameras page: card count does not match the JSON');
+    for (const c of j.cameras) { if ('embed' in c || JSON.stringify(c).includes('"embed')) fail(`cameras JSON: an embed field in ${c.id}`); if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(c.id)) fail('cameras JSON: a bad id'); for (const u of [c.page_url, c.terms?.url, c.license?.url, c.operator?.url]) { let h = ''; try { const x = new URL(u); h = x.protocol === 'https:' && !x.username && !x.password && !x.port ? x.hostname : ''; } catch { h = ''; } if (!['beachcam.meo.pt', 'www.skylinewebcams.com'].includes(h)) fail(`cameras JSON: a link off the operators' hosts in ${c.id}`); } }
+    if (j.read_at && Date.parse(j.read_at) > Date.now() + 5 * 60 * 1000) fail('cameras JSON: read in the future');
+  } catch (e) { fail(`cameras JSON: ${e.message}`); }
+}
 if (!existsSync('_site/version.json')) fail('no version.json');
 if (!existsSync('_site/index.html')) fail('no index.html');
 try {
