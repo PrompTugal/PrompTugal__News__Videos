@@ -1,7 +1,7 @@
 {
   "about": "The sites bar registry as videos.b@ last read and checked it (scripts/sync-sites.mjs). Only checked fields; the pins are for our version only. The source and its history: promptugal.news/api/v1/sites.json, in the PrompTugal__News__Website repo.",
   "source": "https://promptugal.news/api/v1/sites.json",
-  "read_at": "2026-11-19T13:54:56Z",
+  "read_at": "2026-11-20T19:54:12Z",
   "status": 200,
   "bar": {
     "ours": "1.2.1",
@@ -21,6 +21,15 @@
           "render": "sha256-nnqUVsff6Cl60jW429GYQ1SRbxsOh1+BnHBWpxCq6Fk="
         }
       }
+    }
+  },
+  "map": {
+    "ours": "1.0.2",
+    "result": "match",
+    "review": "passed (security@ 168c14fc5)",
+    "fingerprint": {
+      "js": "2d90a867a1ad5127ef1a9883ce2dd4a15e90b242",
+      "css": "a8b506de828bf9df6609716042ce89f67be9ca59"
     }
   },
   "sites": [

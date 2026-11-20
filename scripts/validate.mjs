@@ -109,6 +109,25 @@ if (existsSync('_site/cameras/index.html')) {
     if (j.read_at && Date.parse(j.read_at) > Date.now() + 5 * 60 * 1000) fail('cameras JSON: read in the future');
   } catch (e) { fail(`cameras JSON: ${e.message}`); }
 }
+// The shared map (videos.b@, 20 Nov 2026): on only with the wake's match, the served files equal to the fingerprinted ones,
+// one version vendored, its places all linking to this site, and its scripts from this site only.
+{
+  let m = null; try { m = JSON.parse(readFileSync('data/sites/latest.json', 'utf8')).map; } catch { m = null; }
+  const vers = existsSync('src/assets/ptmap') ? readdirSync('src/assets/ptmap') : [];
+  if (vers.length > 1) fail(`src/assets/ptmap/: more than one version vendored (${vers.join(', ')})`);
+  const on = !!(m && m.result === 'match' && typeof m.review === 'string' && (m.review === 'passed' || m.review.startsWith('passed (')) && vers[0] === m.ours);
+  for (const f of files.filter((x) => x.endsWith('.html'))) {
+    const s = readFileSync(f, 'utf8'), has = s.includes('id="ptmap"');
+    if (has && !on) fail(`${f}: a map although the wake's check did not pass`);
+    if (!has) { if (s.includes('/assets/ptmap/')) fail(`${f}: map files without a map`); continue; }
+    if (!s.includes(`<script defer src="/assets/ptmap/${m.ours}/ptmap.js"></script>`) || !/<script defer src="\/assets\/map-init\.js\?v=[^"]+"><\/script>/.test(s)) fail(`${f}: the map's scripts are missing or not deferred`);
+    const raw = (s.match(/data-places="([^"]*)"/) || [])[1];
+    let places = null; try { places = JSON.parse((raw || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')); } catch { places = null; }
+    if (!Array.isArray(places) || !places.length) fail(`${f}: the map's places are not a list`);
+    else for (const p of places) { let h = ''; try { const x = new URL(p.href); h = x.protocol === 'https:' && !x.username && !x.port ? x.hostname : ''; } catch { h = ''; } if (h !== 'videos.promptugal.news') fail(`${f}: a map place linking off this site`); }
+  }
+  if (on) for (const [k, fn] of [['js', 'ptmap.js'], ['css', 'ptmap.css']]) { const p = `_site/assets/ptmap/${m.ours}/${fn}`; if (!existsSync(p) || createHash('sha256').update(readFileSync(p)).digest('hex').slice(0, 40) !== m.fingerprint?.[k]) fail(`${p}: does not match its fingerprint`); }
+}
 if (!existsSync('_site/version.json')) fail('no version.json');
 if (!existsSync('_site/index.html')) fail('no index.html');
 try {

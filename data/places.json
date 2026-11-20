@@ -1,0 +1,105 @@
+{
+ "about": "The places this site shows on its map, with their positions [lon, lat], copied from ontologist@'s places registry (PrompTugal__News__Website data/site/places-registry.json, commit 49a73716be5957c9439661acbc4fc03bba1c10fe, derived from data/places/; text CC BY 4.0). Each links to this site's page for the place.",
+ "source": "https://github.com/PrompTugal/PrompTugal__News__Website/blob/49a73716be5957c9439661acbc4fc03bba1c10fe/data/site/places-registry.json",
+ "places": [
+  {
+   "id": "lisbon",
+   "name": "Lisbon",
+   "at": [
+    -9.139,
+    38.722
+   ],
+   "href": "https://videos.promptugal.news/playlists/place/lisboa/"
+  },
+  {
+   "id": "albufeira",
+   "name": "Albufeira",
+   "at": [
+    -8.25,
+    37.089
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-albufeira"
+  },
+  {
+   "id": "aljezur",
+   "name": "Aljezur",
+   "at": [
+    -8.803,
+    37.318
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-aljezur"
+  },
+  {
+   "id": "castro-marim",
+   "name": "Castro Marim",
+   "at": [
+    -7.443,
+    37.218
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-castro-marim"
+  },
+  {
+   "id": "faro",
+   "name": "Faro",
+   "at": [
+    -7.935,
+    37.019
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-faro"
+  },
+  {
+   "id": "lagoa",
+   "name": "Lagoa",
+   "at": [
+    -8.453,
+    37.135
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-lagoa"
+  },
+  {
+   "id": "lagos",
+   "name": "Lagos",
+   "at": [
+    -8.673,
+    37.102
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-lagos"
+  },
+  {
+   "id": "loule",
+   "name": "Loulé",
+   "at": [
+    -8.023,
+    37.138
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-loule"
+  },
+  {
+   "id": "portimao",
+   "name": "Portimão",
+   "at": [
+    -8.537,
+    37.138
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-portimao"
+  },
+  {
+   "id": "silves",
+   "name": "Silves",
+   "at": [
+    -8.44,
+    37.189
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-silves"
+  },
+  {
+   "id": "vila-do-bispo",
+   "name": "Vila do Bispo",
+   "at": [
+    -8.911,
+    37.083
+   ],
+   "href": "https://videos.promptugal.news/cameras/#place-vila-do-bispo"
+  }
+ ]
+}

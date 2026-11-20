@@ -10,7 +10,7 @@ import { cpSync, rmSync, readdirSync, readFileSync, writeFileSync, statSync, exi
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { loadLibrary, mergeLibrary } from './library-merge.mjs';
-import { BAR_VERSION, BAR_DIR, BAR_FILES, sri, importVerified, pinsFor, siteHosts } from './sync-sites.mjs';
+import { BAR_VERSION, BAR_DIR, BAR_FILES, sri, importVerified, pinsFor, siteHosts, MAP_VERSION, MAP_DIR, MAP_FILES, fp40 } from './sync-sites.mjs';
 
 const version = process.env.SITE_VERSION || 'dev';
 const SITE = 'https://videos.promptugal.news';
@@ -167,11 +167,35 @@ const bar = await (async () => {
   return { on: true, html, hosts, readAt: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(reg.read_at) ? reg.read_at : 'at an unknown time' };
 })();
 console.log(bar.on ? `sites bar ${BAR_VERSION} on (${bar.hosts.length} other hosts, registry read ${bar.readAt})` : `sites bar ${BAR_VERSION} off: ${bar.why}`);
+// The shared map, ptmap (Dinis, 19 Nov 2026 ~17:40 UTC: Portugal big, London and the EU small; designer@'s, security@'s
+// review "passed"). On only when the wake's check against the registry matched and the vendored bytes still match its
+// fingerprint (a different file stops the build). Places from data/places.json (ontologist@'s registry), checked here.
+// No London or EU inset yet: this site has no London or EU data, and the spec draws them only where a site has it.
+const mapOn = (() => {
+  let r; try { r = JSON.parse(readFileSync('data/sites/latest.json', 'utf8')).map; } catch { return false; }
+  if (!r || r.ours !== MAP_VERSION || r.result !== 'match' || typeof r.review !== 'string' || !(r.review === 'passed' || r.review.startsWith('passed ('))) return false;
+  for (const [k, f] of Object.entries(MAP_FILES)) if (fp40(readFileSync(`${MAP_DIR}/${f}`)) !== r.fingerprint?.[k]) throw new Error(`ptmap ${MAP_VERSION}: ${f} does not match its fingerprint; the build stops`);
+  return true;
+})();
+const MAP_PLACES = (() => {
+  const d = JSON.parse(readFileSync('data/places.json', 'utf8'));
+  if (!Array.isArray(d.places) || d.places.length > 400) throw new Error('data/places.json: not a list of places');
+  if (new Set(d.places.map((p) => p && p.id)).size !== d.places.length) throw new Error('data/places.json: a place listed twice');
+  return d.places.map((p) => {
+    let h = null; try { const x = new URL(p.href); h = x.protocol === 'https:' && !x.username && !x.password && !x.port && x.hostname === 'videos.promptugal.news' ? x.href : null; } catch { h = null; }
+    const [lon, lat] = Array.isArray(p.at) ? p.at : [];
+    if (typeof p.id !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.id) || typeof p.name !== 'string' || !p.name.trim() || p.name.length > 40 || !h || !Number.isFinite(lon) || !Number.isFinite(lat) || lon < -10 || lon > -6 || lat < 36.8 || lat > 42.2) throw new Error(`data/places.json: a bad place ${String(p.id).slice(0, 30)}`);
+    return { id: p.id, name: clean(p.name), at: [lon, lat], href: h };
+  });
+})();
+console.log(mapOn ? `ptmap ${MAP_VERSION} on (${MAP_PLACES.length} places)` : `ptmap ${MAP_VERSION} off`);
+const mapBlock = (label, current) => mapOn ? `<div class="ptmap-wrap"><div id="ptmap" class="ptmap" data-label="${esc(label)}"${current ? ` data-current="${esc(current)}"` : ''} data-places="${esc(JSON.stringify(MAP_PLACES))}"></div>
+<p class="small">The shared PrompTugal.news map (ptmap ${MAP_VERSION}, by designer@): the outline from Natural Earth (public domain) through world-atlas (ISC licence, in full in the file); the places from ontologist@'s places registry. London and the EU appear on it once this site has something there.</p></div>` : '';
 const BAR_SRC = bar.on ? bar.hosts.map((h) => ` https://${h}`).join('') : '';
 const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/cameras/', 'Live cameras'], ['/how/', 'How it works'], ['/api/', 'Data']];
 const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}${BAR_SRC}; frame-src ${EMBED_HOST}; connect-src 'self'${BAR_SRC}; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const pages = [];
-function page({ path, title, description, section, body, mdBody }) {
+function page({ path, title, description, section, body, mdBody, map = false }) {
   if (!okRel(path)) throw new Error(`bad page path ${path}`);
   const html = `<!doctype html>
 <html lang="en-GB">
@@ -190,7 +214,7 @@ function page({ path, title, description, section, body, mdBody }) {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/site.css?v=${esc(version)}">
 <script defer src="/assets/player.js?v=${esc(version)}"></script>
-${bar.on ? `<link rel="stylesheet" href="/assets/sites-bar/${BAR_VERSION}/sites-bar.css">\n<script defer src="/assets/sites-bar/${BAR_VERSION}/sites-bar.js"></script>\n` : ''}</head>
+${bar.on ? `<link rel="stylesheet" href="/assets/sites-bar/${BAR_VERSION}/sites-bar.css">\n<script defer src="/assets/sites-bar/${BAR_VERSION}/sites-bar.js"></script>\n` : ''}${map && mapOn ? `<link rel="stylesheet" href="/assets/ptmap/${MAP_VERSION}/ptmap.css">\n<script defer src="/assets/ptmap/${MAP_VERSION}/ptmap.js"></script>\n<script defer src="/assets/map-init.js?v=${esc(version)}"></script>\n` : ''}</head>
 <body>
 ${bar.on ? bar.html + '\n' : ''}<a class="skip" href="#main">Skip to the content</a>
 <div class="version-bar"><span>Version ${esc(version)}</span><span><a href="${path}index.md">This page as markdown</a></span></div>
@@ -367,6 +391,7 @@ ${cards(p.ids)}<p class="small">${link(`/api/v1/playlists/${p.kind}/${p.id}.json
 
 // ---------------------------------------------------------------- home
 page({
+  map: true,
   path: '/', section: '/', title: 'PrompTugal.news Videos: talks and recordings, in their own players',
   description: `Videos about what PrompTugal.news covers, played in each platform's own player: first, Web Summit Lisbon 2026, with the organiser's replays by day and ${others.length} more recordings.`,
   body: `<section class="hero"><p class="kicker">Videos · watch and listen</p>
@@ -378,7 +403,7 @@ ${seed}</section>
 <ul class="days">${C.days.map((d) => `<li class="${d.state === 'cancelled' ? 'is-cancelled' : ''}"><a href="/collections/${esc(C.id)}/#day-${esc(d.date)}"><b>${esc(clean(d.label))}</b> <span class="small">${esc(weekday(d.date))} ${esc(fmtDay(d.date))}</span></a><span class="small">${d.state === 'cancelled' ? 'Cancelled: Storm Charles' : d.replays.length ? "The organiser's replay" : 'Replay not found yet'}</span></li>`).join('')}</ul>
 ${official.length ? `<h3>The opening night</h3>${player(official[0])}` : ''}
 </section>
-<section><h2>Recordings and coverage</h2>${cards(others.slice(0, 6).map((v) => v.id))}<p>${link('/videos/', `Every video (${videos.length})`)} · ${link('/playlists/', 'Playlists')}</p></section>
+${mapOn ? `<section><h2>Where the videos are from</h2>${mapBlock('Places this site has videos or cameras for')}</section>\n` : ''}<section><h2>Recordings and coverage</h2>${cards(others.slice(0, 6).map((v) => v.id))}<p>${link('/videos/', `Every video (${videos.length})`)} · ${link('/playlists/', 'Playlists')}</p></section>
 <section><h2>Find more</h2><p>The catalogue and the graph of everything published about what we cover are kept by the library, ${link('https://library.promptugal.news/', 'library.promptugal.news')}; the data by ${link('https://data.promptugal.news/', 'data.promptugal.news')}. This site is where you watch and listen. If you made a video about an event we cover, ${link(`${REPO}/issues/new`, 'send us its link')}: we publish it credited to you.</p></section>`,
   mdBody: `Videos about what PrompTugal.news covers, played in each platform's own player.\n\n## ${md(C.title)}\n\n${C.days.map((d) => `- ${md(d.label)}, ${fmtDay(d.date)}: ${d.state === 'cancelled' ? 'cancelled (Storm Charles)' : d.replays.length ? mdLink(`/videos/${d.replays[0]}/`, "the organiser's replay") : 'replay not found yet'}`).join('\n')}\n\n## Every video\n\n${mdList(videos.map((v) => v.id))}`,
 });
@@ -660,12 +685,14 @@ page({
 <dt>Why a link</dt><dd>${esc(c.terms.summary)} ${out(c.terms.url, 'Their terms')}.</dd>
 <dt>Status</dt><dd>${esc(state(c.status))}</dd></dl></li>`;
   page({
+    map: true,
     path: '/cameras/', section: '/cameras/', title: 'Live cameras in the Algarve, as links · PrompTugal.news Videos',
     description: `${cams.length} live beach cameras in the Algarve (${counts.map(([k, n]) => `${n} ${k}`).join(', ')}), each a credited link to its operator's own page; never embedded, recorded or re-hosted.`,
     body: `<h1>Live cameras in the Algarve</h1>
 <p class="standfirst">${cams.length} live beach cameras, each a link to its operator's own page: ${counts.map(([k, n]) => `${esc(k)} (${n})`).join(' and ')}. We embed or show in full only what we have full right to use, and these operators' terms do not give it, so each is a credited link (Dinis Cruz, 19 November 2026). Nothing is embedded, recorded or re-hosted.</p>
 ${stale ? '<p class="note"><b>This list may be out of date:</b> it has not been read for more than seven days.</p>' : ''}<p class="small">From data.b@'s camera register on ${link('https://data.promptugal.news/', 'data.promptugal.news')} (its read ${dataAt ? esc(fmtStamp(dataAt)) : 'not stated'}), as we read it ${readAt ? esc(fmtStamp(readAt)) : 'never'}; data.b@ collects twice a day. The register marks every one of these link-only; the terms are the operators'. MEO BeachCam's own pages could not be read by data.b@'s collector, so its terms are as data.b@ records them. The register's records: ${link(CCBY, 'CC BY 4.0')}; each camera: its operator's terms. ${link('/api/v1/cameras/index.json', 'This list as JSON')}.</p>
-${places.map((p) => `<section><h2>${esc(pname(p))}</h2><ul class="vids">${cams.filter((c) => c.place === p).map(camCard).join('\n')}</ul></section>`).join('\n')}`,
+${mapBlock('The Algarve places with live cameras listed here')}
+${places.map((p) => `<section id="place-${esc(p)}"><h2>${esc(pname(p))}</h2><ul class="vids">${cams.filter((c) => c.place === p).map(camCard).join('\n')}</ul></section>`).join('\n')}`,
     mdBody: `${cams.length} live beach cameras in the Algarve, each a credited link to its operator's own page; never embedded, recorded or re-hosted (Dinis Cruz, 19 November 2026). Read ${readAt ? fmtStamp(readAt) : 'never'} from data.b@'s register.\n\n${places.map((p) => `## ${md(pname(p))}\n\n${cams.filter((c) => c.place === p).map((c) => `- ${mdLink(c.page_url, c.name)}: ${md(c.operator.credit)}, a link (${mdLink(c.terms.url, 'their terms')})`).join('\n')}`).join('\n\n')}`,
   });
   api('/api/v1/cameras/index.json', { about: "The Algarve's live beach cameras this site lists as credited links (never embedded, recorded or re-hosted).", source: 'https://data.promptugal.news/api/v1/cameras/index.json', read_at: readAt, data_read_at: dataAt, license: { records: { name: 'CC BY 4.0', url: CCBY }, each_camera: "its operator's terms, linked in its entry" }, count: cams.length, cameras: cams });
