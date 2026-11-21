@@ -34,7 +34,8 @@ if (barHosts) {
 }
 if (BAR_VERSIONS.length > 1) fail(`src/assets/sites-bar/: more than one version vendored (${BAR_VERSIONS.join(', ')})`);
 const B = barHosts ? barHosts.map((h) => ` https://${h}`).join('') : '';
-const EXPECTED_CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://i.ytimg.com${B}; frame-src https://www.youtube-nocookie.com; connect-src 'self'${B}; base-uri 'none'; form-action 'none'; object-src 'none'`;
+const C = [...new Set([...(barHosts || []), 'data.promptugal.news'])].sort().map((h) => ` https://${h}`).join('');
+const EXPECTED_CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://i.ytimg.com${B}; frame-src https://www.youtube-nocookie.com; connect-src 'self'${C}; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const THUMB = /^https:\/\/i\.ytimg\.com\/vi\/[A-Za-z0-9_-]{11}\/(?:mq|hq)default\.jpg$/;
 if (!existsSync('_site')) { console.error('FAILED: _site/ is not built: run node scripts/build.mjs'); process.exit(1); }
 const files = walk('_site');
@@ -127,6 +128,41 @@ if (existsSync('_site/cameras/index.html')) {
     else for (const p of places) { let h = ''; try { const x = new URL(p.href); h = x.protocol === 'https:' && !x.username && !x.port ? x.hostname : ''; } catch { h = ''; } if (h !== 'videos.promptugal.news') fail(`${f}: a map place linking off this site`); }
   }
   if (on) for (const [k, fn] of [['js', 'ptmap.js'], ['css', 'ptmap.css']]) { const p = `_site/assets/ptmap/${m.ours}/${fn}`; if (!existsSync(p) || createHash('sha256').update(readFileSync(p)).digest('hex').slice(0, 40) !== m.fingerprint?.[k]) fail(`${p}: does not match its fingerprint`); }
+}
+// YouTube's own facts, data in the browser (videos.b@, 21 Nov 2026): the script only on a YouTube video's page, exactly one
+// block there with an 11-character id and the built fallback; the script reads one fixed address with no cookies, no referrer,
+// no redirects and no cache, and writes only through textContent and createElement.
+{
+  const FALLBACK = "YouTube's own time published and length load here from data.promptugal.news when your browser runs this page's script (data in the browser). Until then, the date on the card is as it was found.";
+  const TAG = /<script defer src="\/assets\/yt-facts\.js\?v=[^"]+"><\/script>/;
+  for (const f of files.filter((x) => x.endsWith('.html'))) {
+    const s = readFileSync(f, 'utf8');
+    const boxes = s.match(/<section class="yt-facts"[^>]*>/g) || [];
+    const isVideo = /^_site\/videos\/[^/]+\/index\.html$/.test(f);
+    if (!boxes.length) { if (/src="\/assets\/yt-facts\.js|class="yt-facts/.test(s)) fail(`${f}: the YouTube facts script or block outside a YouTube video's page`); continue; }
+    if (!isVideo || boxes.length !== 1 || !/^<section class="yt-facts" data-yt-id="[A-Za-z0-9_-]{11}">$/.test(boxes[0])) fail(`${f}: a bad YouTube facts block`);
+    if (!TAG.test(s) || (s.match(/yt-facts\.js/g) || []).length !== 1) fail(`${f}: the YouTube facts script is missing, doubled or not deferred`);
+    if (!s.includes(`<div class="yt-facts-out"><p class="small">${FALLBACK}</p></div>`)) fail(`${f}: the YouTube facts block has no built fallback`);
+    const id = boxes[0].match(/data-yt-id="([^"]+)"/)[1];
+    if (!s.includes(`data-yt="${id}"`)) fail(`${f}: the YouTube facts id is not this page's video`);
+  }
+  const p = '_site/assets/yt-facts.js';
+  if (!existsSync(p)) fail(`${p}: missing`);
+  else {
+    const js = readFileSync(p, 'utf8');
+    if (/innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\b|new Function|setAttribute\(|\.on[a-z]+\s*=|import\(|XMLHttpRequest|sendBeacon|WebSocket|localStorage|sessionStorage|document\.cookie|postMessage|\blocation\b|window\.open|\bopen\(|DOMParser|createContextualFragment|srcdoc|new Image|\.src\s*=|\.action\s*=|createElement\(\s*['"](?!a['"]|p['"]|dl['"]|dt['"]|dd['"])/.test(js)) fail(`${p}: a banned API`);
+    // Every link is made by a() with one of the constant addresses, and only a() sets an href.
+    const calls = js.replace('function a(href, text) {', '').match(/\ba\(([^,()]*),/g) || [];
+    if (!calls.length || calls.some((c) => !/^a\((YT_SITE|YT_TERMS|FEED_PAGE),$/.test(c))) fail(`${p}: a link not made from a constant address`);
+    if ((js.match(/\.href\s*=/g) || []).length !== 1 || !js.includes('    e.href = href;\n')) fail(`${p}: an href set outside the link helper`);
+    const urls = js.match(/https:\/\/[^'"\s)]+/g) || [];
+    const allowed = new Set(['https://data.promptugal.news/api/v1/youtube-replays/latest.json', 'https://data.promptugal.news/', 'https://www.youtube.com/t/terms', 'https://www.youtube.com/']);
+    for (const u of urls) if (!allowed.has(u)) fail(`${p}: an address that is not allowed (${u.slice(0, 80)})`);
+    if ((js.match(/fetch\(/g) || []).length !== 1 || !js.includes("fetch(FEED, { method: 'GET', mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'error', cache: 'no-store' })")) fail(`${p}: the fetch is not the one fixed, credential-free call`);
+    if (!js.includes("if (total > MAX_BYTES) { reader.cancel(); throw new Error('too large'); }") || (js.match(/JSON\.parse\(/g) || []).length !== 1 || !/new TextDecoder\('utf-8', \{ fatal: true \}\)\.decode\(buf\.subarray\(0, at\)\);\n\s*var f = check\(JSON\.parse\(s\), id, Date\.now\(\)\);/.test(js) || !js.includes('var buf = new Uint8Array(MAX_BYTES)')) fail(`${p}: no streamed size cap before JSON.parse`);
+    if (!js.includes("e.rel = 'noopener noreferrer nofollow'") || !js.includes("e.referrerPolicy = 'no-referrer'")) fail(`${p}: its links are not rel=noopener noreferrer nofollow with no referrer`);
+    if (!js.includes('YouTube Terms of Service')) fail(`${p}: YouTube's terms are not linked beside its figures`);
+  }
 }
 if (!existsSync('_site/version.json')) fail('no version.json');
 if (!existsSync('_site/index.html')) fail('no index.html');

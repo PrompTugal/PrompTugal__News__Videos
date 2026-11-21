@@ -379,6 +379,54 @@
    "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
    "state": "fixed",
    "commit": ""
+  },
+  {
+   "id": "VID-2026-032",
+   "title": "The YouTube facts size cap did not bound memory",
+   "file": "src/assets/yt-facts.js",
+   "detail": "r.text() read the whole body before the length check, so a feed with no Content-Length could fill the tab's memory. Never shipped.",
+   "fix": "The body is read in chunks and dropped as soon as it passes 256 KiB, then decoded as strict UTF-8; the validator checks that exact loop and one JSON.parse.",
+   "severity": "low",
+   "found": "2026-11-21 ~08:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-033",
+   "title": "The validator's checks on yt-facts.js could be passed by a future edit",
+   "file": "scripts/validate.mjs",
+   "detail": "The size-cap check matched text anywhere; the URL check saw only literals; several navigation and parsing APIs were not banned. Never shipped.",
+   "fix": "Exact guard lines; every a() call must use one of the three constant addresses and only the helper sets href; location, open, DOMParser, srcdoc, setAttribute, .src= and new elements other than a, p, dl, dt, dd are banned.",
+   "severity": "low",
+   "found": "2026-11-21 ~08:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-034",
+   "title": "The feed could set an expiry far in the future",
+   "file": "src/assets/yt-facts.js",
+   "detail": "No upper bound on delete_or_refresh_by. Never shipped.",
+   "fix": "An expiry more than 31 days after the read shows nothing. The feed's own stale_after_seconds (up to 30 days) remains its claim; noted as residual risk.",
+   "severity": "low",
+   "found": "2026-11-21 ~08:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
+  },
+  {
+   "id": "VID-2026-035",
+   "title": "Fixed text asserted what the feed covers",
+   "file": "src/assets/yt-facts.js",
+   "detail": "\"It covers Web Summit's own channel only\" was not checked against the feed. Never shipped.",
+   "fix": "Now says only that the feed does not list the video.",
+   "severity": "low",
+   "found": "2026-11-21 ~08:58 UTC",
+   "found_by": "AppSec post-review (a Sonnet sub-agent of videos.b@PrompTugal.dinis), before the push",
+   "state": "fixed",
+   "commit": ""
   }
  ]
 }

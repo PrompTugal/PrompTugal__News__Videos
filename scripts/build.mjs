@@ -193,9 +193,14 @@ const mapBlock = (label, current) => mapOn ? `<div class="ptmap-wrap"><div id="p
 <p class="small">The shared PrompTugal.news map (ptmap ${MAP_VERSION}, by designer@): the outline from Natural Earth (public domain) through world-atlas (ISC licence, in full in the file); the places from ontologist@'s places registry. London and the EU appear on it once this site has something there.</p></div>` : '';
 const BAR_SRC = bar.on ? bar.hosts.map((h) => ` https://${h}`).join('') : '';
 const NAV = [['/', 'Videos'], ['/collections/web-summit-lisbon-2026/', 'Web Summit 2026'], ['/playlists/', 'Playlists'], ['/videos/', 'Every video'], ['/cameras/', 'Live cameras'], ['/how/', 'How it works'], ['/api/', 'Data']];
-const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}${BAR_SRC}; frame-src ${EMBED_HOST}; connect-src 'self'${BAR_SRC}; base-uri 'none'; form-action 'none'; object-src 'none'`;
+// YouTube's own facts are read in the browser from data.b@'s feed (yt-facts.js): its host is listed in connect-src whether or
+// not the sites bar is on, once, beside the bar's hosts (21 Nov 2026).
+const DATA_HOST = 'data.promptugal.news';
+const YT_FACTS_FALLBACK = "YouTube's own time published and length load here from data.promptugal.news when your browser runs this page's script (data in the browser). Until then, the date on the card is as it was found.";
+const CONNECT_SRC = [...new Set([...(bar.on ? bar.hosts : []), DATA_HOST])].sort().map((h) => ` https://${h}`).join('');
+const CSP = `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' ${THUMB_HOST}${BAR_SRC}; frame-src ${EMBED_HOST}; connect-src 'self'${CONNECT_SRC}; base-uri 'none'; form-action 'none'; object-src 'none'`;
 const pages = [];
-function page({ path, title, description, section, body, mdBody, map = false }) {
+function page({ path, title, description, section, body, mdBody, map = false, ytFacts = false }) {
   if (!okRel(path)) throw new Error(`bad page path ${path}`);
   const html = `<!doctype html>
 <html lang="en-GB">
@@ -214,7 +219,7 @@ function page({ path, title, description, section, body, mdBody, map = false }) 
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/site.css?v=${esc(version)}">
 <script defer src="/assets/player.js?v=${esc(version)}"></script>
-${bar.on ? `<link rel="stylesheet" href="/assets/sites-bar/${BAR_VERSION}/sites-bar.css">\n<script defer src="/assets/sites-bar/${BAR_VERSION}/sites-bar.js"></script>\n` : ''}${map && mapOn ? `<link rel="stylesheet" href="/assets/ptmap/${MAP_VERSION}/ptmap.css">\n<script defer src="/assets/ptmap/${MAP_VERSION}/ptmap.js"></script>\n<script defer src="/assets/map-init.js?v=${esc(version)}"></script>\n` : ''}</head>
+${bar.on ? `<link rel="stylesheet" href="/assets/sites-bar/${BAR_VERSION}/sites-bar.css">\n<script defer src="/assets/sites-bar/${BAR_VERSION}/sites-bar.js"></script>\n` : ''}${map && mapOn ? `<link rel="stylesheet" href="/assets/ptmap/${MAP_VERSION}/ptmap.css">\n<script defer src="/assets/ptmap/${MAP_VERSION}/ptmap.js"></script>\n<script defer src="/assets/map-init.js?v=${esc(version)}"></script>\n` : ''}${ytFacts ? `<script defer src="/assets/yt-facts.js?v=${esc(version)}"></script>\n` : ''}</head>
 <body>
 ${bar.on ? bar.html + '\n' : ''}<a class="skip" href="#main">Skip to the content</a>
 <div class="version-bar"><span>Version ${esc(version)}</span><span><a href="${path}index.md">This page as markdown</a></span></div>
@@ -333,7 +338,7 @@ for (const v of videos) {
   const pls = playlistsOf(v.id);
   const talks = v.talks.length ? `<ol class="talks">${v.talks.map((t) => `<li><button type="button" class="seek" data-start="${t.start}">${String(Math.floor(t.start / 3600)).padStart(1, '0')}:${String(Math.floor(t.start / 60) % 60).padStart(2, '0')}:${String(t.start % 60).padStart(2, '0')}</button> ${esc(clean(t.title))}</li>`).join('')}</ol>` : `<p class="none">Not listed yet. ${link('/how/#talks', 'Why')}.</p>`;
   page({
-    path: `/videos/${v.id}/`, section: '/videos/',
+    path: `/videos/${v.id}/`, section: '/videos/', ytFacts: v.platform === 'youtube' && /^[A-Za-z0-9_-]{11}$/.test(v.platform_id || ''),
     title: `${clean(v.title)} · ${clean(v.channel.name)} · PrompTugal.news Videos`,
     description: `${clean(v.title)}, published by ${clean(v.channel.name)}${v.published.date ? ` on ${fmtDay(v.published.date)}` : ''}: played in ${PLATFORMS[v.platform].name}'s own player, with where it came from and how we found it.`,
     body: `<p class="crumbs"><a href="/collections/${esc(v.collection)}/">${esc(C.title)}</a> › <a href="/videos/">Every video</a></p>
@@ -344,17 +349,17 @@ ${player(v)}
 <dl class="facts big">
 <dt>What</dt><dd>${esc(KIND[v.kind] || 'A video')}${v.note ? `. ${esc(clean(v.note))}` : ''}</dd>
 <dt>Who</dt><dd>Published by ${esc(clean(v.channel.name))}, ${esc(CH_KIND[v.channel.kind] || 'a channel')}.${v.people.length ? ` With ${people(v)} (public and professional, as named in the title or by the publisher).` : ''}</dd>
-<dt>When</dt><dd>${when(v)}${v.day ? `; ${esc(dayLabel(v))} of the summit` : ''}</dd>
+<dt>When</dt><dd>${when(v)}${v.day ? `; ${esc(dayLabel(v))} of the summit` : ''}. <span class="small">As this card has it, from how the video was found${v.platform === 'youtube' ? "; YouTube's own time, where it has one, is below" : ''}.</span></dd>
 <dt>Where</dt><dd>${esc(placeName(v.place))}, at <a href="/collections/${esc(v.collection)}/">${esc(C.title)}</a></dd>
 <dt>Source</dt><dd>${link(v.url, v.url)}</dd>
 <dt>Licence</dt><dd><a class="lic" href="${href(lic.url)}">${esc(lic.name)}</a> (${esc(PLATFORMS[v.platform].name)}'s). Our card: <a class="lic" href="${CCBY}">CC BY 4.0</a>.</dd>
 <dt>Found</dt><dd>By ${esc(clean(v.found.by))}, ${esc(fmtStamp(v.found.at))}: ${esc(clean(v.found.how))}.${v.found.verified ? '' : ' <b>Not fully checked.</b>'} ${link(v.found.evidence || data.evidence_base, 'The evidence')}.</dd>
 <dt>Call number</dt><dd><code>${esc(v.id)}</code> · ${link(`/api/v1/videos/${v.id}.json`, 'as JSON')}${v.library ? ` · in the library as ${link(v.library.page, v.library.call_number)}` : ''}</dd>
 </dl></section>
-<section><h2 id="talks">Talks by timestamp</h2>${talks}</section>
+${v.platform === 'youtube' && /^[A-Za-z0-9_-]{11}$/.test(v.platform_id || '') ? `<section class="yt-facts" data-yt-id="${esc(v.platform_id)}"><h2>From YouTube</h2><div class="yt-facts-out"><p class="small">${YT_FACTS_FALLBACK}</p></div></section>\n` : ''}<section><h2 id="talks">Talks by timestamp</h2>${talks}</section>
 ${pls.length ? `<section><h2>In the playlists</h2><ul>${pls.map((p) => `<li>${link(plPath(p), p.title)} <span class="small">(${p.ids.length})</span></li>`).join('')}</ul></section>` : ''}
 <p class="report small">Is this card wrong, or should this video not be here? <a href="${REPO}/issues/new">Tell us</a>.</p>`,
-    mdBody: `- What: ${md(KIND[v.kind] || 'A video')}${v.note ? `. ${md(v.note)}` : ''}\n- Who: ${md(v.channel.name)}${v.people.length ? `; with ${v.people.map((p) => md(p.name)).join(', ')}` : ''}\n- When: ${v.published.date ? fmtDay(v.published.date) : 'not known'} (${md(v.published.precision)})\n- Where: ${md(placeName(v.place))}, ${md(C.title)}\n- Source: <${mdUrl(v.url)}>\n- Licence: the platform's terms (<${mdUrl(lic.url)}>); our card CC BY 4.0\n- Found: by ${md(v.found.by)}, ${fmtStamp(v.found.at)}: ${md(v.found.how)}${v.found.verified ? '' : ' (not fully checked)'}\n- Call number: ${v.id}\n\nWatch: <${mdUrl(v.url)}>`,
+    mdBody: `- What: ${md(KIND[v.kind] || 'A video')}${v.note ? `. ${md(v.note)}` : ''}\n- Who: ${md(v.channel.name)}${v.people.length ? `; with ${v.people.map((p) => md(p.name)).join(', ')}` : ''}\n- When: ${v.published.date ? fmtDay(v.published.date) : 'not known'} (${md(v.published.precision)})${v.platform === 'youtube' ? "; as this card has it; YouTube's own time is on the page, read in the browser" : ''}\n- Where: ${md(placeName(v.place))}, ${md(C.title)}\n- Source: <${mdUrl(v.url)}>\n- Licence: the platform's terms (<${mdUrl(lic.url)}>); our card CC BY 4.0\n- Found: by ${md(v.found.by)}, ${fmtStamp(v.found.at)}: ${md(v.found.how)}${v.found.verified ? '' : ' (not fully checked)'}\n- Call number: ${v.id}\n\nWatch: <${mdUrl(v.url)}>`,
   });
   api(`api/v1/videos/${v.id}.json`, { ...pick(v), license: lic, page: `${SITE}/videos/${v.id}/`, embed: v.platform === 'youtube' ? `${EMBED_HOST}/embed/${v.platform_id}` : null, evidence: v.found.evidence || data.evidence_base, license_of_this_record: data.license_of_this_record });
 }
@@ -425,6 +430,7 @@ page({
 <li><b>The preview image is YouTube's own.</b> Each card and player shows YouTube's thumbnail, unaltered, loaded from YouTube's image host <code>i.ytimg.com</code> (the only outside host this site may load images from, apart from the other PrompTugal.news sites' own preview images in the sites bar). Your browser fetches it when the page opens, so YouTube sees that request, but we send no referrer with it. The video itself loads only when you press play. Without JavaScript, each video links to its page on YouTube. (Dinis Cruz decided this on 19 November 2026, for usability.)</li>
 <li><b>Never copied.</b> We never download, copy or host a video, a thumbnail, a still or a transcript: the preview image is loaded from YouTube each time, never kept by us. Titles and channel names are shown as published, as a search engine would.</li>
 <li>A video on another site (CNBC's own player, for one) is linked, not embedded.</li>
+<li><b>YouTube's own facts load in your browser.</b> On a YouTube video's page, its time published and length come from YouTube's Data API through ${link('https://data.promptugal.news/', 'data.promptugal.news')} (data.b@'s feed), read when the page opens: data in the browser. That host sees your IP address and browser on each view; no cookie and no referrer are sent; the figures are checked, shown with the time they were read and YouTube's terms, marked when out of date, and never kept here (YouTube allows 30 days at most). Without them, the card's date is our sweep's.</li>
 <li><b>Live cameras are links.</b> The Algarve's live beach cameras (${link('/cameras/', 'the list')}) are credited links to their operators' own pages: we embed or show in full only what we have full right to use (Dinis Cruz, 19 November 2026).</li>
 <li><b>The sites bar.</b> The row of PrompTugal.news sites at the top of every page is the shared sites bar (version ${BAR_VERSION}), drawn when this site is built from the sites registry at <code>promptugal.news/api/v1/sites.json</code>, read and checked at each of our wakes. When you point at or tab to a site's name, your browser fetches that site's own preview image and <code>version.json</code> from that site, with no cookies and no referrer; nothing else is loaded and nothing is stored or sent. Its code is a copy kept in this site, checked against the registry's fingerprint, never loaded from another site.</li></ul></section>
 <section><h2 id="talks">Talks by timestamp</h2>
